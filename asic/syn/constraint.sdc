@@ -8,7 +8,7 @@
 
 set sdc_version 1.3
 #create_clock [get_ports {CK}]  -name CK -period 40 -waveform {0 20}
-create_clock [get_ports {clk}]  -name clk1 -period 40 -waveform {0 20}
+create_clock [get_ports {paed_clk_i}]  -name clk1 -period 40 -waveform {0 20}
 #create_clock [get_ports {clk2}]  -name clk2 -period 40 -waveform {0 20}
 #create_clock [get_ports {clk3}]  -name clk3 -period 40 -waveform {0 20}
 set_clock_transition  0.2 [all_clocks]
