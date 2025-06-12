@@ -41,12 +41,12 @@ set ec::RTL_PATH        ../verilog/
 set ec::LIB_PATH        "$TSMC_PDK"
 
 
-set ec::LIBRARY         "$TSMC_PDK/../../digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lpwc.lib \
-						 $TSMC_PDK/../../digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib \
-						 $TSMC_PDK/../../digital/Front_End/timing_power_noise/NLDM/tpan65lpnv2od3_200a/tpan65lpnv2od3wc.lib"
+set ec::LIBRARY         "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lpwc.lib \
+						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib \
+						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpan65lpnv2od3_200a/tpan65lpnv2od3wc.lib"
 						 
-set ec::LIBRARY_7THVT   "$TSMC_PDK/../../digital/Front_End/timing_power_noise/NLDM/tcbn65lpbwp7thvt_141a/tcbn65lpbwp7thvtwc.lib \
-						 $TSMC_PDK/../../digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
+set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcbn65lpbwp7thvt_141a/tcbn65lpbwp7thvtwc.lib \
+						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
 
 
 set ec::VERILOG_LIST    { APP.v addr.v }
@@ -56,12 +56,12 @@ set ec::VERILOG_LIST    { APP.v addr.v }
 #set ec::VHDL_VERSION    1993
 
 #set ec::LEFLIB "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT2.lef "
-set ec::LEFLIB " $TSMC_PDK/../../digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT1.lef \
-				 $TSMC_PDK/../../digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/tpdn65lpnv2od3_6lm.lef \
-				 $TSMC_PDK/../../digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef "
+set ec::LEFLIB " $TSMC_PDK/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT1.lef \
+				 $TSMC_PDK/digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/tpdn65lpnv2od3_6lm.lef \
+				 $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef "
 				 
 #set ec::CAPTABLE "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top2_rcworst.captable"
-set ec::CAPTABLE "$TSMC_PDK/../../digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top1_cworst.captable"
+set ec::CAPTABLE "$TSMC_PDK/digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top1_cworst.captable"
 set ec::SDC             constraint.sdc
 
 
