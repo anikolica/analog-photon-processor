@@ -1,0 +1,112 @@
+
+(envSetVal "ams.envOpts" "netlisterMode" 'string "OSS-based")
+(envSetVal "ams.ncverilogOpts"	"libFiles"	'string	" $PDK_PATH/digital/Front_End/verilog/tcbn65lp_200a/tcbn65lp_pwr.v $PDK_PATH/digital/Front_End/verilog/tpan65lpnv2od3_140b/tpan65lpnv2od3.v $PDK_PATH/digital/Front_End/verilog/tpdn65lpnv2od3_140b/tpdn65lpnv2od3.v $PDK_PATH/digital/Front_End/verilog/tcbn65lpbwp7thvt_pwr.v")
+
+deRegUserTriggers("maskLayout" nil '_pvsMaskLayoutMenuTrigger)
+deRegUserTriggers("maskLayoutXL" nil '_pvsMaskLayoutMenuTrigger)
+
+procedure( PVSPreFormTrigger( runType presetFile winId )
+let( (cv runDir tmpName f)
+tmpName = makeTempFileName( strcat( getTempDir() "/pvsXXXXXX"))
+techlib = "pvtech.lib"
+f = outfile( tmpName )
+if( runType == "DRC" then
+;; create a temporary preset file
+fprintf(f "[ pvsgui.Run%s ]\n" runType )
+fprintf(f "TechnologyLibPath \"%s\" \n" techlib)
+fprintf(f "TechnologyName \"%s\" \n" "tsmc65n")
+fprintf(f "TechnologyRuleSet \"%s\" \n" "Cell Only")
+fprintf(f "RunDir \"%s\" \n" "DRC")
+)
+if( runType == "VIPVSPOSTEDIT" then
+;; create a temporary preset file
+fprintf(f "[ pvsgui.VIPVS ]\n" runType )
+fprintf(f "TechnologyLibPath \"%s\" \n" techlib)
+fprintf(f "TechnologyName \"%s\" \n" "tsmc65n")
+fprintf(f "TechnologyRuleSet \"%s\" \n" "Cell Only")
+fprintf(f "LayerMapFile \"%s/%s/%s/tsmcN65/tsmcN65.layermap\" \n" 
+                                      getShellEnvVar("PDK_PATH") 
+                                      getShellEnvVar("PDK_RELEASE") 
+				      getShellEnvVar("OPTION"))
+)
+if( runType == "LVS" then
+;; create a temporary preset file
+fprintf(f "[ pvsgui.Run%s ]\n" runType )
+fprintf(f "TechnologyLibPath \"%s\" \n" techlib)
+fprintf(f "TechnologyName \"%s\" \n" "tsmc65n")
+fprintf(f "TechnologyRuleSet \"%s\" \n" "default")
+fprintf(f "RunDir \"%s\" \n" "LVS")
+)
+close(f)
+tmpName
+))
+
+procedure( LvsGuiPreset(form) t)
+
+procedure( vuiUserDefinedRCXFormSetupCB(form)
+   let(
+     (DK_path CWD SVDB defTab1 defTab2 defTab3 defTab4 defTab5 path_to_file )
+
+     DK_path= strcat( getShellEnvVar("PDK_PATH") "/" getShellEnvVar("PDK_RELEASE") "/" getShellEnvVar("OPTION"))
+;     path_to_file  = strcat( DK_path "/pvtech.lib")
+parasiticBlockingFile= strcat( DK_path  "/PVS_QRC/lvs/hcell" )
+      CWD=getShellEnvVar("PWD")
+
+; Setting of the preQRCform
+
+;;;	when( form->hiFormSym == 'vuipreRcxForm
+;;;	form->assuraTech->value = path_to_file
+;;;	form->tech->value = "gpdk045_pvs"
+
+;form->runDir->value = "myrundirpath"
+;form->runName->value = "myrunname"
+;form->mapFile->value = "file_name"
+
+	   
+;;;	  ); end of when preQRC
+
+; Setting the QRC form
+ 
+	when( form->hiFormSym == 'vuiRcxRunForm
+
+;Definition of each QRC tabs
+
+	defTab1 = _vuiRcxGetTabField("vuiRcxRunForm" "setupTab")
+	defTab2 = _vuiRcxGetTabField("vuiRcxRunForm" "extractTab")
+	defTab3 = _vuiRcxGetTabField("vuiRcxRunForm" "filterTab")
+	defTab4 = _vuiRcxGetTabField("vuiRcxRunForm" "netlistTab")
+	defTab5 = _vuiRcxGetTabField("vuiRcxRunForm" "runTab")
+
+
+       ;; Set Field values in Setup Tab
+
+       ;defTab1->ruleSetDirField->value="./gpdk045/qrc/typical/"
+       defTab1->technologyField->value="tsmc65n"
+       ;typ must exist in the list of choice
+       defTab1->ruleSetField->value="typical"
+       defTab1->outputFormat->value="Extracted View"
+       defTab1->checkCellView->value=nil
+       
+       ;; Set Field values in Extract Tab
+;       defTab2->capExtractMode->value="Decoupled"
+;       defTab2->rcxExtractionMode->value="RC"
+;       defTab2->refNode->value="gnd!"
+;       defTab2->netNameSpace->value="Schematic Names"
+        defTab2->parasBlockDevCellsFile->value= parasiticBlockingFile
+	;; Set Field values in filterTab
+	;; defTab3->...
+        ;; Set Field values in netlistTab
+        ;; defTab4-->...
+	;; Set Field values in runTab
+        ;; defTab5->...
+
+   ); end When QRC form
+     t ; a true return value is necessary
+ ); end Let
+); end of procedure vuiUserDefinedRCXFormSetupCB
+
+load( strcat( getShellEnvVar("PDK_PATH") "/" getShellEnvVar("PDK_RELEASE") "/" getShellEnvVar("OPTION") "/skill/TSMCN65_cktPro.il"))
+
+
+;; ncd
+envSetVal("asimenv.startup" "projectDir" 'string "./Sim")

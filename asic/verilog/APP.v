@@ -181,6 +181,17 @@ module APP(
     *****************************************************/
 
    addr top_addr ( .a_i(a_i), .b_i(b_i), .c_o( c_o ), .clk(clk), .rstb(rstb) );
+
+
+   /****************************************************
+    *             MACROS -ncd                          *
+    ****************************************************/ 
+
+   X0814_opamp_N_P amplifier1 (                        //verilog doesnt like start with number  
+			      .VINm (clk),
+			      .VINp (rstb),            // verilog not like VIN-, VIN+ either
+			      .VOUT (pad_c4_o)          // This is output
+			      );
    
-   
+
 endmodule // dummy_top

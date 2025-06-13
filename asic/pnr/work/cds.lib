@@ -1,0 +1,48 @@
+#SOFTINCLUDE $AMSHOME/tools/affirma_ams/etc/connect_lib/cds.lib
+#SOFTINCLUDE $CDSHOME/share/cdssetup/cds.lib
+#INCLUDE $PDK_PATH/$PDK_RELEASE/$OPTION/cds.lib
+
+#INCLUDE $PDK_PATH/digital/Back_End/cdk/tcbn65lp_200a_oa/$OPTION/cds.lib
+#SOFTINCLUDE $PDK_PATH/digital/Back_End/cdk/tpdn65lpnv2od3_140b_oa/$OPTION/mt_2/6lm/cds.lib
+#SOFTINCLUDE $PDK_PATH/digital/Back_End/cdk/tpdn65lpnv2od3_140b_oa/$OPTION/mt_2/7lm/cds.lib
+#SOFTINCLUDE $PDK_PATH/digital/Back_End/cdk/tpan65lpnv2od3_200a_oa/$OPTION/mt_2/6lm/cds.lib
+#SOFTINCLUDE $PDK_PATH/digital/Back_End/cdk/tpan65lpnv2od3_200a_oa/$OPTION/mt_2/7lm/cds.lib
+#INCLUDE $PDK_PATH/digital/Back_End/cdk/tcbn65lpbwp7thvt_200a_oa/cds.lib
+#SOFTINCLUDE $PDK_PATH/digital/Back_End/cdk/tpbn65v_200b_oa/$OPTION/cds.lib
+#DEFINE avTech /cad/ASSURA41-616-lnx/tools/assura/etc/avtech/avTech
+
+
+## official libraries defined here -ncd
+INCLUDE /tape/mitch_sim/cds_proto/tsmc/cds.lib
+
+## These must remain defined -ncd
+### required this to pre-exist: (cp -r ./scripts/emptyLib ../output) 
+### Maybe should added createLib command in import.tcl to accomodate this.
+DEFINE output ../output
+DEFINE mklib ./mklib
+
+DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_lib
+
+
+#DEFINE avTech /cad/ASSURA41-617-lnx/tools.lnx86/assura/etc/avtech/avTech
+
+##### OTHER LIBS  
+## Cern ring oscillator
+#250612 DEFINE chip_digital_hierarchical_2 /tape/mitch_sim/cds_proto/tsmc/Stefano_RingOsc/projects/TSMC65/devel65/V2.2011/workAreas/pvalerio/chip_digital_hierarchical_2
+#250612 DEFINE CERN_IO_1P2V_ncd /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW/pnr/work/CERN_IO_1P2V_ncd
+#250612 DEFINE FEOADesignlib FEOADesignlib
+
+
+#250612 DEFINE mklib_final /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW/pnr/work/mklib_final
+#250612 DEFINE mklib_final_v2 /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/mklib_final_v2
+#250612 DEFINE streamIn_v2 /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/streamIn_v2
+#250612 DEFINE streamIn_junk /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/streamIn_junk
+#250612 DEFINE testJunk /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/testJunk
+#250612 DEFINE mklib mklib
+
+
+#250612 DEFINE mklib_final_v3 /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v3/pnr/work/mklib_final_v3
+#250612 DEFINE streamIn_final /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v3/pnr/work/streamIn_final
+#Removed by ddDeleteObj: DEFINE mklib_justPads /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v3/pnr/work/mklib_justPads
+#250612 DEFINE streamInPads /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v3/pnr/work/streamInPads
+

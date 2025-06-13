@@ -1,0 +1,13 @@
+dest_sch_lib := mklib
+ref_lib_list := basic, US_8ths , tcbn65lp , tcbn65lpbwp7thvt , tpdn65lpnv2od3 , tpan65lpnv2od3 ,  coldMPW_lib
+schematic_view_name := schematic
+symbol_view_name := symbol
+log_file_name := verilogIn.log
+map_file_name := verilogIn.map.table
+power_net := - 
+ground_net := - 
+import_if_exists := 1
+
+
+
+

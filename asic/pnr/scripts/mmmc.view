@@ -1,0 +1,69 @@
+#######################################################
+#                                                     
+#  THE RECIPE
+#  by Sandro Bonacini
+#  CERN PH/ESE/ME
+#  Created on 15 Oct 2013
+#                                                     
+#######################################################
+
+#create_rc_corner -name RC_BEST -qx_tech_file {RC_QRC_crn65lp_1p6m_3X1Z1U_alrdl_rcbest/qrcTechFile}
+#create_rc_corner -name RC_TYP    -qx_tech_file {RC_QRC_crn65lp_1p6m_3X1Z1U_alrdl_typical/qrcTechFile}
+#create_rc_corner -name RC_WORST -qx_tech_file {RC_QRC_crn65lp_1p6m_3X1Z1U_alrdl_rcworst/qrcTechFile}
+
+#create_rc_corner -name RC_TYP    -qx_tech_file typical/qrcTechFile
+#create_rc_corner -name RC_BEST   -qx_tech_file rcbest/qrcTechFile
+#create_rc_corner -name RC_WORST  -qx_tech_file rcworst/qrcTechFile
+
+## fix up paths -ncd
+create_rc_corner -name RC_TYP    -qx_tech_file $glv::PVS_QRC/typical/qrcTechFile
+create_rc_corner -name RC_BEST    -qx_tech_file $glv::PVS_QRC/rcbest/qrcTechFile
+create_rc_corner -name RC_WORST    -qx_tech_file $glv::PVS_QRC/rcworst/qrcTechFile
+
+
+
+# -cap_table {cln65lp_1p06m+alrdl_top2_rcbest.captable} 
+# -cap_table {cln65lp_1p06m+alrdl_top2_typical.captable}
+# -cap_table {cln65lp_1p06m+alrdl_top2_rcworst.captable}
+
+
+create_library_set -name libs_typ_9t -timing {/cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lptc.lib \
+    /cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3tc.lib \
+    /cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tpan65lpnv2od3_200a/tpan65lpnv2od3tc.lib} \
+    -si {/cad/Technology/TSMC650A.new/digital/Back_End/celtic/tcbn65lp_200c/tcbn65lptc.cdb \
+         /cad/Technology/TSMC650A.new/digital/Back_End/celtic/tpdn65lpnv2od3_200a/tpdn65lpnv2od3tc.cdb}
+
+create_library_set -name libs_min_9t -timing {/cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lplt.lib \
+     /cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3lt.lib \
+     /cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tpan65lpnv2od3_200a/tpan65lpnv2od3lt.lib} \
+     -si {/cad/Technology/TSMC650A.new/digital/Back_End/celtic/tcbn65lp_200c/tcbn65lplt.cdb \
+          /cad/Technology/TSMC650A.new/digital/Back_End/celtic/tpdn65lpnv2od3_200a/tpdn65lpnv2od3lt.cdb}
+
+create_library_set -name libs_max_9t -timing {/cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lpwc.lib \
+     /cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib \
+     /cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tpan65lpnv2od3_200a/tpan65lpnv2od3wc.lib} \
+     -si {/cad/Technology/TSMC650A.new/digital/Back_End/celtic/tcbn65lp_200c/tcbn65lpwc.cdb \
+          /cad/Technology/TSMC650A.new/digital/Back_End/celtic/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.cdb}
+
+
+create_op_cond -name oc_typ_9t -library_file {/cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lptc.lib} -P {1} -V {1.2} -T {25}
+create_op_cond -name oc_min_9t -library_file {/cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lplt.lib} -P {1} -V {1.32} -T {0}
+create_op_cond -name oc_max_9t -library_file {/cad/Technology/TSMC650A.new/digital/Front_End/timing_power_noise/NLDM/tcbn65lp_200a/tcbn65lpwc.lib} -P {1} -V {1.08} -T {-25}
+
+#create_constraint_mode -name default_mode -sdc_files {../../syn/sdc/constraint.sdc}
+create_constraint_mode -name default_mode -sdc_files {../../syn/output/r2g.sdc}
+
+create_delay_corner -name av_min_dc -library_set {libs_min_9t} -opcond_library {tcbn65lplt} -opcond {oc_min_9t} -rc_corner {RC_BEST}
+update_delay_corner -name av_min_dc -power_domain core9t -library_set {libs_min_9t} -opcond_library {tcbn65lplt} -opcond {oc_min_9t}
+
+create_delay_corner -name av_max_dc -library_set {libs_max_9t} -opcond_library {tcbn65lpwc} -opcond {oc_max_9t} -rc_corner {RC_WORST}
+update_delay_corner -name av_max_dc -power_domain core9t -library_set {libs_max_9t} -opcond_library {tcbn65lpwc} -opcond {oc_max_9t}
+
+create_delay_corner -name av_typ_dc -library_set {libs_typ_9t} -opcond_library {tcbn65lptc} -opcond {oc_typ_9t} -rc_corner {RC_TYP}
+update_delay_corner -name av_typ_dc -power_domain core9t -library_set {libs_typ_9t} -opcond_library {tcbn65lptc} -opcond {oc_typ_9t}
+
+create_analysis_view -name av_typ -constraint_mode {default_mode} -delay_corner {av_typ_dc}
+create_analysis_view -name av_min -constraint_mode {default_mode} -delay_corner {av_min_dc}
+create_analysis_view -name av_max -constraint_mode {default_mode} -delay_corner {av_max_dc}
+
+set_analysis_view -setup {av_min av_typ} -hold {av_min av_max}

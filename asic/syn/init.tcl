@@ -57,8 +57,10 @@ set ec::VERILOG_LIST    { APP.v addr.v }
 
 #set ec::LEFLIB "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT2.lef "
 set ec::LEFLIB " $TSMC_PDK/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT1.lef \
-				 $TSMC_PDK/digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/tpdn65lpnv2od3_6lm.lef \
-				 $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef "
+	            $TSMC_PDK/digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/tpdn65lpnv2od3_6lm.lef \
+	            $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef    \
+                 /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/libs/lef/0814_opamp_N_P.lef "                    
+
 				 
 #set ec::CAPTABLE "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top2_rcworst.captable"
 set ec::CAPTABLE "$TSMC_PDK/digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top1_cworst.captable"
