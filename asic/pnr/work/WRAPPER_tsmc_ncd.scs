@@ -1,0 +1,35 @@
+//
+// Makes this wrapper file to run process corners using Virtusos Maestro -ncd
+// 11/19/2024 
+
+simulator lang=spectre insensitive = yes
+
+section tt
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=tt_lib
+endsection
+
+
+section ss
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=ss_lib
+endsection
+
+section ff
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=ff_lib
+endsection
+
+section fs
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=fs_lib
+endsection
+
+section sf
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=sf_lib
+endsection
+
+section mismatch_lib
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=mismatch_lib
+endsection
+
+section mc_lib
+include  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/tsmcN65/../models/spectre/toplevel.scs" section=mc_lib
+endsection
+

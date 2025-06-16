@@ -1,0 +1,24 @@
+
+// Location of exampes: /tape/mitch_sim/cds_proto/tsmc180/vbit*.scs
+
+// Must have extention *scs
+// Must reference this file in  "Model Libraries"
+
+
+
+
+// define your bit pattern
+DATA1 pattern data="01011011111010111101101111101011010101010101010101011110111011010"
+
+
+DATA2 pattern data="011001110011100111100111100111110011111001111100"
+
+
+
+//DATA2 pattern data="101"
+//DATA3 pattern data='DATA2,1001,DATA1'
+
+//CLK1 pattern data="01" rptstart=1 rpttimes=10
+//DELAY pattern data="00" rptstart=1 rpttimes=10
+
+
