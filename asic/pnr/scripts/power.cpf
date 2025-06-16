@@ -1,0 +1,86 @@
+#set_design chip  -ncd
+set_design coldMPW 
+
+set_hierarchy_separator "/"
+
+create_power_domain -name core9t -default 
+#create_power_domain -name core7thvt -instances core_digital/CSR
+create_power_domain -name core7thvt -instances cf
+##create_power_domain -name core7thvt -instances core_digital/slave/slave*/synch*
+
+create_power_nets -nets VDD -voltage 1.2 -internal
+
+update_power_domain -name core9t -internal_power_net {VDD}
+update_power_domain -name core7thvt -internal_power_net {VDD}
+
+create_global_connection -net VDD -domain core9t -pins VDD
+create_global_connection -net VDD -domain core7thvt -pins VDD
+
+create_ground_nets -nets VSS
+
+create_global_connection -net VSS -domain core9t -pins VSS
+create_global_connection -net VSS -domain core7thvt -pins VSS
+
+define_library_set -name libs_max_9t -libraries {tcbn65lpwc.lib  tpdn65lpnv2od3wc.lib} 
+define_library_set -name libs_typ_9t -libraries {tcbn65lptc.lib  tpdn65lpnv2od3tc.lib} 
+define_library_set -name libs_min_9t -libraries {tcbn65lplt.lib  tpdn65lpnv2od3lt.lib} 
+
+define_library_set -name libs_max_7thvt -libraries { tcbn65lpbwp7thvtwc.lib tpdn65lpnv2od3wc.lib} 
+define_library_set -name libs_typ_7thvt -libraries { tcbn65lpbwp7thvttc.lib tpdn65lpnv2od3tc.lib} 
+define_library_set -name libs_min_7thvt -libraries { tcbn65lpbwp7thvtlt.lib tpdn65lpnv2od3lt.lib} 
+
+
+create_operating_corner -name oc_max_9t \
+-voltage 1.08 \
+-process 1 \
+-temperature -25 \
+-library_set libs_max_9t
+
+create_operating_corner -name oc_typ_9t \
+-voltage 1.2 \
+-process 1 \
+-temperature 25 \
+-library_set libs_typ_9t
+
+create_operating_corner -name oc_min_9t \
+-voltage 1.32 \
+-process 1 \
+-temperature 0 \
+-library_set libs_min_9t
+
+create_operating_corner -name oc_max_7thvt \
+-voltage 1.08 \
+-process 1 \
+-temperature -25 \
+-library_set libs_max_7thvt
+
+create_operating_corner -name oc_typ_7thvt \
+-voltage 1.2 \
+-process 1 \
+-temperature 25 \
+-library_set libs_typ_7thvt
+
+create_operating_corner -name oc_min_7thvt \
+-voltage 1.32 \
+-process 1 \
+-temperature 0 \
+-library_set libs_min_7thvt
+
+
+create_nominal_condition -name NC_9t -voltage 1.2
+update_nominal_condition -name NC_9t -library_set libs_typ_9t 
+
+create_nominal_condition -name NC_7thvt -voltage 1.2
+update_nominal_condition -name NC_7thvt -library_set libs_typ_7thvt 
+
+create_power_mode -name PM -domain_conditions { core9t@NC_9t core7thvt@NC_7thvt} -default
+
+update_power_mode -name PM -sdc_files {../../syn/sdc/constraint.sdc}
+
+create_analysis_view -name av_min -mode PM -domain_corners { core9t@oc_min_9t core7thvt@oc_min_7thvt }
+create_analysis_view -name av_typ -mode PM -domain_corners { core9t@oc_typ_9t core7thvt@oc_typ_7thvt }
+create_analysis_view -name av_max -mode PM -domain_corners { core9t@oc_max_9t core7thvt@oc_max_7thvt }
+
+ 
+
+end_design
