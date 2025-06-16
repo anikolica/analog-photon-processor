@@ -125,6 +125,7 @@ catch {exec rm -rf $oaLibName/[dbGet top.name]/layout}
 #oaOut $oaLibName [dbGet top.name] layout -leafViewNames layout -noConnectivity
 #exec defin -def dfm.def -lib $oaLibName -cell [dbGet top.name] -view dfm -masterLibs tcbn65lp_lef -overwrite -log defin.log
 catch {exec virtuoso -nograph -log makeLayout.log -replay ../scripts/makeLayout.il}
+
 puts "Making final virtuoso schematic view... (check verilogIn.log for details)"
 catch {exec rm -rf $oaLibName/*/symbol}
 catch {exec rm -rf $oaLibName/*/schematic}

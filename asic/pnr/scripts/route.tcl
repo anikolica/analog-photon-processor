@@ -62,17 +62,21 @@ setNanoRouteMode -routeConcurrentMinimizeViaCountEffort high
 ## 
 
 
-
-setCTSMode -specMultiMode true -traceDPinAsLeaf false -traceIoPinAsLeaf false -routeClkNet true -routeGuide true \
-	-topPreferredLayer $clockTopRoutingLayer -bottomPreferredLayer $clockBottomRoutingLayer \
-	-useLefACLimit false -routePreferredExtraSpace 1 -opt true -optAddBuffer true -moveGate true -useHVRC true \
-	-fixLeafInst true -fixNonLeafInst true -verbose false -reportHTML false -addClockRootProp false \
-	-nameSingleDelim false -honorFence false -useLibMaxFanout false -useLibMaxCap false
+## THIS SEEMS OBSELETE -ncd 2025
+#setCTSMode   -routeGuide true \
+#	-topPreferredLayer $clockTopRoutingLayer -bottomPreferredLayer $clockBottomRoutingLayer \
+#	-useLefACLimit false -routePreferredExtraSpace 1 -opt true -optAddBuffer true -moveGate true -useHVRC true \
+#	-fixLeafInst true -fixNonLeafInst true -verbose false -reportHTML false -addClockRootProp false \
+#	-nameSingleDelim false -honorFence false -useLibMaxFanout false -useLibMaxCap false
 
 setOptMode -effort high -leakagePowerEffort none -yieldEffort none -reclaimArea true -simplifyNetlist true -setupTargetSlack 0 -holdTargetSlack 0 -maxDensity 0.95 -drcMargin 0 -usefulSkew false
 setCTSMode -powerAware true
 
-## don't extact caps for SI analysis here -ncd 
+setOptMode -opt_power_effort low -opt_leakage_to_dynamic_ratio 0.5
+
+
+
+## don't extract caps for SI analysis here -ncd 
 setDelayCalMode -siAware false
 ## do extract caps for  SI analysis here
 #setExtractRCMode -coupled true
@@ -87,12 +91,12 @@ win
 #clockDesign -genSpecOnly Clock.ctstch
 
 
+## REMOVED -ncd 2025
+#createClockTreeSpec  -file Clock.ctstch  -clkGroup
+#createClockTreeSpec  -file Clock.ctstch.default_mode  -clkGroup
 
-createClockTreeSpec  -file Clock.ctstch  -clkGroup
-createClockTreeSpec  -file Clock.ctstch.default_mode  -clkGroup
-
-clockDesign -specFile Clock.ctstch -outDir ../report/clock_report -fixedInstBeforeCTS
-#set_clock_uncertainty 0 -from [all_clocks] -to [all_clocks]
+#clockDesign -specFile Clock.ctstch -outDir ../report/clock_report -fixedInstBeforeCTS
+##set_clock_uncertainty 0 -from [all_clocks] -to [all_clocks]
 win
 
 # dont save to OA yet -ncd
@@ -119,6 +123,8 @@ timeDesign -postRoute -pathReports -drvReports -prefix pre_hold_fix -outDir ../r
 win
 # optimization
 setOptMode -effort high -leakagePowerEffort none -yieldEffort none -reclaimArea true -simplifyNetlist true -setupTargetSlack 0.01 -holdTargetSlack 0.01 -maxDensity 0.95 -drcMargin 0 -usefulSkew false
+
+setOptMode -opt_power_effort high -opt_leakage_to_dynamic_ratio 0.5
 optDesign -postRoute  -drv
 optDesign -postRoute -hold
 win

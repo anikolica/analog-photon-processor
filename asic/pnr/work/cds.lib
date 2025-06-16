@@ -38,7 +38,7 @@ DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/as
 #250612 DEFINE streamIn_v2 /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/streamIn_v2
 #250612 DEFINE streamIn_junk /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/streamIn_junk
 #250612 DEFINE testJunk /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v2/pnr/work/testJunk
-#250612 DEFINE mklib mklib
+#250612 
 
 
 #250612 DEFINE mklib_final_v3 /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v3/pnr/work/mklib_final_v3

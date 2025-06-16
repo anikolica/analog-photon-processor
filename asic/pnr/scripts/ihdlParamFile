@@ -1,5 +1,5 @@
 dest_sch_lib := mklib
-ref_lib_list := basic, US_8ths , tcbn65lp , tcbn65lpbwp7thvt , tpdn65lpnv2od3 , tpan65lpnv2od3 ,  coldMPW_lib
+ref_lib_list := basic, US_8ths , tcbn65lp , tcbn65lpbwp7thvt , tpdn65lpnv2od3 , tpan65lpnv2od3 , 2025_APP
 schematic_view_name := schematic
 symbol_view_name := symbol
 log_file_name := verilogIn.log

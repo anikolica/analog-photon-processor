@@ -57,7 +57,7 @@ if {$ONLY_7TRACKS} { addWellTap -cell TAPCELLBWP7T -cellInterval 14 -inRowOffset
 
 win
 setPlaceMode -reset
-setPlaceMode -congEffort high -timingDriven 1 -modulePlan 1  -clkGateAware 0 -powerDriven 0 -ignoreScan 1 -reorderScan 1 -ignoreSpare 1 -placeIOPins 1 -moduleAwareSpare 0 -checkPinLayerForAccess {  1 } -preserveRouting 0 -rmAffectedRouting 0 -checkRoute 0 -swapEEQ 0
+setPlaceMode -congEffort high -timingDriven 1  -clkGateAware 0 -powerDriven 0 -ignoreScan 1 -reorderScan 1 -ignoreSpare 1 -placeIOPins 1 -moduleAwareSpare 0  -preserveRouting 0 -rmAffectedRouting 0 -checkRoute 0 -swapEEQ 0
 
 setTrialRouteMode -highEffort false -floorPlanMode false -detour true -maxRouteLayer $preferredTopRoutingLayer -minRouteLayer $bottomRoutingLayer -handlePreroute true -autoSkipTracks false -handlePartition false -handlePartitionComplex false -useM1 false -keepExistingRoutes false -ignoreAbutted2TermNet false -pinGuide true -honorPin false -selNet {} -selNetOnly {} -selMarkedNet false -selMarkedNetOnly false -ignoreObstruct false -PKS false -updateRemainTrks false -ignoreDEFTrack false -printWiresOnRTBlk false -usePagedArray false -routeObs true -routeGuide {} -blockageCostMultiple 1 -maxDetourRatio 0
 
@@ -65,7 +65,7 @@ setOptMode  -bufferAssignNets true
 setOptMode -allEndPoints true
 
 catch { defIn ../../syn/output/scan.def }
-#scanTrace -compLogic -verbose
+scanTrace -compLogic -verbose
 scanTrace
 
 setDrawView place

@@ -57,7 +57,7 @@ set conf_qxconf_file NULL
 set init_import_mode { -keepEmptyModule 1 -treatUndefinedCellAsBbox 0}
 set conf_qxlib_file NULL
 set init_layout_view layout
-set init_gnd_net {VSS  AVSS VSSPST}
+set init_gnd_net {VSS GND AVSS VSSPST}
 set init_abstract_view abstract
 getenv ENCOUNTER_CONFIG_RELATIVE_CWD
 setDoAssign on
@@ -68,7 +68,7 @@ setDoAssign on
 ## -ncd
 init_design
 
-stop
+#stop
 
 
 fit
@@ -105,6 +105,9 @@ source ../scripts/variables.tcl
 
 globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
+globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
+
+
 
 ## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
 #globalNetConnect VDDPST -type pgpin -pin VDDPST -inst *
@@ -116,130 +119,33 @@ globalNetConnect VSS -type pgpin -pin VSS -inst *
 #globalNetConnect VDDPST -type net -net VDDPST! 
 #globalNetConnect VSSPST -type net -net VSSPST! 
 
-stop
+#stop
 
 ## Load IO pads and special routing
-   loadIoFile 	coldMPW.save.io
-   floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
+loadIoFile 	APP.save.io     ; # padring corners plus some pads -ncd
+floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
 fit
+
+#setDrawView ameba  ; # Toggle innovus to wake it up! -ncd
+#setDrawView place
+
+# Set pins visible
+setLayerPreference node_cell -isVisible 0
+setLayerPreference pinObj -isVisible 1
+setDrawView fplan 
+
+
+## PLACE MACROS -ncd
+
+#selectInst amplifier1
+#setObjFPlanBox Instance amplifier1 1307.107 1229.966 1367.107 1294.971
+placeInstance amplifier1 1300 1200 R0 -fixed
+fit  ; # Toggle to wake up Innovus GUI ! -ncd
+
 
 stop
 
-## place macros -ncd
 
-placeInstance ringOsc90nm1 1651 1100 R90 -fixed 
-placeInstance ringOsc60nm1 1651 1200 R90 -fixed 
-
-
-#placeInstance xorCntr1 360 1500 R0 -fixed 
-placeInstance xorCntr1 358.5 1498.5 R0 -fixed 
-
-placeInstance ringOsc1 275 1373.5 MY -fixed 
-placeInstance ringOsc2 475 1373.5 MY -fixed 
-placeInstance ringOsc3 675 1373.5 MY -fixed 
-
-placeInstance ringOsc4 275 1273.5 MY -fixed 
-placeInstance ringOsc5 475 1273.5 MY -fixed 
-placeInstance ringOsc6 675 1273.5 MY -fixed 
-
-placeInstance ringOsc7 275 1173.5 MY -fixed 
-placeInstance ringOsc8 475 1173.5 MY -fixed 
-placeInstance ringOsc9 675 1173.5 MY -fixed 
-
-placeInstance ringOsc10 275 1073.5 MY -fixed 
-placeInstance ringOsc11 475 1073.5 MY -fixed 
-placeInstance ringOsc12 675 1073.5 MY -fixed 
-
-placeInstance ringOsc13 275 973.5 MY -fixed 
-placeInstance ringOsc14 475 973.5 MY -fixed 
-placeInstance ringOsc15 675 973.5 MY -fixed 
-
-placeInstance ringOsc16 275 873.5 MY -fixed 
-placeInstance ringOsc17 475 873.5 MY -fixed 
-placeInstance ringOsc18 675 873.5 MY -fixed 
-
-placeInstance ringOsc19 275 773.5 MY -fixed 
-placeInstance ringOsc20 475 773.5 MY -fixed 
-placeInstance ringOsc21 675 773.5 MY -fixed 
-
-placeInstance ringOsc22 275 673.5 MY -fixed 
-placeInstance ringOsc23 475 673.5 MY -fixed 
-placeInstance ringOsc24 675 673.5 MY -fixed 
-
-placeInstance ringOsc25 275 573.5 MY -fixed 
-placeInstance ringOsc26 475 573.5 MY -fixed 
-placeInstance ringOsc27 675 573.5 MY -fixed 
-
-placeInstance ringOsc28 275 473.5 MY -fixed 
-placeInstance ringOsc29 475 473.5 MY -fixed 
-placeInstance ringOsc30 675 473.5 MY -fixed 
-
-placeInstance ringOsc31 275 373.5 MY -fixed 
-placeInstance ringOsc32 475 373.5 MY -fixed 
-
-placeInstance delay1 965 1373.5 R0 -fixed 
-placeInstance delay2 1065 1373.5 R0 -fixed 
-placeInstance delay3 1165 1373.5 R0 -fixed 
-
-placeInstance delay4 965 1273.5 R0 -fixed 
-placeInstance delay5 1065 1273.5 R0 -fixed 
-placeInstance delay6 1165 1273.5 R0 -fixed 
-
-placeInstance delay7 965 1173.5 R0 -fixed 
-placeInstance delay8 1065 1173.5 R0 -fixed 
-placeInstance delay9 1165 1173.5 R0 -fixed 
-
-placeInstance delay10 965 1073.5 R0 -fixed 
-placeInstance delay11 1065 1073.5 R0 -fixed 
-placeInstance delay12 1165 1073.5 R0 -fixed 
-
-placeInstance delay13 965 973.5 R0 -fixed 
-placeInstance delay14 1065 973.5 R0 -fixed 
-placeInstance delay15 1165 973.5 R0 -fixed 
-
-placeInstance delay16 965 873.5 R0 -fixed 
-placeInstance delay17 1065 873.5 R0 -fixed 
-placeInstance delay18 1165 873.5 R0 -fixed 
-
-placeInstance delay19 965 773.5 R0 -fixed 
-placeInstance delay20 1065 773.5 R0 -fixed 
-placeInstance delay21 1165 773.5 R0 -fixed 
-
-placeInstance delay22 965 673.5 R0 -fixed 
-placeInstance delay23 1065 673.5 R0 -fixed 
-placeInstance delay24 1165 673.5 R0 -fixed 
-
-placeInstance delay25 965 573.5 R0 -fixed 
-placeInstance delay26 1065 573.5 R0 -fixed 
-placeInstance delay27 1165 573.5 R0 -fixed 
-
-placeInstance delay28 965 473.5 R0 -fixed 
-placeInstance delay29 1065 473.5 R0 -fixed 
-placeInstance delay30 1165 473.5 R0 -fixed 
-
-placeInstance CLAMP1c 335 130 MY -fixed 
-placeInstance CLAMP2c 463 130 MY -fixed 
-placeInstance CLAMP3c 591 130 MY -fixed 
-placeInstance CLAMP4c 719 130 MY -fixed 
-
-placeInstance CLAMP3b 847 130 MY -fixed 
-placeInstance CLAMP4b 975 130 MY -fixed 
-placeInstance CLAMP5b 1103 130 MY -fixed 
-placeInstance CLAMP6b 1231 130 MY -fixed 
-placeInstance CLAMP7b 1359 130 MY -fixed 
-
-placeInstance CLAMP3a 847 1675 MY -fixed  
-placeInstance CLAMP4a 975 1675 MY -fixed 
-placeInstance CLAMP5a 1103 1675 MY -fixed 
-placeInstance CLAMP6a 1231 1675 MY -fixed 
-placeInstance CLAMP7a 1359 1675 MY -fixed 
-
-## big cap
-placeInstance bgcap1 1422 1275 MX -fixed 
-placeInstance CLAMPcap 1615 1675 MY -fixed 
-
-## test transistors
-placeInstance trnstr1 1565 225 R0 -fixed 
 
 
 ## defIn special routing -mcd
@@ -288,7 +194,6 @@ if {$CORE_CHIP == "CHIP"} {
 	addIoFiller -cell PFILLER1
 	addIoFiller -cell PFILLER05
 	addIoFiller -cell PFILLER0005 -fillAnyGap
-
 	
 	# deleteInst pad_*  
 	source ../scripts/addPads.tcl 
