@@ -99,10 +99,12 @@ source ../scripts/variables.tcl
 globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
 
-## add these -ncd
+
+## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
 globalNetConnect VDDPST -type pgpin -pin VDDPST -inst *
 globalNetConnect VSSPST -type pgpin -pin VSSPST -inst *
 
+## Maybe these should be removed --> They generate unneeded cds_thru's -ncd
 globalNetConnect VDD -type net -net VDD! 
 globalNetConnect VSS -type net -net VSS! 
 globalNetConnect VDDPST -type net -net VDDPST! 

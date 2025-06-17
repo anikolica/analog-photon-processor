@@ -57,7 +57,9 @@ set conf_qxconf_file NULL
 set init_import_mode { -keepEmptyModule 1 -treatUndefinedCellAsBbox 0}
 set conf_qxlib_file NULL
 set init_layout_view layout
+
 set init_gnd_net {VSS GND AVSS VSSPST}
+
 set init_abstract_view abstract
 getenv ENCOUNTER_CONFIG_RELATIVE_CWD
 setDoAssign on
@@ -121,10 +123,40 @@ globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
 
 #stop
 
+## add corners and physical cells (not in verilog) -ncd
+if {$CORE_CHIP == "CHIP"} {
+	addInst -physical -cell PCORNER -inst corner1
+	addInst -physical -cell PCORNER -inst corner2
+	addInst -physical -cell PCORNER -inst corner3
+	addInst -physical -cell PCORNER -inst corner4
+	#loadIoFile ../scripts/corner.io
+}
+
+
 ## Load IO pads and special routing
 loadIoFile 	APP.save.io     ; # padring corners plus some pads -ncd
+
+
 floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
 fit
+
+## Install I/O filler and bondpads -ncd
+if {$CORE_CHIP == "CHIP"} {
+	addIoFiller -cell PFILLER20
+	addIoFiller -cell PFILLER10
+	addIoFiller -cell PFILLER5
+	addIoFiller -cell PFILLER1
+	addIoFiller -cell PFILLER05
+	addIoFiller -cell PFILLER0005 -fillAnyGap
+	
+	# deleteInst pad_*  
+	source ../scripts/addPads.tcl 
+}
+
+
+#stop
+
+
 
 #setDrawView ameba  ; # Toggle innovus to wake it up! -ncd
 #setDrawView place
@@ -139,13 +171,20 @@ setDrawView fplan
 
 #selectInst amplifier1
 #setObjFPlanBox Instance amplifier1 1307.107 1229.966 1367.107 1294.971
-placeInstance amplifier1 1300 1200 R0 -fixed
+placeInstance amplifier1 1310 1200 R0 -fixed
 fit  ; # Toggle to wake up Innovus GUI ! -ncd
 
 
+
+
+## Add rings around core area: 10 wide/5 space rings on M9/M8 -ncd 
+addRing -skip_via_on_wire_shape Noshape -use_wire_group_bits 2 -use_interleaving_wire_group 1 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -use_wire_group 1 -type core_rings -jog_distance 2.0 -threshold 2.0 -nets {VDD VSS} -follow io -stacked_via_bottom_layer M1 -layer {bottom M8 top M8 right M9 left M9} -width 10 -spacing 5 -offset 10
+uiSetTool ruler
+
+## add stripes M9 10-5-10 every 100um -ncd
+addStripe -skip_via_on_wire_shape Noshape -block_ring_top_layer_limit M7 -max_same_layer_jog_length 6 -padcore_ring_bottom_layer_limit M5 -set_to_set_distance 100 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -padcore_ring_top_layer_limit M7 -spacing 5 -merge_stripes_value 2.0 -layer M9 -block_ring_bottom_layer_limit M5 -width 10 -nets {VDD VSS} -stacked_via_bottom_layer M1
+
 stop
-
-
 
 
 ## defIn special routing -mcd
@@ -155,15 +194,35 @@ defIn coldMPW.def   ; # Special routes Beginning
 ###defIn coldMPW_rowcuts.def ; # Special routes w/ rowcuts 
 
 
-#stop
 
-# On Macros
+
+##### NCD
+## VDD/VSS on VERTICAL EDGES of core -ncd 
+addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 10 right 10} -center 0 -skip_side {top bottom } -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+
+## VDD/VSS on VERTICAL EDGES of Macros -ncd
+addRing -nets {VDD VSS} -type block_rings -around each_block -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+
+
+# VDD/VSS Rings around  Macros
 #foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {createRouteBlk -cover -name myRtBlk -fills -layer 1 2 3 4 5 6 -cutLayer 2 3 4 5 6 -spacing 4 -inst $inst}
 ## deleteRouteBlk -name myRtBlk 
 
+## ADD rings around Macros -ncd
+addRing -nets {VDD VSS} -type block_rings -around each_block -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 0.5 bottom 0.5 left 0.5 right 0.5} -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
 
-## Prepare row rows around macros
+
+
+
+## CUT ROWS around Macros, etc. -ncd
+cutRow -halo 1.8  ; # 1.8 clearance around Macros -ncd
+## ROUTE rows for standard cells -ncd
+sroute -connect {corePin}
+
+
+
+
 ##### create routing blockages and cut core rows around each macro ############ -ncd
 ## Place expanded routing blockages over macros: expand or contracct by SIZE +/-5 -ncd
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 4.5] {createRouteBlk -layer all -name myRtBlks -box $box}
@@ -172,6 +231,10 @@ foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SI
 foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}
 cutRow -selected -halo 5
 deselectAll
+
+
+
+
 
 setDrawView fplan
 ## bottom
@@ -185,19 +248,6 @@ cutRow -area 1485 265 1735 505
 
 
 #stop
-
-## install I/O filler and pads -ncd
-if {$CORE_CHIP == "CHIP"} {
-	addIoFiller -cell PFILLER20
-	addIoFiller -cell PFILLER10
-	addIoFiller -cell PFILLER5
-	addIoFiller -cell PFILLER1
-	addIoFiller -cell PFILLER05
-	addIoFiller -cell PFILLER0005 -fillAnyGap
-	
-	# deleteInst pad_*  
-	source ../scripts/addPads.tcl 
-}
 
 
 
