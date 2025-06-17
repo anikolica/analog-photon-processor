@@ -7,7 +7,7 @@
 ##    defIn my.def
 ##    defOut -floorplan my.def (*this is the most complete! Includs blockages too)
 #############################
-
+###defOut -cutRow -selected APP1.def
 
 
 set TSMC_PDK $env(TSMC_PDK)
@@ -166,7 +166,7 @@ setLayerPreference node_cell -isVisible 0
 setLayerPreference pinObj -isVisible 1
 setDrawView fplan 
 
-
+#
 ## PLACE MACROS -ncd
 
 #selectInst amplifier1
@@ -174,6 +174,12 @@ setDrawView fplan
 placeInstance amplifier1 1310 1200 R0 -fixed
 fit  ; # Toggle to wake up Innovus GUI ! -ncd
 
+## defIn special routing -mcd
+defIn APP_fp.def ; # Special routes and blockages then skip to place, etc -ncd
+#defIn APP.def   
+#defIn APP_selected.def ; # selected only
+#defIn myBlockages.def  ; # blockages only
+stop
 
 
 
@@ -186,12 +192,6 @@ addStripe -skip_via_on_wire_shape Noshape -block_ring_top_layer_limit M7 -max_sa
 
 stop
 
-
-## defIn special routing -mcd
-defIn coldMPW.def   ; # Special routes Beginning
-#defIn coldMPW_fp.def ; # Special routes w/ floorplan
-##defIn coldMPW_fp_rowcuts.def ; # floorplan w/ rowcuts and row routing
-###defIn coldMPW_rowcuts.def ; # Special routes w/ rowcuts 
 
 
 
@@ -310,6 +310,7 @@ clearDrc
 #stop
 
 source ../scripts/place.tcl
+source ../scripts/cts_CCOpt.tcl  ; # update for timing aware method -ncd
 source ../scripts/route.tcl
 
 source ../scripts/dfm.tcl

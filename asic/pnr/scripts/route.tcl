@@ -70,9 +70,15 @@ setNanoRouteMode -routeConcurrentMinimizeViaCountEffort high
 #	-nameSingleDelim false -honorFence false -useLibMaxFanout false -useLibMaxCap false
 
 setOptMode -effort high -leakagePowerEffort none -yieldEffort none -reclaimArea true -simplifyNetlist true -setupTargetSlack 0 -holdTargetSlack 0 -maxDensity 0.95 -drcMargin 0 -usefulSkew false
-setCTSMode -powerAware true
 
-setOptMode -opt_power_effort low -opt_leakage_to_dynamic_ratio 0.5
+#setOptMode -opt_power_effort low -opt_leakage_to_dynamic_ratio 0.5
+setOptMode -opt_power_effort high -opt_leakage_to_dynamic_ratio  0.75
+
+###setCTSMode -powerAware true ; # this seems to obselete -ncd
+
+set_ccopt_property target_skew 0.1
+set_ccopt_property target_max_trans 1
+set_ccopt_property bufer_cells {list ..}
 
 
 

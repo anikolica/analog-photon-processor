@@ -18,7 +18,8 @@ set ONLY_7TRACKS 0
 # turn on MIXED_TRACKS if you are using both libraries -> this requires a CPF file
 set MIXED_TRACKS 0
 
-set numCpu 4
+#set numCpu 4
+set numCpu 16
 setDesignMode -process 65
 #setReleaseMultiCpuLicense 0
 
