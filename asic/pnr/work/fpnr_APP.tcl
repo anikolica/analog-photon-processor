@@ -61,7 +61,8 @@ set init_layout_view layout
 set init_gnd_net {VSS GND AVSS VSSPST}
 
 set init_abstract_view abstract
-getenv ENCOUNTER_CONFIG_RELATIVE_CWD
+getenv ENCOUNTER_CONsroute -connect {corePin}
+FIG_RELATIVE_CWD
 setDoAssign on
 
 ## Attempt to fix broken pdk vias -ncd
@@ -109,7 +110,7 @@ globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
 globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
 
-
+stop
 
 ## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
 #globalNetConnect VDDPST -type pgpin -pin VDDPST -inst *
@@ -129,16 +130,20 @@ if {$CORE_CHIP == "CHIP"} {
 	addInst -physical -cell PCORNER -inst corner2
 	addInst -physical -cell PCORNER -inst corner3
 	addInst -physical -cell PCORNER -inst corner4
-	#loadIoFile ../scripts/corner.io
+	loadIoFile ../scripts/corner.io
 }
+fit
 
+
+## 
+floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
+fit
 
 ## Load IO pads and special routing
 loadIoFile 	APP.save.io     ; # padring corners plus some pads -ncd
-
-
-floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
 fit
+
+
 
 ## Install I/O filler and bondpads -ncd
 if {$CORE_CHIP == "CHIP"} {
@@ -152,6 +157,7 @@ if {$CORE_CHIP == "CHIP"} {
 	# deleteInst pad_*  
 	source ../scripts/addPads.tcl 
 }
+fit
 
 
 #stop
