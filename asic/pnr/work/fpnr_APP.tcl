@@ -61,12 +61,15 @@ set init_layout_view layout
 set init_gnd_net {VSS GND AVSS VSSPST}
 
 set init_abstract_view abstract
-getenv ENCOUNTER_CONsroute -connect {corePin}
-FIG_RELATIVE_CWD
+
+
+getenv ENCOUNTER_CONFIG_RELATIVE_CWD
 setDoAssign on
 
 ## Attempt to fix broken pdk vias -ncd
 #250612 setGenerateViaMode -auto true -deleteViaBeforeGeneration  all
+
+
 
 ## -ncd
 init_design
@@ -110,7 +113,7 @@ globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
 globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
 
-stop
+
 
 ## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
 #globalNetConnect VDDPST -type pgpin -pin VDDPST -inst *
@@ -122,7 +125,7 @@ stop
 #globalNetConnect VDDPST -type net -net VDDPST! 
 #globalNetConnect VSSPST -type net -net VSSPST! 
 
-#stop
+
 
 ## add corners and physical cells (not in verilog) -ncd
 if {$CORE_CHIP == "CHIP"} {
@@ -143,7 +146,7 @@ fit
 loadIoFile 	APP.save.io     ; # padring corners plus some pads -ncd
 fit
 
-
+#stop
 
 ## Install I/O filler and bondpads -ncd
 if {$CORE_CHIP == "CHIP"} {
@@ -188,6 +191,18 @@ defIn APP_fp.def ; # Special routes and blockages then skip to place, etc -ncd
 stop
 
 
+source ../scripts/place.tcl
+source ../scripts/cts_CCOpt.tcl  ; # update for timing aware method -ncd
+source ../scripts/route.tcl
+
+source ../scripts/dfm.tcl
+
+
+
+
+#########################################################
+################## EXTRAS ##############################
+#########################################################
 
 ## Add rings around core area: 10 wide/5 space rings on M9/M8 -ncd 
 addRing -skip_via_on_wire_shape Noshape -use_wire_group_bits 2 -use_interleaving_wire_group 1 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -use_wire_group 1 -type core_rings -jog_distance 2.0 -threshold 2.0 -nets {VDD VSS} -follow io -stacked_via_bottom_layer M1 -layer {bottom M8 top M8 right M9 left M9} -width 10 -spacing 5 -offset 10
@@ -315,9 +330,4 @@ clearDrc
 
 #stop
 
-source ../scripts/place.tcl
-source ../scripts/cts_CCOpt.tcl  ; # update for timing aware method -ncd
-source ../scripts/route.tcl
-
-source ../scripts/dfm.tcl
 

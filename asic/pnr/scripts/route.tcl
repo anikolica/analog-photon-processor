@@ -23,13 +23,18 @@ setNanoRouteMode  -droutePostRouteSwapVia true
 
 if {$MIXED_TRACKS} { setNanoRouteMode -routeHonorPowerDomain true }
 setNanoRouteMode  -droutePostRouteSwapVia none
-setNanoRouteMode  -drouteStartIteration default
+#setNanoRouteMode  -drouteStartIteration default
 setNanoRouteMode  -routeInsertAntennaDiode false
 setNanoRouteMode  -routeInsertDiodeForClockNets false
-setNanoRouteMode  -routeAntennaCellName {}
+setNanoRouteMode  -routeAntennaCellName {ANTENNA}
 setNanoRouteMode  -drouteFixAntenna true
-setNanoRouteMode  -routeBottomRoutingLayer $bottomRoutingLayer
-setNanoRouteMode  -routeTopRoutingLayer $preferredTopRoutingLayer
+
+#setNanoRouteMode  -routeBottomRoutingLayer $bottomRoutingLayer
+#setNanoRouteMode  -routeTopRoutingLayer $preferredTopRoutingLayer
+setDesignMode -bottomRoutingLayer $bottomRoutingLayer
+setDesignMode -topRoutingLayer $topRoutingLayer
+
+
 setNanoRouteMode  -drouteEndIteration default
 setNanoRouteMode  -droutePostRouteWidenWireRule NA
 setNanoRouteMode  -routeWithTimingDriven false
@@ -53,14 +58,6 @@ setNanoRouteMode -routeConcurrentMinimizeViaCountEffort high
 
 #stop
 
-## Attempt to generate good Tracks for 9 metals and Vias -ncd
-#generateTracks
-#setGenerateViaMode -auto true
-#generateVias -deleteViaBeforeGeneration all
-#setNanoRouteMode -drouteAutoStop false
-#setNanoRouteMode -routeTopRoutingLayer 6
-## 
-
 
 ## THIS SEEMS OBSELETE -ncd 2025
 #setCTSMode   -routeGuide true \
@@ -69,16 +66,18 @@ setNanoRouteMode -routeConcurrentMinimizeViaCountEffort high
 #	-fixLeafInst true -fixNonLeafInst true -verbose false -reportHTML false -addClockRootProp false \
 #	-nameSingleDelim false -honorFence false -useLibMaxFanout false -useLibMaxCap false
 
-setOptMode -effort high -leakagePowerEffort none -yieldEffort none -reclaimArea true -simplifyNetlist true -setupTargetSlack 0 -holdTargetSlack 0 -maxDensity 0.95 -drcMargin 0 -usefulSkew false
+#setOptMode -effort high -leakagePowerEffort none -yieldEffort none -reclaimArea true -simplifyNetlist true -setupTargetSlack 0 -holdTargetSlack 0 -maxDensity 0.95 -drcMargin 0 -usefulSkew false
 
-#setOptMode -opt_power_effort low -opt_leakage_to_dynamic_ratio 0.5
 setOptMode -opt_power_effort high -opt_leakage_to_dynamic_ratio  0.75
 
 ###setCTSMode -powerAware true ; # this seems to obselete -ncd
 
 set_ccopt_property target_skew 0.1
 set_ccopt_property target_max_trans 1
-set_ccopt_property bufer_cells {list ..}
+set_ccopt_property buffer_cells {BUFFD0 BUFFD1 BUFFD2 BUFFD4 BUFFD6 BUFFD8 BUFFD12 BUFFD16 BUFFD20 BUFFER24}
+
+set_ccopt_property inverter_cells { INVD0 INVD1 INV2 INV4 INV8 INV16 INV20 } ;# TRIAL
+
 
 
 
@@ -114,21 +113,29 @@ timeDesign -hold -postRoute -prefix postCTS -outDir ../report/timingReports -tim
 # timing optimization
 optDesign -postCTS  -drv
 win
+
+
 # routing
-setNanoRouteMode  -routeTopRoutingLayer $preferredTopRoutingLayer
+setDesignMode -bottomRoutingLayer $bottomRoutingLayer
+setDesignMode -topRoutingLayer $topRoutingLayer
 routeDesign -globalDetail
 win
 
 # dont save to OA yet -ncd
 #saveDesign -cellview "output [dbGet top.name] route_thin" -enc ../output/route_thin.enc
 
-setNanoRouteMode  -routeTopRoutingLayer $topRoutingLayer
+## Probably dont need this -ncd
 ecoroute
+ecoroute -fix_drc
+
+
 # analyze timing
 timeDesign -postRoute -pathReports -drvReports -prefix pre_hold_fix -outDir ../report/timingReports -timingDebugReport
+
 win
+
+
 # optimization
-setOptMode -effort high -leakagePowerEffort none -yieldEffort none -reclaimArea true -simplifyNetlist true -setupTargetSlack 0.01 -holdTargetSlack 0.01 -maxDensity 0.95 -drcMargin 0 -usefulSkew false
 
 setOptMode -opt_power_effort high -opt_leakage_to_dynamic_ratio 0.5
 optDesign -postRoute  -drv

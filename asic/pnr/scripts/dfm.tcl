@@ -15,7 +15,12 @@ setNanoRouteMode  -drouteFixAntenna false
 setNanoRouteMode  -routeInsertAntennaDiode false
 setNanoRouteMode  -droutePostRouteSwapVia multiCut
 setNanoRouteMode  -drouteUseMultiCutViaEffort high
-setNanoRouteMode -droutePostRouteMinimizeViaCount false
+
+
+## NOT VALLID ANY MORE -ncd
+#setNanoRouteMode -droutePostRouteMinimizeViaCount false
+optDesign -postRoute -viaOpt
+
 setNanoRouteMode  -routeWithEco true
 #setNanoRouteMode  -drouteMinimizeViaCount false
 setNanoRouteMode -routeReserveSpaceForMultiCut false
@@ -24,12 +29,13 @@ setNanoRouteMode -routeWithViaInPin false
 #setNanoRouteMode -droutePostRouteMinimizeViaCount true
 #setNanoRouteMode -routeConcurrentMinimizeViaCountEffort high
 
+
 routeDesign -globalDetail -viaOpt
 setNanoRouteMode  -droutePostRouteSwapVia none
 win
 # fillers
 setFillerMode -reset
-setFillerMode -corePrefix FILLER -createRows 1 -doDRC 1 -deleteFixed 1 -ecoMode 0
+setFillerMode -corePrefix FILLER -createRows 1 -doDRC 1  -ecoMode 0
 #DCAP16 DCAP8 DCAP4 DCAP2 DCAP1
 
 
@@ -46,6 +52,8 @@ if {$ONLY_7TRACKS} {
 	addFiller -cell FILL64BWP7THVT FILL32BWP7THVT FILL16BWP7THVT FILL8BWP7THVT FILL4BWP7THVT FILL2BWP7THVT FILL1BWP7THVT -prefix FILLER
 
 }
+
+
 if {$MIXED_TRACKS} {
 	addFiller -cell DCAP64 DCAP32   FILL64 FILL32 FILL16 FILL8 FILL4 FILL2 FILL1 -prefix FILLER -powerDomain core9t
 	#addFiller -cell TAPCELLBWP7T  -util 0.1 -powerDomain core7thvt
@@ -53,6 +61,9 @@ if {$MIXED_TRACKS} {
 }
 
 win
+
+# clean up any DRC violations -ncd 2025
+ecoRoute -target
 
 
 ## MUST EDIT makePins according to pad names in design  -ncd
@@ -83,11 +94,12 @@ saveNetlist ../output/dfm.v
 saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
 
 
+## This is dangerous -ncd 2025
 ##exec cp -r ../scripts/emptyLib $oaLibName
 ## proper way to copy library -ncd
-catch {exec rm -r $oaLibName}
-catch {exec ../scripts/del_mklib.sh cds.lib}
-createLib mklib -copyTech output
+#catch {exec rm -r $oaLibName}
+#catch {exec ../scripts/del_mklib.sh cds.lib}
+#createLib mklib -copyTech output
 
 
 
@@ -109,6 +121,7 @@ if {$ONLY_9TRACKS} {
 if {$ONLY_7TRACKS} { 
 	saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA -includePhysicalCell {DCAP64BWP7THVT  DCAP32BWP7THVT}
 }
+
 if {$MIXED_TRACKS} { 
 	saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA -includePhysicalCell {DCAP64 DCAP32 DCAP64BWP7THVT  DCAP32BWP7THVT}
 }

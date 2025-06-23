@@ -21,11 +21,15 @@ set MIXED_TRACKS 0
 #set numCpu 4
 set numCpu 16
 setDesignMode -process 65
-#setReleaseMultiCpuLicense 0
+
+#setReleaseMultiCpuLicense true
 
 # -ncd
 #setMultiCpuUsage -cpuAutoAdjust true -localCpu $numCpu -keepLicense true
+
+
 setMultiCpuUsage -keepLicense true -localCpu max
+
 
 #setMultiCpuUsage -numThreads $numCpu -numHosts 1 -superThreadsNumThreads $numCpu -superThreadsNumHosts 1
 #specifyScanChain test_scan -start SCAN_IN -stop SCAN_OUT
