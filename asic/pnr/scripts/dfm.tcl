@@ -19,7 +19,7 @@ setNanoRouteMode  -drouteUseMultiCutViaEffort high
 
 ## NOT VALLID ANY MORE -ncd
 #setNanoRouteMode -droutePostRouteMinimizeViaCount false
-optDesign -postRoute -viaOpt
+#optDesign -postRoute -viaOpt
 
 setNanoRouteMode  -routeWithEco true
 #setNanoRouteMode  -drouteMinimizeViaCount false
@@ -133,6 +133,8 @@ exec ../scripts/foo.sh lvs.v
 
 exec ../scripts/lvs_postprocess.py $CORE_CHIP <lvs.v >lvs_pp.v
 #defOut -floorplan -netlist -routing dfm.def
+
+
 puts "Making final virtuoso layout view... (check makeLayout.log for details)"
 catch {exec rm -rf $oaLibName/[dbGet top.name]/layout}
 #oaOut $oaLibName [dbGet top.name] layout -leafViewNames layout -noConnectivity
