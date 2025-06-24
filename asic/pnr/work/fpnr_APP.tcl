@@ -175,6 +175,9 @@ setLayerPreference node_cell -isVisible 0
 setLayerPreference pinObj -isVisible 1
 setDrawView fplan 
 
+
+stop
+
 #
 ## PLACE MACROS -ncd
 
