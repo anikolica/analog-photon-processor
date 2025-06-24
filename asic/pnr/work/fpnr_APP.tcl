@@ -195,7 +195,7 @@ stop
 
 
 source ../scripts/place.tcl
-source ../scripts/cts_CCOpt.tcl  ; # update for timing aware method -ncd
+#source ../scripts/cts_CCOpt.tcl  ; # update for timing aware method -ncd
 source ../scripts/route.tcl
 
 source ../scripts/dfm.tcl
