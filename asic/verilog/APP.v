@@ -11,23 +11,45 @@
  */
 
 module APP(
-		 input wire pad_a0_i,
-		 input wire pad_a1_i,
-		 input wire pad_a2_i,
-		 input wire pad_a3_i,
-		 input wire pad_b0_i,
-		 input wire pad_b1_i,
-		 input wire pad_b2_i,
-		 input wire pad_b3_i,
+	   input wire  pad_a0_i,
+	   input wire  pad_a1_i,
+	   input wire  pad_a2_i,
+	   input wire  pad_a3_i,
+	   input wire  pad_b0_i,
+	   input wire  pad_b1_i,
+	   input wire  pad_b2_i,
+	   input wire  pad_b3_i,
 
-		 output wire pad_c0_o,
-		 output wire pad_c1_o,
-		 output wire pad_c2_o,
-		 output wire pad_c3_o ,
-		 output wire pad_c4_o,
+	   input wire  pad_ana0_i,
+	   input wire  pad_ana1_i,
 
-		 input wire pad_clk_i,
-		 input wire pad_rstb_i
+	   output wire pad_c0_o,
+	   output wire pad_c1_o,
+	   output wire pad_c2_o,
+	   output wire pad_c3_o ,
+	   output wire pad_c4_o,
+
+	   output wire pad_ts00_o,
+	   output wire pad_ts01_o,
+	   output wire pad_ts02_o,
+	   output wire pad_ts03_o,
+	   output wire pad_ts04_o,
+	   output wire pad_ts05_o,
+	   output wire pad_ts06_o,
+	   output wire pad_ts07_o,
+	   output wire pad_ts08_o,
+	   output wire pad_ts09_o,
+	   output wire pad_ts10_o,
+	   output wire pad_ts11_o,
+	   output wire pad_ts12_o,
+	   output wire pad_ts13_o,
+	   output wire pad_ts14_o,
+	   output wire pad_ts15_o,
+
+	   output wire pad_anaOut_o,
+	   
+	   input wire  pad_clk_i,
+	   input wire  pad_rstb_i
 		 );
 
 /****************************************************************************
@@ -73,7 +95,14 @@ module APP(
    wire [3:0] a_i;
    wire [3:0] b_i;
 
+   wire       ana0, ana1;
+   
    wire [4:0] c_o;
+
+   wire [15:0] tstamp;
+   wire [15:0] tstampOut;
+   
+   wire       anaOut;
 
    wire       clk;
    wire       rstb;
@@ -122,6 +151,15 @@ module APP(
 			.C  (b_i[3]),      // signal
 			.PE (1'b1), .IE(1'b1) );
 
+   PDDW0408SCDG padana0( .I(1'b0), .DS(1'b1), .OEN(1'b1),
+			.PAD(pad_ana0_i),    // Input pad
+			.C  (ana0_i),      // signal
+			.PE (1'b1), .IE(1'b1) );
+   PDDW0408SCDG padana1( .I(1'b0), .DS(1'b1), .OEN(1'b1),
+			.PAD(pad_ana1_i),    // Input pad
+			.C  (ana1_i),      // signal
+			.PE (1'b1), .IE(1'b1) );
+   
 
    PDDW0408SCDG padCLK( .I(1'b0), .DS(1'b1), .OEN(1'b1),
 			.PAD(pad_clk_i),  // Input pad
@@ -176,21 +214,161 @@ module APP(
 			.PE  (1'b0),
 			.IE  (1'b0) );
 
+   PDDW0408SCDG padTS00( .I (tstampOut[0]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts00_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS01( .I (tstampOut[1]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts01_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS02( .I (tstampOut[2]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts02_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS03( .I (tstampOut[3]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts03_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS04( .I (tstampOut[4]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts04_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS05( .I (tstampOut[5]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts05_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS06( .I (tstampOut[6]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts06_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS07( .I (tstampOut[7]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts07_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS08( .I (tstampOut[8]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts08_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS09( .I (tstampOut[9]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts09_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS10( .I (tstampOut[10]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts10_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS11( .I (tstampOut[11]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts11_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS12( .I (tstampOut[12]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts12_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS13( .I (tstampOut[13]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts13_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS14( .I (tstampOut[14]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts14_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   PDDW0408SCDG padTS15( .I (tstampOut[15]),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_ts15_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   
+
+   PDDW0408SCDG padanaOut( .I (anaOut_o),  // signal
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_anaOut_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+   
    /*****************************************************
     *             Top Level Modules                     *
     *****************************************************/
 
+   wire        re_trig;
+   wire        we_trig;
+
+   assign re_trig = ( tstamp == 16'h5555 )? 1'b1 : 1'b0;
+   assign we_trig = ( c_o == 5'b01010 ) ? 1'b1 : 1'b0;
+
+   
    addr top_addr ( .a_i(a_i), .b_i(b_i), .c_o( c_o ), .clk(clk), .rstb(rstb) );
 
+   clk_counter #( .WIDTH(16) ) tstamp_gen ( .count( tstamp ), .clk( clk ), .rstb( rstb ) );
+
+   hcc_syncFifo_latC #( .WORDWIDTH(16), .logDEPTH(3) ) TstampBuf (
+						       .data_i( tstamp ),
+						       .data_o( tstampOut ),
+						       .re_i( re_trig ),
+						       .we_i( we_trig ),
+						       .clk( clk ),
+						       .rstb( rstb )
+						      );
+   
 
    /****************************************************
     *             MACROS -ncd                          *
     ****************************************************/ 
 
    X0814_opamp_N_P amplifier1 (                        //verilog doesnt like start with number  
-			      .VINm (clk),
-			      .VINp (rstb),            // verilog not like VIN-, VIN+ either
-			      .VOUT (pad_c4_o)          // This is output
+			      .VINm (ana0_i),
+			      .VINp (ana1_i),            // verilog not like VIN-, VIN+ either
+			      .VOUT (anaOut_o)          // This is output
 			      );
    
 
