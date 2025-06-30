@@ -150,9 +150,13 @@ setNanoRouteMode  -routeAntennaCellName ANTENNA
 #setNanoRouteMode  -drouteViaOnGridOnly false
 #setNanoRouteMode  -drouteOnGridOnly none
 routeDesign -globalDetail
+
 timeDesign -hold -postRoute -prefix postroute -outDir ../report/timingReports -timingDebugReport
 timeDesign -postRoute -prefix postroute -outDir ../report/timingReports -timingDebugReport
-load_timing_debug_report  ../report/timingReports/postroute.mtarpt.gz
+
+
+## This is not being created; but dont need for now  -ncd 2025
+#load_timing_debug_report  ../report/timingReports/postroute.mtarpt.gz
 
 saveNetlist ../output/route.v
 #delayCal -sdf ../output/route.sdf -idealclock
@@ -160,4 +164,5 @@ saveNetlist ../output/route.v
 
 # dont save to OA yet -ncd
 saveDesign -cellview "output [dbGet top.name] route" -enc ../output/route.enc
+
 

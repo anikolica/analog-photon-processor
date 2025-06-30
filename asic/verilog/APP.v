@@ -176,6 +176,17 @@ module APP(
 			.PE  (1'b0),
 			.IE  (1'b0) );
 
+   
+   PDDW0408SCDG padMacro( .I (opamp_out),  // Macro1 -ncd
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_opamp_o),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+
+
+   
    /*****************************************************
     *             Top Level Modules                     *
     *****************************************************/
@@ -183,15 +194,79 @@ module APP(
    addr top_addr ( .a_i(a_i), .b_i(b_i), .c_o( c_o ), .clk(clk), .rstb(rstb) );
 
 
-   /****************************************************
+ 
+  /****************************************************
     *             MACROS -ncd                          *
     ****************************************************/ 
 
    X0814_opamp_N_P amplifier1 (                        //verilog doesnt like start with number  
-			      .VINm (clk),
-			      .VINp (rstb),            // verilog not like VIN-, VIN+ either
-			      .VOUT (pad_c4_o)          // This is output
+			      .VINm (inN),
+			      .VINp (inP),            // verilog not like VIN-, VIN+ either
+			      .VOUT (opamp_out)          // This is output
 			      );
    
 
+
+  /****************************************************
+    *             POWER/GND PADS  -ncd                          *
+    ****************************************************/ 
+// Cell and Description -ncd
+//PVDD1ANA Dedicated Power Supply to Internal Macro with Core Voltage
+//PVDD1CDG Vdd Pad for Core Power Supply
+//PVDD2ANA Dedicated Power Supply to Internal Macro with I/O Voltage
+//PVDD2CDG Power Pad for I/O Power Supply
+//PVDD2POC Power-on Control Power Pad for I/O Power Supply
+//PVSS1ANA Dedicated Ground Supply for PVDD1ANA
+//PVSS1CDG Vss Pad for Core Ground Supply
+//PVSS2ANA Dedicated Ground Supply for PVDD2ANA
+//PVSS2CDG Ground Pad for I/O Ground Supply
+//PVSS3CDG Ground Pad for I/O and Core Ground Supply
+//PXOE1CDG Crystal Oscillator Cell (High Enable, without Feedback Resistor)
+//PXOE2CDG Crystal Oscillator Cell (High Enable, with Feedback Resistor)
+
+//PCLAMP1ANA ESD Clamp Cell for Core Voltage
+//PCLAMP2ANA ESD Clamp Cell for I/O Voltage  
+
+// PRCUT Power-Cut Cell between Digital Domain A and Digital Domain B with
+//       VSS Shorted and the Rest of Rails Cut 
+
+
+// Core power/gnd   
+PVDD1CDG VDD1(.VDD(VDD) );
+PVDD1CDG VDD2(.VDD(VDD) );
+
+PVSS1CDG VSS1(.VSS(VSS) );
+PVSS1CDG VSS2(.VSS(VSS) );
+PVSS1CDG VSS3(.VSS(VSS) );
+PVSS1CDG VSS4(.VSS(VSS) );
+
+// IO power/gnd
+PVDD2CDG VDDPST1(.VDDPST(DVDD) );
+PVDD2CDG VDDPST2(.VDDPST(DVDD) );
+
+PVSS2CDG VSSPST1(.VSSPST(VSS));
+PVSS2CDG VSSPST2(.VSSPST(VSS));
+
+// Power-on I/O ring sequencer (need one per power domain) 
+PVDD2POC POC1(.VDDPST() );
+
+   
+// analog inputs/outputs -ncd
+PVDD1ANA   ANA_P(.AVDD(inP) );
+PCLAMP1ANA ANA_P_clamp(.VSSESD(VSS), .VDDESD(inP) );  
+
+PVDD1ANA   ANA_N(.AVDD(inN) );
+PCLAMP1ANA ANA_N_clamp(.VSSESD(VSS), .VDDESD(inN) );  
+
+
+PVDD1ANA   ANA_OUT(.AVDD(opamp_out) );
+PCLAMP1ANA ANA_OUT_clamp(.VSSESD(VSS), .VDDESD(opamp_out) );  
+
+
+PCLAMP1ANA VDD_clamp(.VSSESD(VSS), .VDDESD(VDD) );  
+PCLAMP2ANA DVDD_clamp(.VSSESD(VSS), .VDDESD(DVDD) );  
+
+
+
+ 
 endmodule // dummy_top

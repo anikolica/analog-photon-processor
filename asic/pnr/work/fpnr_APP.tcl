@@ -29,7 +29,7 @@ set glv::SIioaPath "/cad/Technology/TSMC650A.new/digital/Back_End/celtic/tadn65l
 
 ####set init_lef_file
 
-# DEFINE ADDITIONAL USER LIBRARIES HERE  -ncd
+# DEFINE ADDITIONAL USER LIBRARIES HERE: must 1st create APP_lib in virtuoso 2025  -ncd
 set userLib "APP_lib"
 if {$ONLY_9TRACKS} {
 	set init_oa_ref_lib "tcbn65lp  tpdn65lpnv2od3  tpan65lpnv2od3 tpbn65v $userLib"
@@ -74,17 +74,19 @@ setDoAssign on
 ## -ncd
 init_design
 
-#stop
+stop
 
 
 fit
 setDrawView fplan
 win
 
-if {$MIXED_TRACKS} {
-	loadCPF ../scripts/power.cpf
-	commitCPF
-}
+
+## This is obselete -ncd 2025
+#if {$MIXED_TRACKS} {
+#	loadCPF ../scripts/power.cpf
+#	commitCPF
+#}
 
 
 
@@ -113,6 +115,8 @@ globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
 globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
 
+globalNetConnect DVDD -type pgpin -pin VDDESD -inst *
+globalNetConnect VSS -type pgpin -pin VSSESD -inst *
 
 
 ## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
@@ -139,7 +143,8 @@ fit
 
 
 ## 
-floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
+#floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
+floorPlan -coreMarginsBy die -site core -d 4500 4500 130 130 130 130 -adjustToSite
 fit
 
 ## Load IO pads and special routing
@@ -176,7 +181,7 @@ setLayerPreference pinObj -isVisible 1
 setDrawView fplan 
 
 
-stop
+#stop
 
 #
 ## PLACE MACROS -ncd
@@ -187,16 +192,19 @@ placeInstance amplifier1 1310 1200 R0 -fixed
 fit  ; # Toggle to wake up Innovus GUI ! -ncd
 
 ## defIn special routing -mcd
-defIn APP_fp.def ; # Special routes and blockages then skip to place, etc -ncd
-#defIn APP.def   
+##defIn APP_fp.def ; # Special routes and blockages then skip to place, etc -ncd
+defIn APP.def   
 #defIn APP_selected.def ; # selected only
 #defIn myBlockages.def  ; # blockages only
+
 stop
 
 
 source ../scripts/place.tcl
-#source ../scripts/cts_CCOpt.tcl  ; # update for timing aware method -ncd
+##source ../scripts/cts_CCOpt.tcl  ; # place these commands into route.tcl 2025 -ncd
 source ../scripts/route.tcl
+
+stop
 
 source ../scripts/dfm.tcl
 
@@ -214,7 +222,7 @@ uiSetTool ruler
 ## add stripes M9 10-5-10 every 100um -ncd
 addStripe -skip_via_on_wire_shape Noshape -block_ring_top_layer_limit M7 -max_same_layer_jog_length 6 -padcore_ring_bottom_layer_limit M5 -set_to_set_distance 100 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -padcore_ring_top_layer_limit M7 -spacing 5 -merge_stripes_value 2.0 -layer M9 -block_ring_bottom_layer_limit M5 -width 10 -nets {VDD VSS} -stacked_via_bottom_layer M1
 
-stop
+#screate_power_nets -nets VDD -voltage 1.2 -internaltop
 
 
 
@@ -222,7 +230,8 @@ stop
 
 ##### NCD
 ## VDD/VSS on VERTICAL EDGES of core -ncd 
-addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 10 right 10} -center 0 -skip_side {top bottom } -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+af
+ddRing -nets {VDD VSS} -type core_rings -follow io -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 10 right 10} -center 0 -skip_side {top bottom } -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
 ## VDD/VSS on VERTICAL EDGES of Macros -ncd
 addRing -nets {VDD VSS} -type block_rings -around each_block -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None

@@ -1,5 +1,6 @@
 #set_design chip  -ncd
-set_design coldMPW 
+#set_design coldMPW 
+set_design APP 
 
 set_hierarchy_separator "/"
 

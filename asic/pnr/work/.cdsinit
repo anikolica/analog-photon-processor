@@ -2,8 +2,10 @@
 (envSetVal "ams.envOpts" "netlisterMode" 'string "OSS-based")
 (envSetVal "ams.ncverilogOpts"	"libFiles"	'string	" $PDK_PATH/digital/Front_End/verilog/tcbn65lp_200a/tcbn65lp_pwr.v $PDK_PATH/digital/Front_End/verilog/tpan65lpnv2od3_140b/tpan65lpnv2od3.v $PDK_PATH/digital/Front_End/verilog/tpdn65lpnv2od3_140b/tpdn65lpnv2od3.v $PDK_PATH/digital/Front_End/verilog/tcbn65lpbwp7thvt_pwr.v")
 
-deRegUserTriggers("maskLayout" nil '_pvsMaskLayoutMenuTrigger)
-deRegUserTriggers("maskLayoutXL" nil '_pvsMaskLayoutMenuTrigger)
+
+;; -ncd removed
+;;deRegUserTriggers("maskLayout" nil '_pvsMaskLayoutMenuTrigger)
+;;deRegUserTriggers("maskLayoutXL" nil '_pvsMaskLayoutMenuTrigger)
 
 procedure( PVSPreFormTrigger( runType presetFile winId )
 let( (cv runDir tmpName f)
@@ -107,6 +109,28 @@ parasiticBlockingFile= strcat( DK_path  "/PVS_QRC/lvs/hcell" )
 
 load( strcat( getShellEnvVar("PDK_PATH") "/" getShellEnvVar("PDK_RELEASE") "/" getShellEnvVar("OPTION") "/skill/TSMCN65_cktPro.il"))
 
-
-;; ncd
+;; -ncd
 envSetVal("asimenv.startup" "projectDir" 'string "./Sim")
+
+;; change some bindkeys -ncd
+load("bindkeys_schem_ncd.txt")
+
+
+;; Calibre setup  -ncd Feb 2025
+
+;; Load Calibre Skill Interface if environment var is set
+mgc_home=getShellEnvVar("MGC_HOME")
+
+if( mgc_home!=nil && isDir(mgc_home) && isReadable(mgc_home) then
+    ; Load calibre.skl for Cadence versions 4.4 and greater
+    load(strcat(mgc_home "/shared/pkgs/icv/tools/queryskl/calibre.skl"))
+else
+    ; MGC_HOME is not set
+    printf("Calibre Skill Interface not loaded.\n")
+)
+;; End of Calibre Skill Interface
+
+
+;; stop virtuoso from always opening the schematic -ncd 2025
+envSetVal("layoutXL" "lxSchematicDefaultApp" 'cyclic "None")
+

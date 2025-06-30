@@ -65,6 +65,8 @@ win
 # clean up any DRC violations -ncd 2025
 ecoRoute -target
 
+stop
+
 
 ## MUST EDIT makePins according to pad names in design  -ncd
 source ../scripts/makePins.tcl
@@ -105,9 +107,29 @@ saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
 
 ##stop
 
+## MAKE LAYOUT FOR VIRTUOSO -ncd 2025
+### saveOaDesign $el::oaLibName [dbGet top.name] dfm
+#saveOaDesign $oaLibName [dbGet top.name] dfm
 
-saveDesign -cellview " $oaLibName [dbGet top.name] dfm "
-if {$CORE_CHIP != "CHIP"} { saveModel -dir ../output/layout }
+## This will generate virtuoso abstract view -ncd 2025
+setOaxMode -allowTechUpdate true
+update_oa_lib mklib -tech_attach_to_reference  ; # give permission to attach new vias to mklib instead of tsmcN65 -ncd 2025   
+##saveDesign -cellview {mklib APP  dfm}  ; # save layout directly to virtuoso as abstracts XX CRASHES!
+
+
+
+## This will never work to export layout to Virtuoso since it requires the techfile to be writable -ncd 2025
+##saveDesign -cellview " $oaLibName [dbGet top.name] dfm "
+
+# Instead, create Virtuoso Layout by exporting a DEF file out of Innovus and into Virtuoso:
+set dbgLefDefOutVersion 5.8
+global dbgLefDefOutVersion
+defOut -floorplan -netlist -routing APP.def
+
+
+### output directory must exist; This creates a DEF file that can import the layout into Virtuoso  -ncd  2015
+#if {$CORE_CHIP != "CHIP"} { saveModel -dir ../output/layout }
+if {$CORE_CHIP != "CHIP"} { saveModel -dir ../output }
 
 
 
@@ -132,14 +154,20 @@ exec ../scripts/foo.sh lvs.v
 
 
 exec ../scripts/lvs_postprocess.py $CORE_CHIP <lvs.v >lvs_pp.v
-#defOut -floorplan -netlist -routing dfm.def
 
+## THIS NO LONGER WORKS since it requires write permission on techfile -ncd 2025.
+## Instead import Layout into Virtuoso using a DEF file -ncd
 
-puts "Making final virtuoso layout view... (check makeLayout.log for details)"
-catch {exec rm -rf $oaLibName/[dbGet top.name]/layout}
-#oaOut $oaLibName [dbGet top.name] layout -leafViewNames layout -noConnectivity
-#exec defin -def dfm.def -lib $oaLibName -cell [dbGet top.name] -view dfm -masterLibs tcbn65lp_lef -overwrite -log defin.log
+#puts "Making final virtuoso layout view... (check makeLayout.log for details)"
+
+defOut -floorplan -netlist -routing dfm.def
+catch {exec rm -rf $oaLibName/[dbGet top.name]/layout} 
+#oaOut $oaLibName [dbGet top.name] layout -leafViewNames layout -noConnectivity ; # create dfm view with abstracts -ncd 20225
+##exec defin -def dfm.def -lib $oaLibName -cell [dbGet top.name] -view dfm -masterLibs tcbn65lp_lef -overwrite -log defin.log
+
+exec defin -def dfm.def -lib $oaLibName -cell [dbGet top.name] -view dfm -overwrite -log defin.log
 catch {exec virtuoso -nograph -log makeLayout.log -replay ../scripts/makeLayout.il}
+
 
 puts "Making final virtuoso schematic view... (check verilogIn.log for details)"
 catch {exec rm -rf $oaLibName/*/symbol}

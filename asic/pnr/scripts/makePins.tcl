@@ -39,13 +39,14 @@ foreach p [dbGet top.terms] {
 }
 
 if {$CORE_CHIP == "CHIP"} {
-	deselectAll
-	selectInstByCellName PVDD2POC  
-	selectInstByCellName PVDD2CDG  
-	selectInstByCellName PVSS2CDG  
-	selectInstByCellName PVDD1CDG  
-	selectInstByCellName PVSS1CDG  
+    deselectAll
+    catch {selectInstByCellName PVDD2POC}  
+    catch {selectInstByCellName PVDD2CDG}  
+    catch {selectInstByCellName PVSS2CDG}  
+    catch {selectInstByCellName PVDD1CDG}  
+    catch {selectInstByCellName PVSS1CDG}  
 ## removed -ncd
+#        selectInstByCellName PVDD1ANA   
 #	selectInstByCellName PVDD3A  
 #	selectInstByCellName PVSS3A  
 
@@ -56,7 +57,7 @@ if {$CORE_CHIP == "CHIP"} {
 #		if {$pinName == 0x0} {set pinName [dbGet $pInst.instTerms.net.name]}
 		if {$pinName == 0x0} {set pinName [dbGet $pInst.cell.terms.name]}
 
-#	    if {$pinName != 0x0} {
+	    if {$pinName != 0x0} {
 		set box [lindex [dbGet $pInst.box] 0]
 		set xc [expr ( [lindex $box 0] + [lindex $box 2] ) /2 ]
 		set yc [expr ( [lindex $box 1] + [lindex $box 3] ) /2 ]
@@ -69,28 +70,6 @@ if {$CORE_CHIP == "CHIP"} {
 	deselectAll
 }
 
-###### #### Now get PVDD1ANA pads -ncd
-if {$CORE_CHIP == "CHIP"} {
-	deselectAll
-	selectInstByCellName PVDD1ANA  
-
-	foreach pInst [dbGet selected] {
-#		set pinName [dbGet $pInst.pgTermNets.name]
-        	set pinName [dbGet $pInst.instTerms.net.name]
-
-		if {$pinName == 0x0} {set pinName [dbGet $pInst.cell.terms.name]}
-
-		set box [lindex [dbGet $pInst.box] 0]
-		set xc [expr ( [lindex $box 0] + [lindex $box 2] ) /2 ]
-		set yc [expr ( [lindex $box 1] + [lindex $box 3] ) /2 ]
-		set pinPos "$xc $yc"
-		puts $skillfd "label0 = dbCreateLabel(au1 list(\"$layer_top\" \"pin\") list( $pinPos ) \"$pinName\" \"centerCenter\" \"R0\" \"stick\" 10)"
-		puts $skillfd "printf(\">>> makeLayout: Adding label $pinName\\n\")"
-		puts "$pinName $pinPos"
-
-	}
-	deselectAll
-}
 
 
 

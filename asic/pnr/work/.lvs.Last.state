@@ -17,7 +17,7 @@ vuiLVSFormTable = '(
 	runDir  "./LVS"
 	machineLoc  "local"
 	viewRules  t
-	technologyField  "assura_tech"
+	technologyField  "-undefined-"
 	runsetField  "default"
 	extract  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/Assura/lvs_rcx/extract.rul"
 	compare  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/Assura/lvs_rcx/compare.rul"
@@ -28,24 +28,19 @@ vuiLVSFormTable = '(
 	varVal  ""
 	varDefVal  ""
 	varDesc  ""
-	avView  t
+	avView  nil
 	avCompareView  t
 	additionalFunctionsButton  nil
-	schLibrary  "2025_PLAY_ncd"
-	schCell  "0814_opamp_N_P"
+	schLibrary  "mklib"
+	schCell  "APP"
 	schView  "schematic"
 	existingSchNetlist  nil
 	useVerilogTopCell  nil
-	layLibrary  "2025_PLAY_ncd"
-	layCell  "0814_opamp_N_P"
+	layLibrary  "mklib"
+	layCell  "APP"
 	layView  "layout"
 	layUseExistingNL  nil
-	avParameters  ("?avrpt t")
-	avCompare  nil
-	extractButton  nil
-	compareButton  nil
-	bindButton  nil
-	rsfIncludeButton  nil
+	avCompare  (":gen: breakAmbiguityThreshold( 8000 )" ":sch: filterDevice(\"cds_thru\"  short(\"src\" \"dst\") )")
 )
 
 
@@ -95,7 +90,6 @@ vuiLVSschNLoptionFormTable = '(
 	netlistFileHolding  ""
 	netlistLib  ""
 	netlistFile  nil
-	deviceInformationButton  nil
 )
 
 
@@ -790,9 +784,9 @@ vuiAVCGenOptions = '(
      (( breakAmbiguityThreshold ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
-             ( comment nil )
-             ( breakAmbiguityThreshold 2000 )
+             ( "use" t )
+             ( comment "The threshold for breaking instance ambiguities" )
+             ( breakAmbiguityThreshold 8000 )
      )
      (( combineTolerance ) 
              ( "view" t )
@@ -1214,7 +1208,7 @@ vuiAVCLayOptions = '(
      (( filterDevice ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
+             ( "use" t )
              ( filterDevice nil )
      )
      (( filterOptions ) 
@@ -1380,14 +1374,14 @@ vuiAVCSchOptions = '(
      (( filterDevice ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
-             ( filterDevice "" )
+             ( "use" t )
+             ( filterDevice "filterDevice(\"cds_thru\"  short(\"src\" \"dst\") )" )
      )
      (( filterOptions ) 
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( filterOptions nil )
+             ( filterOptions "" )
      )
      (( fixDevice ) 
              ( "view" t )
