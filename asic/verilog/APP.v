@@ -371,9 +371,6 @@ module APP(
 			      .VINm (inN),
 			      .VINp (inP),            // verilog not like VIN-, VIN+ either
 			      .VOUT (opamp_out)          // This is output
-			      .VINm (ana0_i),
-			      .VINp (ana1_i),            // verilog not like VIN-, VIN+ either
-			      .VOUT (anaOut_o)          // This is output
 			      );
    
 
