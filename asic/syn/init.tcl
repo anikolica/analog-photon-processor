@@ -49,7 +49,7 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
 
 
-set ec::VERILOG_LIST    { APP.v addr.v }
+set ec::VERILOG_LIST    { APP.v addr.v clk_counter.v hcc_syncFifo_latC.v }
 
 #set ec::VERILOG_VERSION 2001
 #set ec::VHDL_LIST       {}

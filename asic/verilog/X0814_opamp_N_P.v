@@ -1,4 +1,4 @@
-/Verilog HDL for ""0814_opamp_N_P, "
+//Verilog HDL for ""0814_opamp_N_P, ""
 `timescale 1 ps / 1 ps
 
 module X0814_opamp_N_P ( 

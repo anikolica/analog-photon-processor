@@ -18,7 +18,7 @@ module addr(
       if ( rstb == 1'b0 )
 	c <= 5'b00000;
       else 
-	c <= a_i + b_i;
+	c <= {1'b0, a_i} + {1'b0, b_i};
    end
 
 endmodule // dummy_top
