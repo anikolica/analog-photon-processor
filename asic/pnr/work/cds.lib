@@ -18,3 +18,6 @@ DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/as
 #Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
 #Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
 DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
+
+# tsmc65 seal-ring -ncd 2025
+DEFINE TSMC_SEAL_RING /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/TSMC_SEAL_RING

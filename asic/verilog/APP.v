@@ -418,22 +418,15 @@ PVSS2CDG VSSPST2(.VSSPST(VSS));
 // Power-on I/O ring sequencer (need one per power domain) 
 PVDD2POC POC1(.VDDPST() );
 
-   
+    
 // analog inputs/outputs -ncd
-PVDD1ANA   ANA_P(.AVDD(inP) );
-PCLAMP1ANA ANA_P_clamp(.VSSESD(VSS), .VDDESD(inP) );  
-
-PVDD1ANA   ANA_N(.AVDD(inN) );
-PCLAMP1ANA ANA_N_clamp(.VSSESD(VSS), .VDDESD(inN) );  
-
-
-PVDD1ANA   ANA_OUT(.AVDD(opamp_out) );
-PCLAMP1ANA ANA_OUT_clamp(.VSSESD(VSS), .VDDESD(opamp_out) );  
-
-
-PCLAMP1ANA VDD_clamp(.VSSESD(VSS), .VDDESD(VDD) );  
-PCLAMP2ANA DVDD_clamp(.VSSESD(VSS), .VDDESD(DVDD) );  
-
+// PDB1A Analog pad with diode protection
+// PCLAMPA Analog clamp ckt
+   
+PDB1A ANA_P(.AIO(inP) );
+PDB1A ANA_N(.AIO(inN) );
+PDB1A ANA_OUT(.AIO(opamp_out) );
+PCLAMPA ANA_P_clamp(.VSSESD(VSS), .VDDESD(VDD) );  
 
 
  

@@ -74,7 +74,7 @@ setDoAssign on
 ## -ncd
 init_design
 
-stop
+#stop
 
 
 fit
@@ -118,6 +118,10 @@ globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
 globalNetConnect DVDD -type pgpin -pin VDDESD -inst *
 globalNetConnect VSS -type pgpin -pin VSSESD -inst *
 
+######   LOAD EXISTING FLOORPLAN HERE IF DESIRED ###### 
+loadFPlan APP.fp                                    ; #
+#######################################################
+stop
 
 ## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
 #globalNetConnect VDDPST -type pgpin -pin VDDPST -inst *
@@ -215,23 +219,39 @@ source ../scripts/dfm.tcl
 ################## EXTRAS ##############################
 #########################################################
 
-## Add rings around core area: 10 wide/5 space rings on M9/M8 -ncd 
+## ADD RINGS around CORE area: 10 wide/5 space rings on M9/M8 -ncd 
 addRing -skip_via_on_wire_shape Noshape -use_wire_group_bits 2 -use_interleaving_wire_group 1 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -use_wire_group 1 -type core_rings -jog_distance 2.0 -threshold 2.0 -nets {VDD VSS} -follow io -stacked_via_bottom_layer M1 -layer {bottom M8 top M8 right M9 left M9} -width 10 -spacing 5 -offset 10
 uiSetTool ruler
 
-## add stripes M9 10-5-10 every 100um -ncd
+## ADD STRIPES M9 10-5-10 every 100um -ncd
 addStripe -skip_via_on_wire_shape Noshape -block_ring_top_layer_limit M7 -max_same_layer_jog_length 6 -padcore_ring_bottom_layer_limit M5 -set_to_set_distance 100 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -padcore_ring_top_layer_limit M7 -spacing 5 -merge_stripes_value 2.0 -layer M9 -block_ring_bottom_layer_limit M5 -width 10 -nets {VDD VSS} -stacked_via_bottom_layer M1
 
 #screate_power_nets -nets VDD -voltage 1.2 -internaltop
 
 
 
+## cut core rows around macros in expanded area by "halo"  -ncd
+foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}
+cutRow -selected -halo 5
+deselectAll
+
+##### CREATE ROUTING BLOCKAGES and cut core rows around each macro ############ -ncd
+foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 8.1] {createRouteBlk -layer all -name myRtBlks -box $box}
+
+
+## CUT ROWS around Macros, etc. -ncd
+#cutRow -halo 5.0    ; #   5.0 clearance around Macros -ncd
+## ROUTE rows for standard cells -ncd
+sroute -connect {corePin}
+
+
+#########################################
+
 
 
 ##### NCD
 ## VDD/VSS on VERTICAL EDGES of core -ncd 
-af
-ddRing -nets {VDD VSS} -type core_rings -follow io -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 10 right 10} -center 0 -skip_side {top bottom } -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 10 right 10} -center 0 -skip_side {top bottom } -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
 ## VDD/VSS on VERTICAL EDGES of Macros -ncd
 addRing -nets {VDD VSS} -type block_rings -around each_block -layer {top M2 bottom M2 left M1 right M1} -width {top 1.8 bottom 1.8 left 1.8 right 1.8} -spacing {top 1.8 bottom 1.8 left 1.8 right 1.8} -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
@@ -248,22 +268,9 @@ addRing -nets {VDD VSS} -type block_rings -around each_block -layer {top M2 bott
 
 
 
-## CUT ROWS around Macros, etc. -ncd
-cutRow -halo 1.8  ; # 1.8 clearance around Macros -ncd
-## ROUTE rows for standard cells -ncd
-sroute -connect {corePin}
 
 
 
-
-##### create routing blockages and cut core rows around each macro ############ -ncd
-## Place expanded routing blockages over macros: expand or contracct by SIZE +/-5 -ncd
-foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 4.5] {createRouteBlk -layer all -name myRtBlks -box $box}
-
-## cut core rows around macros in expanded area by "halo"  -ncd
-foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}
-cutRow -selected -halo 5
-deselectAll
 
 
 
