@@ -28,9 +28,12 @@ set glv::SIioaPath "/cad/Technology/TSMC650A.new/digital/Back_End/celtic/tadn65l
 
 
 ####set init_lef_file
-
 # DEFINE ADDITIONAL USER LIBRARIES HERE: must 1st create APP_lib in virtuoso 2025  -ncd
-set userLib "APP_lib"
+# Must reference all libraries containing macro abstracts here -ncd 2025
+set userLib "APP_lib 2025_APP 2025_Chip_area"
+
+
+
 if {$ONLY_9TRACKS} {
 	set init_oa_ref_lib "tcbn65lp  tpdn65lpnv2od3  tpan65lpnv2od3 tpbn65v $userLib"
 	set init_mmmc_file ../scripts/mmmc.view
@@ -74,7 +77,7 @@ setDoAssign on
 ## -ncd
 init_design
 
-#stop
+stop
 
 
 fit
@@ -110,7 +113,7 @@ win
 
 
 source ../scripts/variables.tcl
-
+##globalNetConnect VDDH_FUSE -type pgpin -pin DVDD -inst vfuse1 
 globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
 globalNetConnect VSS -type pgpin -pin GND -inst *    ; # add GND -ncd
@@ -144,6 +147,16 @@ if {$CORE_CHIP == "CHIP"} {
 	loadIoFile ../scripts/corner.io
 }
 fit
+
+## Add physical Instances -ncd 2025
+#addInst -cell AGIO_GND  -inst GND2
+
+addInst -physical -cell PRCUT -inst BREAK1
+addInst -physical -cell PRCUT -inst BREAK2
+addInst -physical -cell PRCUT -inst BREAK3
+addInst -physical -cell PRCUT -inst BREAK4
+# Must now edit teh IoFile, APP.save.io to include these BREAK's -ncd 2025
+## Once loaded, you can move them around with the GUI ! -ncd
 
 
 ## 
