@@ -31,15 +31,16 @@ vuiLVSFormTable = '(
 	avView  t
 	avCompareView  t
 	additionalFunctionsButton  t
-	schLibrary  "2025_Chip_area"
-	schCell  "chip_pads"
+	schLibrary  "2025_APP_yimingh"
+	schCell  "comparator3_inv_mac_v2"
 	schView  "schematic"
 	existingSchNetlist  nil
 	useVerilogTopCell  nil
-	layLibrary  "2025_Chip_area"
-	layCell  "chip_pads"
+	layLibrary  "2025_APP_yimingh"
+	layCell  "comparator3_inv_mac_v2"
 	layView  "layout"
 	layUseExistingNL  nil
+	avParameters  ("?avrpt t" "?ercSetPwr (\"VDD\" \"VDD!\" \"VDDPST!\")" "?ercSetGnd (\"VSS!\" \"VSS\" \"GND\" \"VSSPST!\")")
 	avCompare  (":gen: breakAmbiguityThreshold( 8000 )" ":lay: filterDevice( \"CM\" )" ":sch: filterDevice(\"cds_thru\"  short(\"src\" \"dst\") )")
 	flattenCellButton  nil
 	joinableNetsButton  nil
@@ -47,7 +48,6 @@ vuiLVSFormTable = '(
 	changeLabelButton  nil
 	mustJoinNetButton  nil
 	deleteCellTextButton  nil
-	avParameters  ("?avrpt t" "?ercSetPwr (\"VDD\" \"VDD!\" \"VDDPST!\")" "?ercSetGnd (\"VSS!\" \"VSS\" \"VSSPST!\")")
 )
 
 
@@ -267,7 +267,7 @@ vuiLVSOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" t )
-             ( gndlist "VSS! VSS VSSPST!" )
+             ( gndlist "VSS! VSS GND VSSPST!" )
              ( gndfile "" )
      )
      (( ?errorOnMissingMaster ) 

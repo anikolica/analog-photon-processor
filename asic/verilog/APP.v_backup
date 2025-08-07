@@ -385,17 +385,45 @@ module APP(
    *      Single APP Channel  Macro                        *
    *********************************************************/
 
-   
+
+/*   
 wire  GND, TOT_INTEGRAL, VDD, VDDH, amplitudePeak1, amplitudePeak2,
      amplitudeValley1, eventEdge_back, eventEdge_front, timePeak1,
      timePeak2, timeValley1;
-
-wire  B0, CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
+*/
+   
+wire  CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
      VTH_valley, Vbase, vcomp;
 
-wire [8:1]  WE_ampl;
-wire [8:1]  WE_time;
+wire [8:1]  WE_ampl_ch1;
+wire [8:1]  WE_time_ch1;
 
+   
+wire B0_ch1;  // PMT chan1   
+wire CMP_ch1;
+wire timePeak1_ch1;
+wire timePeak2_ch1;
+wire timeValley1_ch1;
+wire amplitudeValley1_ch1;
+wire amplitudePeak2_ch1;
+wire amplitudePeak1_ch1;
+wire eventEdge_back_ch1;
+wire eventEdge_front_ch1;
+wire TOT_INTEGRAL_ch1;
+   
+wire timePeak1_ch2;
+wire timePeak2_ch2;
+wire timeValley1_ch2;
+wire amplitudeValley1_ch2;
+wire amplitudePeak2_ch2;
+wire amplitudePeak1_ch2;
+wire eventEdge_back_ch2;
+wire eventEdge_front_ch2;
+wire TOT_INTEGRAL_ch2;
+   
+
+wire B0_ch2;   // PMT chan2
+wire CMP_ch2;
 wire [3:1]  sel_TOT_event;
 wire [2:0]  TOT_delay;
 wire [2:0]  delay_hold_U2;
@@ -406,14 +434,14 @@ wire [2:0]  delay_hold_D1;
 wire [2:0]  delay_hold_D1P;
 
   
-APP_chan APPchan1 ( .WE_ampl(WE_ampl), .WE_time(WE_TOTback),
-     .timePeak1(timePeak1), .timePeak2(timePeak2),
-     .timeValley1(timeValley1), .amplitudeValley1(amplitudeValley1),
-     .amplitudePeak2(amplitudePeak2), .amplitudePeak1(amplitudePeak1),
-     .eventEdge_back(eventEdge_back),
-     .eventEdge_front(eventEdge_front),
-     .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL),
-     .GND(GND), .VDD(VDD), .VDDH(VDDH), .B0(B0), .CLK(CLK), .RE(RE),
+APP_chan APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
+     .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1),
+     .timeValley1(timeValley1_ch1), .amplitudeValley1(amplitudeValley1_ch1),
+     .amplitudePeak2(amplitudePeak2_ch1), .amplitudePeak1(amplitudePeak1_ch1),
+     .eventEdge_back(eventEdge_back_ch1),
+     .eventEdge_front(eventEdge_front_ch1),
+     .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL_ch1),
+     .GND(GND), .VDD(VDD), .VDDH(VDDH), .B0(B0_ch1), .CLK(CLK), .RE(RE),
      .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
      .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
      .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
@@ -425,6 +453,70 @@ APP_chan APPchan1 ( .WE_ampl(WE_ampl), .WE_time(WE_TOTback),
      .delay_hold_U2P(delay_hold_U2P[2:0]), .vcomp(vcomp));
 
 
+APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2),
+     .timePeak1(timePeak1_ch2), .timePeak2(timePeak2_ch2),
+     .timeValley1(timeValley1_ch2), .amplitudeValley1(amplitudeValley1_ch2),
+     .amplitudePeak2(amplitudePeak2_ch2), .amplitudePeak1(amplitudePeak1_ch2),
+     .eventEdge_back(eventEdge_back_ch2),
+     .eventEdge_front(eventEdge_front_ch2),
+     .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL_ch2),
+     .GND(GND), .VDD(VDD), .VDDH(VDDH), .B0(B0_ch2), .CLK(CLK), .RE(RE),
+     .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
+     .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
+     .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
+     .delay_hold_D1(delay_hold_D1[2:0]),
+     .delay_hold_D1P(delay_hold_D1P[2:0]),
+     .delay_hold_U1(delay_hold_U1[2:0]),
+     .delay_hold_U1P(delay_hold_U1P[2:0]),
+     .delay_hold_U2(delay_hold_U2[2:0]),
+     .delay_hold_U2P(delay_hold_U2P[2:0]), .vcomp(vcomp));
+
+/* APP_channel signals -ncd
+ 
+ GND          inout
+  VDD          inout       1.2v
+ VDDH         inout       1.6v
+
+ TOT_INTEGRAL inout       PMT TOT Intagral (ADC)
+ amplitudePeak1   inout   Amplitude of peak1 (ADC)
+ amplitudePeak2   inout   Amplitude of peak2 (ADC)
+ amplitudeValley1 inout   Amplitude of first valley (ADC)
+ eventEdge_back   inout   Time of PMT back edge (ADC)
+ eventEdge_front  inout   Time of PMT front edge (ADC)
+ timePeak1       inout    Time of peak1 (ADC)
+ timePeak2       inout    Time of peak2 (ADC)
+ timeValley1     inout    Time of first valley (ADC)
+ 
+ B0              input    PMT analog signal terminated 50 Ohms and referenced to Vbase=600mv
+ CLK             input    synchronous clock 50MHz
+ RE              input    Read Enable (read back everything)
+ RST_INIT        input    System Reset (need after power-up)
+ VTH_armpeak     input    Arming comparator for peak detector (connect to a DAC)
+ VTH_armvalley   input    Arming comparator for valley detector (connect to a DAC)
+ VTH_peak        input    Threshold for peak detector (connect to a DAC)
+ VTH_valley      input    Threshold for valley detector (connect to a DAC)
+ Vbase           input    Base volage for all opamps: connect to 600mV reference (OR a DAC)
+ vcomp           input    Threshold for TOT Comparator (DAC)
+ delay_hold_D1 [2:0] input   Digital delay to align valley1 ping
+ delay_hold_D1P [2:0] input  Digital delay to align peak1   pong
+ delay_hold_U1 [2:0] input   Digital delay to align peak1   ping
+ delay_hold_U1P [2:0] input  Digital delay to align peak1   pong
+ delay_hold_U2 [2:0] input   Digital delay to align peak2   ping
+ delay_hold_U2P [2:0] input  Digital delay to align peak2   pong
+ TOT_delay     [2:0] input   Digital delay to align TOT comparator 
+ sel_TOT_event [3:1] input   Select TOT event to read out with ADCs
+ WE_ampl [8:1] output        Flags: Amplitude done for each TOT event; 1 if writing memory
+                                                                       0 when write is done 
+                                                                       Asychronous!   
+ 
+ WE_time [8:1] output        Flags: TAC done for each TOT event ; = 1 if writing memory
+                                                                    0 when write is done
+                                                                    Sychronous with CLK  
+ 
+ 
+ 
+ */
+   
    
 
   /****************************************************
@@ -451,23 +543,29 @@ APP_chan APPchan1 ( .WE_ampl(WE_ampl), .WE_time(WE_TOTback),
 //       VSS Shorted and the Rest of Rails Cut 
 
 
-// Core power/gnd   
-PVDD1CDG VDD1(.VDD(VDD) );
+// Digital Core power/gnd   
+PVDD1CDG VDD1(.VDD(VDD) ); // digital core logic 1.2v
 PVDD1CDG VDD2(.VDD(VDD) );
 
-PVSS1CDG VSS1(.VSS(VSS) );
+PVSS1CDG VSS1(.VSS(VSS) );  // digital core logic return 0v
 PVSS1CDG VSS2(.VSS(VSS) );
 PVSS1CDG VSS3(.VSS(VSS) );
 PVSS1CDG VSS4(.VSS(VSS) );
 
-// IO power/gnd
-PVDD2CDG VDDPST1(.VDDPST(DVDD) );
-PVDD2CDG VDDPST2(.VDDPST(DVDD) );
+PCLAMP1ANA vddClamp (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
 
-PVSS2CDG VSSPST1(.VSSPST(VSS));
+
+   
+// IO Digital power/gnd
+PVDD2CDG VDDPST1(.VDDPST(VDD) ); // digital I/O Drivers/Receivers 2.5v 
+PVDD2CDG VDDPST2(.VDDPST(VDD) );
+
+PVSS2CDG VSSPST1(.VSSPST(VSS)); // digital I/O return 0v 
 PVSS2CDG VSSPST2(.VSSPST(VSS));
 
-// Power-on I/O ring sequencer (need one per power domain) 
+PCLAMP2ANA dvddClamp (.VSSESD(VSS), .VDDESD(DVDD) ); // ESD clamp for I/O voltage 2.5v  
+   
+// Digital Power-on I/O ring sequencer (need one per power domain) 
 PVDD2POC POC1(.VDDPST() );
 
     
@@ -476,12 +574,47 @@ PVDD2POC POC1(.VDDPST() );
 // PCLAMPA Analog clamp ckt
 
 
+// ANALOG DOMAIN  -ncd
+// Separate from digital regions with "PRCUT" Physical cell in innovus -ncd   
+
+PVDD3A VDDA1(.AVDD(VDD) );
+PVSS3A VSSA1(.AVSS(VSS) );
    
-PDB1A ANA_PMT (.AIO(B0) );
+  
+  
+PDB1A ch1_PMT (.AIO(B0_ch1) ); // PMT channel 1
+PDB1A ch2_PMT (.AIO(B0_ch2) ); // PMT channel 2
+   
 PDB1A ANA_P (.AIO(inP) );
 PDB1A ANA_N (.AIO(inN) );
 PDB1A ANA_OUT (.AIO(opamp_out) );
-PCLAMPA ANA_P_clamp (.VSSESD(VSS), .VDDESD(VDD) );  
+
+
+// These single-ended pads will eventually be replace with differential pads -ncd   
+PDB1A ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1) ); 
+PDB1A ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1) );
+PDB1A ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1) );
+PDB1A ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1) );
+PDB1A ch1_eventEdge_back (.AIO (eventEdge_back_ch1) );
+PDB1A ch1_eventEdge_front (.AIO (eventEdge_front_ch1) );
+PDB1A ch1_timePeak1 (.AIO (timePeak1_ch1) );
+PDB1A ch1_timePeak2 (.AIO (timePeak2_ch1) );
+PDB1A ch1_timeValley1 (.AIO (timeValley1_ch1) );
+PDB1A ch1_CMP (.AIO (CMP_ch1) );
+
+
+PDB1A ch2_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch2) ); 
+PDB1A ch2_amplitudePeak1 (.AIO (amplitudePeak1_ch2) );
+PDB1A ch2_amplitudePeak2 (.AIO (amplitudePeak2_ch2) );
+PDB1A ch2_amplitudeValley1 (.AIO (amplitudeValley1_ch2) );
+PDB1A ch2_eventEdge_back (.AIO (eventEdge_back_ch2) );
+PDB1A ch2_eventEdge_front (.AIO (eventEdge_front_ch2) );
+PDB1A ch2_timePeak1 (.AIO (timePeak1_ch2) );
+PDB1A ch2_timePeak2 (.AIO (timePeak2_ch2) );
+PDB1A ch2_timeValley1 (.AIO (timeValley1_ch2) );
+PDB1A ch2_CMP (.AIO (CMP_ch2) );
+
+   
 
 
  

@@ -153,15 +153,16 @@ fit
 
 addInst -physical -cell PRCUT -inst BREAK1
 addInst -physical -cell PRCUT -inst BREAK2
-addInst -physical -cell PRCUT -inst BREAK3
-addInst -physical -cell PRCUT -inst BREAK4
+#addInst -physical -cell PRCUT -inst BREAK3
+#addInst -physical -cell PRCUT -inst BREAK4
+
 # Must now edit teh IoFile, APP.save.io to include these BREAK's -ncd 2025
 ## Once loaded, you can move them around with the GUI ! -ncd
 
 
 ## 
 #floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
-floorPlan -coreMarginsBy die -site core -d 4500 4500 130 130 130 130 -adjustToSite
+floorPlan -coreMarginsBy die -site core -d 5000 5500 130 130 130 130 -adjustToSite
 fit
 
 ## Load IO pads and special routing

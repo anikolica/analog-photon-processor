@@ -48,18 +48,31 @@ set ec::LIBRARY         "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcbn65lpbwp7thvt_141a/tcbn65lpbwp7thvtwc.lib \
 						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
 
+# ADD MACROS BEORE EVERYTHING ELSE & set command to handle blackbox/macros  -NCD 2025
+set ec::VERILOG_LIST    { X0814_opamp_N_P.v PDB1A.v APP.v addr.v clk_counter.v hcc_syncFifo_latC.v }
+set_db init_blackbox_for_undefined true
 
-set ec::VERILOG_LIST    { APP.v addr.v clk_counter.v hcc_syncFifo_latC.v }
+#set_attribute init_blackbox_for_undefined false
+#set_db hdl_blackbox_modules {PDB1A X0814_opamp_N_P}
+
+
+
+#
 
 #set ec::VERILOG_VERSION 2001
 #set ec::VHDL_LIST       {}
 #set ec::VHDL_VERSION    1993
 
 #set ec::LEFLIB "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT2.lef "
+# Add paths for analog pads and antenna LEFs 
 set ec::LEFLIB " $TSMC_PDK/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT1.lef \
 	            $TSMC_PDK/digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/tpdn65lpnv2od3_6lm.lef \
-	            $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef    \
-                 /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/libs/lef/0814_opamp_N_P.lef "                    
+	            $TSMC_PDK/digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/antenna_6lm.lef \
+	            $TSMC_PDK/digital/Back_End/lef/tpan65lpnv2od3_200a/mt_2/6lm/lef/tpan65lpnv2od3_6lm.lef \
+	            $TSMC_PDK/digital/Back_End/lef/tpan65lpnv2od3_200a/mt_2/6lm/lef/antenna_6lm.lef \
+	            $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef    "
+
+
 
 				 
 #set ec::CAPTABLE "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top2_rcworst.captable"
@@ -135,7 +148,7 @@ set_attribute hdl_search_path $ec::RTL_PATH /
 set_attribute lib_search_path $ec::LIB_PATH /
 
 # timing libraries
-create_library_domain {sc9t sc7thvt}
+create_library_domain {sc9t sc7thvt} 
 set_attribute library $ec::LIBRARY sc9t
 set_attribute library $ec::LIBRARY_7THVT sc7thvt
 
@@ -143,7 +156,9 @@ set_attribute default true sc9t
 #set_attribute default true sc7thvt
 
 # lef & captbl
-set_attribute lef_library $ec::LEFLIB /
+# set_attribute lef_library $ec::LEFLIB / -ncd 2025
+set_db lef_library $ec::LEFLIB
+
 set_attribute cap_table_file $ec::CAPTABLE /
 
 set_attribute interconnect_mode ple / 
@@ -177,6 +192,7 @@ set_attribute hdl_track_filename_row_col true /
 set_attribute auto_ungroup none /
 set_attribute hdl_language sv /
 set_attribute hdl_infer_unresolved_from_logic_abstract true
+
 read_hdl $ec::VERILOG_LIST
 
 # report time and memory
@@ -187,6 +203,11 @@ puts "\nEC INFO: Total cpu-time and memory after LOAD: [get_attr runtime /] sec.
 #####################################################################
 
 elaborate
+
+# Try to preserve analog net 'opamp_out' that connects two analog Marcros
+# This will stop Genus from optimizing the Macros away -ncd 2025
+set_attribute preserve true opamp_out
+
 
 # report time and memory
 puts "\nEC INFO: Total cpu-time and memory after ELAB: [get_attr runtime /] sec., [get_attr memory_usage /] MBytes.\n"

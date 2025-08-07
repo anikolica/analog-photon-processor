@@ -398,7 +398,9 @@ wire  CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
 wire [8:1]  WE_ampl_ch1;
 wire [8:1]  WE_time_ch1;
 
+   
 wire B0_ch1;  // PMT chan1   
+wire CMP_ch1;
 wire timePeak1_ch1;
 wire timePeak2_ch1;
 wire timeValley1_ch1;
@@ -421,6 +423,7 @@ wire TOT_INTEGRAL_ch2;
    
 
 wire B0_ch2;   // PMT chan2
+wire CMP_ch2;
 wire [3:1]  sel_TOT_event;
 wire [2:0]  TOT_delay;
 wire [2:0]  delay_hold_U2;
@@ -431,7 +434,7 @@ wire [2:0]  delay_hold_D1;
 wire [2:0]  delay_hold_D1P;
 
   
-APP_chan APPchan1 ( .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
+APP_chan APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
      .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1),
      .timeValley1(timeValley1_ch1), .amplitudeValley1(amplitudeValley1_ch1),
      .amplitudePeak2(amplitudePeak2_ch1), .amplitudePeak1(amplitudePeak1_ch1),
@@ -450,7 +453,7 @@ APP_chan APPchan1 ( .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
      .delay_hold_U2P(delay_hold_U2P[2:0]), .vcomp(vcomp));
 
 
-APP_chan APPchan2 ( .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2),
+APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2),
      .timePeak1(timePeak1_ch2), .timePeak2(timePeak2_ch2),
      .timeValley1(timeValley1_ch2), .amplitudeValley1(amplitudeValley1_ch2),
      .amplitudePeak2(amplitudePeak2_ch2), .amplitudePeak1(amplitudePeak1_ch2),
@@ -597,6 +600,8 @@ PDB1A ch1_eventEdge_front (.AIO (eventEdge_front_ch1) );
 PDB1A ch1_timePeak1 (.AIO (timePeak1_ch1) );
 PDB1A ch1_timePeak2 (.AIO (timePeak2_ch1) );
 PDB1A ch1_timeValley1 (.AIO (timeValley1_ch1) );
+PDB1A ch1_CMP (.AIO (CMP_ch1) );
+
 
 PDB1A ch2_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch2) ); 
 PDB1A ch2_amplitudePeak1 (.AIO (amplitudePeak1_ch2) );
@@ -607,6 +612,7 @@ PDB1A ch2_eventEdge_front (.AIO (eventEdge_front_ch2) );
 PDB1A ch2_timePeak1 (.AIO (timePeak1_ch2) );
 PDB1A ch2_timePeak2 (.AIO (timePeak2_ch2) );
 PDB1A ch2_timeValley1 (.AIO (timeValley1_ch2) );
+PDB1A ch2_CMP (.AIO (CMP_ch2) );
 
    
 
