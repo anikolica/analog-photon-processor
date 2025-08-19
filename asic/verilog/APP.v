@@ -12,18 +12,22 @@
 
 module APP(
 	   input wire  pad_a0_i,
+	   /*
 	   input wire  pad_a1_i,
 	   input wire  pad_a2_i,
 	   input wire  pad_a3_i,
+
 	   input wire  pad_b0_i,
 	   input wire  pad_b1_i,
 	   input wire  pad_b2_i,
 	   input wire  pad_b3_i,
+	    */
 
 	   input wire  pad_ana0_i,
 	   input wire  pad_ana1_i,
 
 	   output wire pad_c0_o,
+	   /*
 	   output wire pad_c1_o,
 	   output wire pad_c2_o,
 	   output wire pad_c3_o ,
@@ -45,7 +49,7 @@ module APP(
 	   output wire pad_ts13_o,
 	   output wire pad_ts14_o,
 	   output wire pad_ts15_o,
-
+	    */
 	   output wire pad_anaOut_o,
 	   
 	   input wire  pad_clk_i,
@@ -114,7 +118,7 @@ module APP(
 			.PAD(pad_a0_i),    // Input pad
 			.C  (a_i[0]),      // signal
 			.PE (1'b1), .IE(1'b1) );
-
+/*
    PDDW0408SCDG padA1( .I(1'b0), .DS(1'b1), .OEN(1'b1),
 			.PAD(pad_a1_i),    // Input pad
 			.C  (a_i[1]),      // signal
@@ -150,7 +154,7 @@ module APP(
 			.PAD(pad_b3_i),    // Input pad
 			.C  (b_i[3]),      // signal
 			.PE (1'b1), .IE(1'b1) );
-
+*/
    PDDW0408SCDG padana0( .I(1'b0), .DS(1'b1), .OEN(1'b1),
 			.PAD(pad_ana0_i),    // Input pad
 			.C  (ana0_i),      // signal
@@ -181,7 +185,7 @@ module APP(
 			.C   (),
 			.PE  (1'b0),
 			.IE  (1'b0) );
-
+/*
    PDDW0408SCDG padC1( .I (c_o[1]),  // signal
 			.DS  (1'b1),
 			.OEN (1'b0),
@@ -326,7 +330,7 @@ module APP(
 			.C   (),
 			.PE  (1'b0),
 			.IE  (1'b0) );
-   
+*/   
 
    PDDW0408SCDG padanaOut( .I (anaOut_o),  // signal
 			.DS  (1'b1),
@@ -340,7 +344,7 @@ module APP(
    /*****************************************************
     *             Top Level Modules                     *
     *****************************************************/
-
+/*
    wire        re_trig;
    wire        we_trig;
 
@@ -361,7 +365,10 @@ module APP(
 						       .rstb( rstb )
 						      );
    
+*/
 
+   assign c_o[0] = a_i[0] ? 1'b0 : 1'b1;
+   
  
   /****************************************************
     *             MACROS -ncd                          *
