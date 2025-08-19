@@ -49,6 +49,7 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
 
 # ADD MACROS BEORE EVERYTHING ELSE & set command to handle blackbox/macros  -NCD 2025
+<<<<<<< HEAD
 set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
 
 
@@ -57,6 +58,10 @@ set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_co
 #         /tape/cad_Tech/TSMC650A/digital/Front_End/verilog/tpan65lpnv2od3_140b/tpan65lpnv2od3.v"  ; # point to analop pads -ncd 2025
 
 
+=======
+set ec::VERILOG_LIST    { X0814_opamp_N_P.v PDB1A.v APP.v }
+#set ec::VERILOG_LIST    { X0814_opamp_N_P.v PDB1A.v APP.v addr.v clk_counter.v hcc_syncFifo_latC.v }
+>>>>>>> 0ca4c2248f726c3240ee26142e05512fd02c6cf4
 set_db init_blackbox_for_undefined true
 
 #set_attribute init_blackbox_for_undefined false
@@ -245,10 +250,10 @@ define_cost_group -name I2C
 define_cost_group -name C2O
 define_cost_group -name I2O
 define_cost_group -name C2C
-path_group -from [all des seqs] -to [all des seqs] -group C2C -name C2C
-path_group -from [all des seqs] -to [all des outs] -group C2O -name C2O
-path_group -from [all des inps] -to [all des seqs] -group I2C -name I2C
-path_group -from [all des inps] -to [all des outs] -group I2O -name I2O
+#ptk#path_group -from [all des seqs] -to [all des seqs] -group C2C -name C2C
+#ptk#path_group -from [all des seqs] -to [all des outs] -group C2O -name C2O
+#ptk#path_group -from [all des inps] -to [all des seqs] -group I2C -name I2C
+#ptk#path_group -from [all des inps] -to [all des outs] -group I2O -name I2O
 
 #####################################################################
 # Initial reports
