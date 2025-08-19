@@ -31,16 +31,15 @@ vuiLVSFormTable = '(
 	avView  t
 	avCompareView  t
 	additionalFunctionsButton  t
-	schLibrary  "2025_APP_yimingh"
-	schCell  "comparator3_inv_mac_v2"
+	schLibrary  "mklib"
+	schCell  "APP"
 	schView  "schematic"
 	existingSchNetlist  nil
 	useVerilogTopCell  nil
-	layLibrary  "2025_APP_yimingh"
-	layCell  "comparator3_inv_mac_v2"
+	layLibrary  "mklib"
+	layCell  "APP"
 	layView  "layout"
 	layUseExistingNL  nil
-	avParameters  ("?avrpt t" "?ercSetPwr (\"VDD\" \"VDD!\" \"VDDPST!\")" "?ercSetGnd (\"VSS!\" \"VSS\" \"GND\" \"VSSPST!\")")
 	avCompare  (":gen: breakAmbiguityThreshold( 8000 )" ":lay: filterDevice( \"CM\" )" ":sch: filterDevice(\"cds_thru\"  short(\"src\" \"dst\") )")
 	flattenCellButton  nil
 	joinableNetsButton  nil
@@ -48,6 +47,7 @@ vuiLVSFormTable = '(
 	changeLabelButton  nil
 	mustJoinNetButton  nil
 	deleteCellTextButton  nil
+	avParameters  ("?avrpt t" "?diskListAuto 100" "?ercSetPwr (\"VDD\" \"VDDPST\" \"VDDPST!\")" "?ercSetGnd (\"VSS\" \"VSSPST\" \"VSSPST!\" \"VSS!\")" "?multiCPU 16")
 )
 
 
@@ -226,16 +226,16 @@ vuiLVSOptions = '(
      (( ?diskList ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
-             ( dir nil )
+             ( "use" t )
+             ( dir "" )
              ( diskList nil )
      )
      (( ?diskListAuto ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
+             ( "use" t )
              ( diskListAuto nil )
-             ( diskListAutoVal 80 )
+             ( diskListAutoVal 100 )
      )
      (( ?doNotSaveRectsAsPaths ) 
              ( "view" t )
@@ -260,14 +260,14 @@ vuiLVSOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" t )
-             ( pwrlist "VDD VDD! VDDPST!" )
+             ( pwrlist "VDD VDDPST VDDPST!" )
              ( pwrfile "" )
      )
      (( ?ercSetGnd ) 
              ( "view" t )
              ( "edit" t )
              ( "use" t )
-             ( gndlist "VSS! VSS GND VSSPST!" )
+             ( gndlist "VSS VSSPST VSSPST! VSS!" )
              ( gndfile "" )
      )
      (( ?errorOnMissingMaster ) 
@@ -487,9 +487,9 @@ vuiLVSOptions = '(
      (( ?multiCPU ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
-             ( multiCPU t )
-             ( number 1 )
+             ( "use" t )
+             ( multiCPU nil )
+             ( number 16 )
      )
      (( ?netTextFile ) 
              ( "view" t )

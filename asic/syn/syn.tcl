@@ -18,10 +18,24 @@ set_attribute max_leakage_power 0.0 "$ec::DESIGN"
 set_attribute remove_assigns true /
 set_remove_assign_options -verbose
 
+
+
+### None of this crap worked -ncd
+###set_db tiehi_cell TIEH
+###set_db syn_use_tie_cells true
+###set_attribute [get_lib_cells TIEH] is_tiehi_cell "true"
+###set_attribute [get_lib_cells TIEL] is_tielo_cell true
+##set_db syn_use_tie_cells true
+
+
+
+
 # ptk 250225 -- genus 231 doesn't like "synthesize" any more
 #synthesize -to_generic -effort $ec::SYN_EFFORT
 syn_gen
 report datapath > $ec::reportDir/datapath_generic.rpt
+
+
 
 ################################################
 # Synthesizing to gates
@@ -31,5 +45,7 @@ report datapath > $ec::reportDir/datapath_generic.rpt
 #synthesize -to_mapped -eff $ec::MAP_EFFORT -no_incr
 set_attribute syn_map_effort $ec::MAP_EFFORT
 syn_map
+
+
 puts "Runtime & Memory after 'synthesize -to_map -no_incr'"
 report datapath > $ec::reportDir/datapath_mapped.rpt

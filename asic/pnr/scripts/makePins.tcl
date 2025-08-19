@@ -45,7 +45,13 @@ if {$CORE_CHIP == "CHIP"} {
     catch {selectInstByCellName PVSS2CDG}  
     catch {selectInstByCellName PVDD1CDG}  
     catch {selectInstByCellName PVSS1CDG}  
-## removed -ncd
+
+    catch {selectInstByCellName PDB3AC} 
+    catch {selectInstByCellName PVDD3A} 
+    catch {selectInstByCellName PVSS3A} 
+
+
+## removed -ncd  
 #        selectInstByCellName PVDD1ANA   
 #	selectInstByCellName PVDD3A  
 #	selectInstByCellName PVSS3A  

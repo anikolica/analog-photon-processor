@@ -24,13 +24,13 @@ output [8:1]  WE_ampl;
 output [8:1]  WE_time;
 
 input [3:1]  sel_TOT_event;
-input [2:0]  TOT_delay;
-input [2:0]  delay_hold_U2;
-input [2:0]  delay_hold_U2P;
-input [2:0]  delay_hold_U1P;
-input [2:0]  delay_hold_U1;
-input [2:0]  delay_hold_D1;
-input [2:0]  delay_hold_D1P;
+input [3:0]  TOT_delay;
+input [3:0]  delay_hold_U2;
+input [3:0]  delay_hold_U2P;
+input [3:0]  delay_hold_U1P;
+input [3:0]  delay_hold_U1;
+input [3:0]  delay_hold_D1;
+input [3:0]  delay_hold_D1P;
 
 
 endmodule // APP_chan

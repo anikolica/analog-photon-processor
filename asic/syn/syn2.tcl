@@ -19,6 +19,11 @@ syn_opt -incremental
 puts "Runtime & Memory after incremental synthesis"
 timestat INCREMENTAL
 
+# Swap 1'b1,0 --> TIEH, TIEL -ncd 2025 This needs to be the last syn2 step
+insert_tiehilo_cells -hi TIEH -lo TIEL -all
+
+
+
 foreach cg [find / -cost_group -null_ok *] {
   report timing -cost_group [list $cg] > $ec::reportDir/[basename $cg]_post_incr.rpt
 }

@@ -2,7 +2,7 @@
 `timescale 1 ps / 1 ps
 
 module X0814_opamp_N_P ( 
-  inout  VINm, 
+  input  VINm, 
   input  VINp, 
   inout  VOUT
   );

@@ -1,23 +1,29 @@
 ## official libraries defined here -ncd
 INCLUDE /tape/mitch_sim/cds_proto/tsmc/cds.lib
-
-
 ## swap in writeable techfile directory -ncd 2025
 #UNDEFINE tsmcN65
 #DEFINE tsmcN65 /tape/mitch_sim/cds_proto/tsmc/tsmcN65
 ## Need this AND also must have innovus run 'update_oa_lib' command -ncd 2025
-
 ## These must remain defined -ncd
 ### required this to pre-exist: (cp -r ./scripts/emptyLib ../output) 
 ### Maybe should added createLib command in import.tcl to accomodate this.
 DEFINE output ../output
-
 DEFINE FEOADesignlib FEOADesignlib
-
-DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_lib
-#Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
-#Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
-DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
-
+#Removed by ddDeleteObj: DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_lib
 # tsmc65 seal-ring -ncd 2025
 DEFINE TSMC_SEAL_RING /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/TSMC_SEAL_RING
+DEFINE 2025_RingOutPads /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_RingOutPads
+#Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
+#Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
+#Removed by ddDeleteObj: DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
+#Removed by ddDeleteObj: DEFINE mklib_tmp /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib_tmp
+#Removed by ddDeleteObj: DEFINE APP_lib2 APP_lib2
+#Removed by ddDeleteObj: DEFINE APP_lib APP_lib
+DEFINE APP_lib_clean APP_lib_clean
+#Removed by ddDeleteObj: DEFINE APP_lib APP_lib
+#Removed by ddDeleteObj: DEFINE APP_LLB /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_LLB
+DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_lib
+DEFINE APP_specialTech /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_specialTech
+DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
+DEFINE apple /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/apple
+DEFINE mkdir_referenced /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mkdir_referenced

@@ -49,7 +49,14 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
 
 # ADD MACROS BEORE EVERYTHING ELSE & set command to handle blackbox/macros  -NCD 2025
-set ec::VERILOG_LIST    { X0814_opamp_N_P.v PDB1A.v APP.v addr.v clk_counter.v hcc_syncFifo_latC.v }
+set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
+
+
+## This somehow causes genus to create re-named copies like PDB1A, PDB1A_55, etc.. why?
+#set ec::VERILOG_LIST    "APP.v X0814_opamp_N_P.v  addr.v clk_counter.v hcc_syncFifo_latC.v /
+#         /tape/cad_Tech/TSMC650A/digital/Front_End/verilog/tpan65lpnv2od3_140b/tpan65lpnv2od3.v"  ; # point to analop pads -ncd 2025
+
+
 set_db init_blackbox_for_undefined true
 
 #set_attribute init_blackbox_for_undefined false
@@ -194,6 +201,7 @@ set_attribute hdl_language sv /
 set_attribute hdl_infer_unresolved_from_logic_abstract true
 
 read_hdl $ec::VERILOG_LIST
+#set_top_module APP
 
 # report time and memory
 puts "\nEC INFO: Total cpu-time and memory after LOAD: [get_attr runtime /] sec., [get_attr memory_usage /] MBytes.\n"
@@ -201,12 +209,17 @@ puts "\nEC INFO: Total cpu-time and memory after LOAD: [get_attr runtime /] sec.
 #####################################################################
 # Elaborate
 #####################################################################
+   
 
-elaborate
+
+#elaborate 
+elaborate APP   ; # Need to specify toplevel module now -ncd 2025
 
 # Try to preserve analog net 'opamp_out' that connects two analog Marcros
 # This will stop Genus from optimizing the Macros away -ncd 2025
-set_attribute preserve true opamp_out
+set_attribute preserve true opamp_out  
+set_attribute preserve true pad_ana0_i 
+set_attribute preserve true pad_ana1_i 
 
 
 # report time and memory

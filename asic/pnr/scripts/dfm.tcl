@@ -48,8 +48,9 @@ if {$ONLY_7TRACKS} {
 	#addFiller -cell TAPCELLBWP7T  -util 0.1
 
 ## dont allow extra DCAPs for now until passing LVS -ncd
-#	addFiller -cell DCAP64BWP7THVT DCAP32BWP7THVT FILL64BWP7THVT FILL32BWP7THVT FILL16BWP7THVT FILL8BWP7THVT FILL4BWP7THVT FILL2BWP7THVT FILL1BWP7THVT -prefix FILLER
-	addFiller -cell FILL64BWP7THVT FILL32BWP7THVT FILL16BWP7THVT FILL8BWP7THVT FILL4BWP7THVT FILL2BWP7THVT FILL1BWP7THVT -prefix FILLER
+#addFiller -cell DCAP64BWP7THVT DCAP32BWP7THVT FILL64BWP7THVT FILL32BWP7THVT FILL16BWP7THVT FILL8BWP7THVT FILL4BWP7THVT FILL2BWP7THVT FILL1BWP7THVT -prefix FILLER
+
+addFiller -cell FILL64BWP7THVT FILL32BWP7THVT FILL16BWP7THVT FILL8BWP7THVT FILL4BWP7THVT FILL2BWP7THVT FILL1BWP7THVT -prefix FILLER
 
 }
 
@@ -113,13 +114,15 @@ saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
 
 ## This will generate virtuoso abstract view -ncd 2025
 setOaxMode -allowTechUpdate true
+
 update_oa_lib mklib -tech_attach_to_reference  ; # give permission to attach new vias to mklib instead of tsmcN65 -ncd 2025   
-##saveDesign -cellview {mklib APP  dfm}  ; # save layout directly to virtuoso as abstracts XX CRASHES!
+
+#saveDesign -cellview {mklib APP  dfm}  ; # save layout directly to virtuoso as abstracts XX CRASHES!
 
 
 
 ## This will never work to export layout to Virtuoso since it requires the techfile to be writable -ncd 2025
-##saveDesign -cellview " $oaLibName [dbGet top.name] dfm "
+#saveDesign -cellview " $oaLibName [dbGet top.name] dfm "
 
 # Instead, create Virtuoso Layout by exporting a DEF file out of Innovus and into Virtuoso:
 set dbgLefDefOutVersion 5.8
@@ -136,12 +139,12 @@ if {$CORE_CHIP != "CHIP"} { saveModel -dir ../output }
 if {$ONLY_9TRACKS} { 
 #saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA -includePhysicalCell {DCAP64 DCAP32 } 
 ## dont write out dcaps, and later manually in virtuosos - too much clutter -ncd
-	saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA  
+saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA  
 }
 
 
 if {$ONLY_7TRACKS} { 
-	saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA -includePhysicalCell {DCAP64BWP7THVT  DCAP32BWP7THVT}
+saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA -includePhysicalCell {DCAP64BWP7THVT  DCAP32BWP7THVT}
 }
 
 if {$MIXED_TRACKS} { 
@@ -160,12 +163,30 @@ exec ../scripts/lvs_postprocess.py $CORE_CHIP <lvs.v >lvs_pp.v
 
 #puts "Making final virtuoso layout view... (check makeLayout.log for details)"
 
-defOut -floorplan -netlist -routing dfm.def
+# Need Method to write out custom vias for virtuoso -ncd 2025
+write_lef_library custom_vias.lef -all_auto_generated_via
+#THEN: IN Virtuoso GUI File-->Import-->lefIn:
+#                           LEF File Name: custom_vias.lef
+#                           Target Library: mklib
+#                           Macro Target view: layout
+#Then: Virtuoso Gui: Import--> dEF
+#                           DEFin file: APP.def
+#                           Target Libr: mklib
+#                           Target Cell: APP
+#                           Target View: dfm
+#          OVerwrite Design: check
+## THIS ALL worked on 8/17/2025 -ncd
+
+
+defOut -floorplan -netlist -routing -vias -pins dfm.def 
 catch {exec rm -rf $oaLibName/[dbGet top.name]/layout} 
 #oaOut $oaLibName [dbGet top.name] layout -leafViewNames layout -noConnectivity ; # create dfm view with abstracts -ncd 20225
 ##exec defin -def dfm.def -lib $oaLibName -cell [dbGet top.name] -view dfm -masterLibs tcbn65lp_lef -overwrite -log defin.log
 
+# Do this IF importing into Virtuoso using dfm.def ; But not needed now -ncd
 exec defin -def dfm.def -lib $oaLibName -cell [dbGet top.name] -view dfm -overwrite -log defin.log
+
+#This step creates virtuoso Layout from virtuoso dfm (abstract view)
 catch {exec virtuoso -nograph -log makeLayout.log -replay ../scripts/makeLayout.il}
 
 

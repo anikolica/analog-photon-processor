@@ -425,13 +425,13 @@ wire TOT_INTEGRAL_ch2;
 wire B0_ch2;   // PMT chan2
 wire CMP_ch2;
 wire [3:1]  sel_TOT_event;
-wire [2:0]  TOT_delay;
-wire [2:0]  delay_hold_U2;
-wire [2:0]  delay_hold_U2P;
-wire [2:0]  delay_hold_U1P;
-wire [2:0]  delay_hold_U1;
-wire [2:0]  delay_hold_D1;
-wire [2:0]  delay_hold_D1P;
+wire [3:0]  TOT_delay;
+wire [3:0]  delay_hold_U2;
+wire [3:0]  delay_hold_U2P;
+wire [3:0]  delay_hold_U1P;
+wire [3:0]  delay_hold_U1;
+wire [3:0]  delay_hold_D1;
+wire [3:0]  delay_hold_D1P;
 
   
 APP_chan APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
@@ -445,12 +445,12 @@ APP_chan APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1
      .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
      .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
      .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
-     .delay_hold_D1(delay_hold_D1[2:0]),
-     .delay_hold_D1P(delay_hold_D1P[2:0]),
-     .delay_hold_U1(delay_hold_U1[2:0]),
-     .delay_hold_U1P(delay_hold_U1P[2:0]),
-     .delay_hold_U2(delay_hold_U2[2:0]),
-     .delay_hold_U2P(delay_hold_U2P[2:0]), .vcomp(vcomp));
+     .delay_hold_D1(delay_hold_D1[3:0]),
+     .delay_hold_D1P(delay_hold_D1P[3:0]),
+     .delay_hold_U1(delay_hold_U1[3:0]),
+     .delay_hold_U1P(delay_hold_U1P[3:0]),
+     .delay_hold_U2(delay_hold_U2[3:0]),
+     .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp));
 
 
 APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2),
@@ -464,12 +464,12 @@ APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2
      .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
      .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
      .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
-     .delay_hold_D1(delay_hold_D1[2:0]),
-     .delay_hold_D1P(delay_hold_D1P[2:0]),
-     .delay_hold_U1(delay_hold_U1[2:0]),
-     .delay_hold_U1P(delay_hold_U1P[2:0]),
-     .delay_hold_U2(delay_hold_U2[2:0]),
-     .delay_hold_U2P(delay_hold_U2P[2:0]), .vcomp(vcomp));
+     .delay_hold_D1(delay_hold_D1[3:0]),
+     .delay_hold_D1P(delay_hold_D1P[3:0]),
+     .delay_hold_U1(delay_hold_U1[3:0]),
+     .delay_hold_U1P(delay_hold_U1P[3:0]),
+     .delay_hold_U2(delay_hold_U2[3:0]),
+     .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp));
 
 /* APP_channel signals -ncd
  
@@ -497,13 +497,13 @@ APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2
  VTH_valley      input    Threshold for valley detector (connect to a DAC)
  Vbase           input    Base volage for all opamps: connect to 600mV reference (OR a DAC)
  vcomp           input    Threshold for TOT Comparator (DAC)
- delay_hold_D1 [2:0] input   Digital delay to align valley1 ping
- delay_hold_D1P [2:0] input  Digital delay to align peak1   pong
- delay_hold_U1 [2:0] input   Digital delay to align peak1   ping
- delay_hold_U1P [2:0] input  Digital delay to align peak1   pong
- delay_hold_U2 [2:0] input   Digital delay to align peak2   ping
- delay_hold_U2P [2:0] input  Digital delay to align peak2   pong
- TOT_delay     [2:0] input   Digital delay to align TOT comparator 
+ delay_hold_D1 [3:0] input   Digital delay to align valley1 ping
+ delay_hold_D1P [3:0] input  Digital delay to align peak1   pong
+ delay_hold_U1 [3:0] input   Digital delay to align peak1   ping
+ delay_hold_U1P [3:0] input  Digital delay to align peak1   pong
+ delay_hold_U2 [3:0] input   Digital delay to align peak2   ping
+ delay_hold_U2P [3:0] input  Digital delay to align peak2   pong
+ TOT_delay     [3:0] input   Digital delay to align TOT comparator 
  sel_TOT_event [3:1] input   Select TOT event to read out with ADCs
  WE_ampl [8:1] output        Flags: Amplitude done for each TOT event; 1 if writing memory
                                                                        0 when write is done 
@@ -552,8 +552,7 @@ PVSS1CDG VSS2(.VSS(VSS) );
 PVSS1CDG VSS3(.VSS(VSS) );
 PVSS1CDG VSS4(.VSS(VSS) );
 
-PCLAMP1ANA vddClamp (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
-
+//PCLAMP1ANA vddClamp (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
 
    
 // IO Digital power/gnd
@@ -577,8 +576,10 @@ PVDD2POC POC1(.VDDPST() );
 // ANALOG DOMAIN  -ncd
 // Separate from digital regions with "PRCUT" Physical cell in innovus -ncd   
 
-PVDD3A VDDA1(.AVDD(VDD) );
-PVSS3A VSSA1(.AVSS(VSS) );
+PVDD3AC VDDA1(.AVDD(VDD) );
+PVSS2AC VSSA1(.VSS(VSS) ); 
+
+//PCLAMPAC vddClampA (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v 
    
   
   
