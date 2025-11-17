@@ -9,6 +9,13 @@
 
 source ../scripts/variables.tcl
 
+## Stop routing VDD, VSS, VDDPST, TACVDD, AVSS, etc
+## Uses this: "setAttribute -net <netname> -skip_routing true 
+source ../scripts/excludeRoutingNets.tcl
+
+
+
+
 if {$ONLY_7TRACKS} { generateTracks -m1HOffset 0.1 }
 
 setPlaceMode -reset

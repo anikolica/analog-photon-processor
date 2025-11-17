@@ -10,7 +10,32 @@
  *     /cad/Technology/TSMC650A/V1.7A_1/1p9m6x1z1u/../../digital/Front_End/verilog/tcbn65lp_200a/tcbn65lp.v
  */
 
+
+
 module APP(
+	   // Declare all global nets for innovus 
+	   inout wire POC, VDDPST, VDD, VSS, VSSPST,      // digital pad globals
+	   inout wire  TAVDD, TACVDD,                     // analog pad globals
+
+	   inout wire  TAVDD_1 , TACVDD_1,                  // analog pad Local domains
+	   inout wire  TAVDD_2 , TACVDD_2,                  // analog pad Local domains
+
+	   inout wire VDD_1 , VDD_2,                       // analog 1.2v and 1.6v chipside pins
+ 	   
+           // *** For top-level LABELING to work need top level nets here -ncd ***
+	   inout wire pad_inN, pad_inP, pad_opamp_out, 
+	   inout wire pad_B0_ch1,                  
+	   inout wire pad_signal, 
+	   inout wire LI_INTEGRAL_ch1, TOT_INTEGRAL_ch1,
+	   inout wire timePeak1_ch1, timePeak2_ch1, timeValley1_ch1, 
+	   inout wire amplitudeValley1_ch1, amplitudePeak2_ch1, amplitudePeak1_ch1, 
+	   inout wire eventEdge_back_ch1, eventEdge_front_ch1, 
+	   output wire pad_CMP_ch1,       // proposed pad to see comparator out -ncd
+	   input wire pad_RST_INIT,       // proposed pad. External option to reset -ncd
+	   
+
+	   // *** Digital Pads -ncd  ***
+	   
 	   input wire  pad_a0_i,
 	   /*
 	   input wire  pad_a1_i,
@@ -56,13 +81,20 @@ module APP(
 	   input wire  pad_rstb_i
 		 );
 
+
+
+    // Declare global nets used in layout but not exposed in Verilog
+//    (* keep = "true" *) wire POC;
+
+
+   
 /****************************************************************************
  *				 PADS                                       *
  ****************************************************************************/
 /* -> /tape/mitch_sim/cds_proto/tsmc/digital/coldMPW_v3/syn/verilog/coldMPW.v <-
  
    module PDDW0204CDG (I,DS,OEN,PAD,C,PE,IE);
-   input I,DS,OEN,PE,IE;
+   input I,DS,OEN,PE,IE;PDB1AC_Penn
    inout PAD;
    output C;
    wire  MG;
@@ -373,12 +405,12 @@ module APP(
   /****************************************************
     *             MACROS -ncd                          *
     ****************************************************/ 
-   wire  inN, inP, opamp_out; // use pragma to encourage Genus to NOT remove this Macro -ncd
+//   wire  inN, inP, opamp_out; // use pragma to encourage Genus to NOT remove this Macro -ncd
    
    X0814_opamp_N_P amplifier1 (                  //verilog doesnt like start with number  
-			      .VINm (inN),
-			      .VINp (inP),       // verilog not like VIN-, VIN+ either
-			      .VOUT (opamp_out)  // can also preserve this analog net
+			      .VINm (pad_inN),
+			      .VINp (pad_inP),       // verilog not like VIN-, VIN+ either
+			      .VOUT (pad_opamp_out)  // can also preserve this analog net
 			      );
 
 /*  Adding a preserve net (opamp_out) statement just after elaboration 
@@ -393,20 +425,15 @@ module APP(
    *********************************************************/
 
 
-/*   
-wire  GND, TOT_INTEGRAL, VDD, VDDH, amplitudePeak1, amplitudePeak2,
-     amplitudeValley1, eventEdge_back, eventEdge_front, timePeak1,
-     timePeak2, timeValley1;
-*/
-   
+//   *********************** -ncd *****************
 wire  CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
-     VTH_valley, Vbase, vcomp;
+      VTH_valley, Vbase, vcomp;
 
 wire [8:1]  WE_ampl_ch1;
 wire [8:1]  WE_time_ch1;
 
-   
-wire B0_ch1;  // PMT chan1   
+// PMT chan1   
+wire B0_ch1;
 wire CMP_ch1;
 wire timePeak1_ch1;
 wire timePeak2_ch1;
@@ -417,7 +444,15 @@ wire amplitudePeak1_ch1;
 wire eventEdge_back_ch1;
 wire eventEdge_front_ch1;
 wire TOT_INTEGRAL_ch1;
+wire cycle;
+wire LI_INTEGRAL;
+
+  
    
+/*
+// PMT chan2
+wire B0_ch2;
+wire CMP_ch2;
 wire timePeak1_ch2;
 wire timePeak2_ch2;
 wire timeValley1_ch2;
@@ -427,10 +462,10 @@ wire amplitudePeak1_ch2;
 wire eventEdge_back_ch2;
 wire eventEdge_front_ch2;
 wire TOT_INTEGRAL_ch2;
+*/
    
-
-wire B0_ch2;   // PMT chan2
-wire CMP_ch2;
+// Common Support Services (From DACs)
+wire [3:1]  sel_LI_event;
 wire [3:1]  sel_TOT_event;
 wire [3:0]  TOT_delay;
 wire [3:0]  delay_hold_U2;
@@ -440,15 +475,16 @@ wire [3:0]  delay_hold_U1;
 wire [3:0]  delay_hold_D1;
 wire [3:0]  delay_hold_D1P;
 
-  
-APP_chan APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
+// swapped in gutted APP_chan --> APP_chan_gutted    
+APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
      .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1),
      .timeValley1(timeValley1_ch1), .amplitudeValley1(amplitudeValley1_ch1),
      .amplitudePeak2(amplitudePeak2_ch1), .amplitudePeak1(amplitudePeak1_ch1),
      .eventEdge_back(eventEdge_back_ch1),
      .eventEdge_front(eventEdge_front_ch1),
      .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL_ch1),
-     .GND(GND), .VDD(VDD), .VDDH(VDDH), .B0(B0_ch1), .CLK(CLK), .RE(RE),
+     .sel_LI_event(sel_LI_event[3:1]), .LI_INTEGRAL(LI_INTEGRAL_ch1),
+     .GND(VSS), .VDD(VDD_1), .VDDH(VDD_2), .B0(B0_ch1), .CLK(CLK), .RE(RE),
      .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
      .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
      .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
@@ -457,9 +493,43 @@ APP_chan APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1
      .delay_hold_U1(delay_hold_U1[3:0]),
      .delay_hold_U1P(delay_hold_U1P[3:0]),
      .delay_hold_U2(delay_hold_U2[3:0]),
-     .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp));
+     .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
+     .cycle(cycle)  );
 
+   
+// These single-ended pads will eventually be replace with differential pads -ncd   
+PDB1A ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1) ); 
 
+PDB1A ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1) ); 
+PDB1A ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1) );
+PDB1A ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1) );
+PDB1A ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1) );
+PDB1A ch1_eventEdge_back (.AIO (eventEdge_back_ch1) );
+PDB1A ch1_eventEdge_front (.AIO (eventEdge_front_ch1) );
+PDB1A ch1_timePeak1 (.AIO (timePeak1_ch1) );
+PDB1A ch1_timePeak2 (.AIO (timePeak2_ch1) );
+PDB1A ch1_timeValley1 (.AIO (timeValley1_ch1) );
+
+//PDB1A ch1_CMP (.AIO (CMP_ch1) );
+PDDW0408SCDG ch1_CMP( .I (CMP_ch1),  // Proposed OUTPUT pad to see Comparator output -ncd
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_CMP_ch1),   // Output pad
+			.C   (),
+			.PE  (1'b0),
+			.IE  (1'b0) );
+
+PDDW0408SCDG padRST_INIT( .I (1'b0),  // Proposed INPUT pad to provide external reset -ncd
+			.DS  (1'b1),
+			.OEN (1'b0),
+			.PAD (pad_RST_INIT),   // Output pad
+			.C   (RST_INIT),
+			.PE  (1'b1),
+			.IE  (1'b1) );
+
+   
+
+/*  remove second channel -ncd 
 APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2),
      .timePeak1(timePeak1_ch2), .timePeak2(timePeak2_ch2),
      .timeValley1(timeValley1_ch2), .amplitudeValley1(amplitudeValley1_ch2),
@@ -478,51 +548,70 @@ APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2
      .delay_hold_U2(delay_hold_U2[3:0]),
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp));
 
-/* APP_channel signals -ncd
- 
- GND          inout
-  VDD          inout       1.2v
- VDDH         inout       1.6v
+PDB1A ch2_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch2) ); 
+PDB1A ch2_amplitudePeak1 (.AIO (amplitudePeak1_ch2) );
+PDB1A ch2_amplitudePeak2 (.AIO (amplitudePeak2_ch2) );
+PDB1A ch2_amplitudeValley1 (.AIO (amplitudeValley1_ch2) );
+PDB1A ch2_eventEdge_back (.AIO (eventEdge_back_ch2) );
+PDB1A ch2_eventEdge_front (.AIO (eventEdge_front_ch2) );
+PDB1A ch2_timePeak1 (.AIO (timePeak1_ch2) );
+PDB1A ch2_timePeak2 (.AIO (timePeak2_ch2) );
+PDB1A ch2_timeValley1 (.AIO (timeValley1_ch2) );
+PDB1A ch2_CMP (.AIO (CMP_ch2) );
+*/
 
- TOT_INTEGRAL inout       PMT TOT Intagral (ADC)
- amplitudePeak1   inout   Amplitude of peak1 (ADC)
- amplitudePeak2   inout   Amplitude of peak2 (ADC)
- amplitudeValley1 inout   Amplitude of first valley (ADC)
- eventEdge_back   inout   Time of PMT back edge (ADC)
- eventEdge_front  inout   Time of PMT front edge (ADC)
- timePeak1       inout    Time of peak1 (ADC)
- timePeak2       inout    Time of peak2 (ADC)
- timeValley1     inout    Time of first valley (ADC)
- 
- B0              input    PMT analog signal terminated 50 Ohms and referenced to Vbase=600mv
- CLK             input    synchronous clock 50MHz
- RE              input    Read Enable (read back everything)
- RST_INIT        input    System Reset (need after power-up)
- VTH_armpeak     input    Arming comparator for peak detector (connect to a DAC)
- VTH_armvalley   input    Arming comparator for valley detector (connect to a DAC)
- VTH_peak        input    Threshold for peak detector (connect to a DAC)
- VTH_valley      input    Threshold for valley detector (connect to a DAC)
- Vbase           input    Base volage for all opamps: connect to 600mV reference (OR a DAC)
- vcomp           input    Threshold for TOT Comparator (DAC)
- delay_hold_D1 [3:0] input   Digital delay to align valley1 ping
- delay_hold_D1P [3:0] input  Digital delay to align peak1   pong
- delay_hold_U1 [3:0] input   Digital delay to align peak1   ping
- delay_hold_U1P [3:0] input  Digital delay to align peak1   pong
- delay_hold_U2 [3:0] input   Digital delay to align peak2   ping
- delay_hold_U2P [3:0] input  Digital delay to align peak2   pong
- TOT_delay     [3:0] input   Digital delay to align TOT comparator 
- sel_TOT_event [3:1] input   Select TOT event to read out with ADCs
- WE_ampl [8:1] output        Flags: Amplitude done for each TOT event; 1 if writing memory
-                                                                       0 when write is done 
-                                                                       Asychronous!   
- 
- WE_time [8:1] output        Flags: TAC done for each TOT event ; = 1 if writing memory
-                                                                    0 when write is done
-                                                                    Sychronous with CLK  
- 
- 
- 
- */
+
+   
+  
+
+
+// APP_channel signals -ncd
+// 
+// GND          inout
+//  VDD          inout       1.2v
+// VDDH         inout       1.6v
+//
+// TOT_INTEGRAL inout       PMT TOT Intagral (ADC)
+// amplitudePeak1   inout   Amplitude of peak1 (ADC)
+// amplitudePeak2   inout   Amplitude of peak2 (ADC)
+// amplitudeValley1 inout   Amplitude of first valley (ADC)
+// eventEdge_back   inout   Time of PMT back edge (ADC)
+// eventEdge_front  inout   Time of PMT front edge (ADC)
+// timePeak1       inout    Time of peak1 (ADC)
+// timePeak2       inout    Time of peak2 (ADC)
+// timeValley1     inout    Time of first valley (ADC)
+// 
+// B0        input    PMT analog signal terminated 50 Ohms and referenced to Vbase=600mv
+// CLK             input    synchronous clock 50MHz
+// RE              input    Read Enable (read back everything)
+// RST_INIT        input    System Reset (need after power-up)
+// VTH_armpeak     input    Arming comparator for peak detector (connect to a DAC)
+// VTH_armvalley   input    Arming comparator for valley detector (connect to a DAC)
+// VTH_peak        input    Threshold for peak detector (connect to a DAC)
+// VTH_valley      input    Threshold for valley detector (connect to a DAC)
+// Vbase      input    Base volage for all opamps: connect to 600mV reference (OR a DAC)
+// vcomp           input    Threshold for TOT Comparator (DAC)
+// delay_hold_D1 [3:0] input   Digital delay to align valley1 ping
+// delay_hold_D1P [3:0] input  Digital delay to align peak1   pong
+// delay_hold_U1 [3:0] input   Digital delay to align peak1   ping
+// delay_hold_U1P [3:0] input  Digital delay to align peak1   pong
+// delay_hold_U2 [3:0] input   Digital delay to align peak2   ping
+// delay_hold_U2P [3:0] input  Digital delay to align peak2   pong
+// TOT_delay     [3:0] input   Digital delay to align TOT comparator 
+// sel_TOT_event [3:1] input   Select TOT event to read out with ADCs
+// sel_LI_event [3:1] input    Select LI event to read out with ADCs
+// cycle               input   Select continuous operation (Dont stop at 8 events)
+// WE_ampl [8:1] output  Flags: Amplitude done for each TOT event; 1 if writing memory
+//                                                                 0 when write is done 
+//                                                                   Asychronous!   
+// 
+// WE_time [8:1] output  Flags: TAC done for each TOT event ; = 1 if writing memory
+//                                                              0 when write is done
+//                                                                Sychronous with CLK  
+// 
+// 
+// 
+
    
    
 
@@ -559,70 +648,97 @@ PVSS1CDG VSS2(.VSS(VSS) );
 PVSS1CDG VSS3(.VSS(VSS) );
 PVSS1CDG VSS4(.VSS(VSS) );
 
+// For new top digital domain 
+PVSS1CDG VSS5(.VSS(VSS) );
+PVDD1CDG VDD3(.VDD(VDD) );
+PVDD2CDG VDDPST3(.VDDPST(VDDPST) );
+PVSS2CDG VSSPST3(.VSSPST(VSSPST)); // VSSPST doesn't get exposed to VSS
+PVDD2POC POC2(.VDDPST(VDDPST) );
+
+
+
 //PCLAMP1ANA vddClamp (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
 
    
 // IO Digital power/gnd
-PVDD2CDG VDDPST1(.VDDPST(VDD) ); // digital I/O Drivers/Receivers 2.5v 
-PVDD2CDG VDDPST2(.VDDPST(VDD) );
+PVDD2CDG VDDPST1(.VDDPST(VDDPST) ); // digital I/O Drivers/Receivers 2.5v 
+PVDD2CDG VDDPST2(.VDDPST(VDDPST) );
 
-PVSS2CDG VSSPST1(.VSSPST(VSS)); // digital I/O return 0v 
-PVSS2CDG VSSPST2(.VSSPST(VSS));
+PVSS2CDG VSSPST1(.VSSPST(VSSPST)); // digital I/O return 0v 
+PVSS2CDG VSSPST2(.VSSPST(VSSPST)); // VSSPST doesn't get exposed to VSS
 
-PCLAMP2ANA dvddClamp (.VSSESD(VSS), .VDDESD(DVDD) ); // ESD clamp for I/O voltage 2.5v  
+//PCLAMP2ANA dvddClamp (.VSSESD(VSS), .VDDESD(DVDD) ); // ESD clamp for I/O voltage 2.5v  
    
 // Digital Power-on I/O ring sequencer (need one per power domain) 
-PVDD2POC POC1(.VDDPST() );
+PVDD2POC POC1(.VDDPST(VDDPST) );
 
     
 // analog inputs/outputs -ncd
 // PDB1A Analog pad with diode protection
 // PCLAMPA Analog clamp ckt
 
-
+//// NOTE: "TACVDD: "T" is for Top level pad (Ie. bondpad) -ncd 2025
 // ANALOG DOMAIN  -ncd
-// Separate from digital regions with "PRCUT" Physical cell in innovus -ncd   
+// Separate from digital regions with "PRCUTA"  -ncd   
 
-PVDD3AC VDDA1(.AVDD(VDD) );
-PVSS2AC VSSA1(.VSS(VSS) ); 
+// If want to power core then need .AVDD(VDD)
+// But can set it to any net for a macro voltage: .AVDD(AVDD) -ncd 2025   
 
+// IO Voltage Domain ("_2" is 1.6v)    
+PVDD3A_Penn VDDA1(.AVDD(VDD_2), .TAVDD(TAVDD_2), .VSS(VSS) ); 
+PVDD3A_Penn VDDA2(.AVDD(VDD_2), .TAVDD(TAVDD_2), .VSS(VSS) ); 
+
+PVSS2A_Penn VSSA1(.TAVDD(TAVDD_2), .VSS(VSS)  );  // T stand for Top -ncd
+PVSS2A_Penn VSSA2(.TAVDD(TAVDD_2), .VSS(VSS)  );  // T stand for Top -ncd
+
+PDB3A_Penn ch_signal (.AIO(pad_signal), .TAVDD(TAVDD_2), .VSS(VSS) ); // PMT channel 1
+
+
+   
+// Core Voltage Domain ("_1" is 1.2v )
+PVDD3AC_Penn VDDAC1(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC2(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC3(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC4(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+
+PVDD3AC_Penn VDDAC5(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC6(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC7(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC8(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+   
+PVSS2AC_Penn VSSAC1(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC2(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC3(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC4(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+
+PVSS2AC_Penn VSSAC5(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC6(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC7(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC8(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+
+
+   
+PVDD3AC_Penn VDDAC9(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC10(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+
+PVSS2AC_Penn VSSAC9(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC10(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+
+
+  
 //PCLAMPAC vddClampA (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v 
-   
   
-  
-PDB1A ch1_PMT (.AIO(B0_ch1) ); // PMT channel 1
-PDB1A ch2_PMT (.AIO(B0_ch2) ); // PMT channel 2
-   
-PDB1A ANA_P (.AIO(inP) );
-PDB1A ANA_N (.AIO(inN) );
-PDB1A ANA_OUT (.AIO(opamp_out) );
+//PDB1AC_Penn ch1_PMT (.AIO(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
+ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
+
+// PDB1AC_Penn ch2_PMT (.AIO(B0_ch2), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 2
+    
+PDB1AC_Penn ANA_P (.AIO(pad_inP), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
+PDB1AC_Penn ANA_N (.AIO(pad_inN), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
+PDB1AC_Penn ANA_OUT (.AIO(pad_opamp_out), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
 
 
-// These single-ended pads will eventually be replace with differential pads -ncd   
-PDB1A ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1) ); 
-PDB1A ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1) );
-PDB1A ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1) );
-PDB1A ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1) );
-PDB1A ch1_eventEdge_back (.AIO (eventEdge_back_ch1) );
-PDB1A ch1_eventEdge_front (.AIO (eventEdge_front_ch1) );
-PDB1A ch1_timePeak1 (.AIO (timePeak1_ch1) );
-PDB1A ch1_timePeak2 (.AIO (timePeak2_ch1) );
-PDB1A ch1_timeValley1 (.AIO (timeValley1_ch1) );
-PDB1A ch1_CMP (.AIO (CMP_ch1) );
 
-
-PDB1A ch2_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch2) ); 
-PDB1A ch2_amplitudePeak1 (.AIO (amplitudePeak1_ch2) );
-PDB1A ch2_amplitudePeak2 (.AIO (amplitudePeak2_ch2) );
-PDB1A ch2_amplitudeValley1 (.AIO (amplitudeValley1_ch2) );
-PDB1A ch2_eventEdge_back (.AIO (eventEdge_back_ch2) );
-PDB1A ch2_eventEdge_front (.AIO (eventEdge_front_ch2) );
-PDB1A ch2_timePeak1 (.AIO (timePeak1_ch2) );
-PDB1A ch2_timePeak2 (.AIO (timePeak2_ch2) );
-PDB1A ch2_timeValley1 (.AIO (timeValley1_ch2) );
-PDB1A ch2_CMP (.AIO (CMP_ch2) );
-
-   
 
 
  

@@ -9,6 +9,13 @@
 
 source ../scripts/variables.tcl
 
+## Stop routing VDD, VSS, VDDPST, TACVDD, AVSS, etc
+## Uses this: "setAttribute -net <netname> -skip_routing true 
+source ../scripts/excludeRoutingNets.tcl
+
+
+
+
 ## and Decoupling caps -ncd
 #capacitance in fF
 #addDeCapCellCandidates DECAP_CG 275 

@@ -9,20 +9,21 @@ module APP_chan ( CMP, WE_ampl, WE_time, GND, TOT_INTEGRAL, VDD, VDDH,
      RST_INIT, TOT_delay, VTH_armpeak, VTH_armvalley, VTH_peak,
      VTH_valley, Vbase, delay_hold_D1, delay_hold_D1P, delay_hold_U1,
      delay_hold_U1P, delay_hold_U2, delay_hold_U2P, sel_TOT_event,
-     vcomp );
+     vcomp, cycle, LI_INTEGRAL, sel_LI_event );
 
 output  CMP;
 
 inout  GND, TOT_INTEGRAL, VDD, VDDH, amplitudePeak1, amplitudePeak2,
      amplitudeValley1, eventEdge_back, eventEdge_front, timePeak1,
-     timePeak2, timeValley1;
+     timePeak2, timeValley1, LI_INTEGRAL;
 
 input  B0, CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
-     VTH_valley, Vbase, vcomp;
+     VTH_valley, Vbase, vcomp, cycle;
 
 output [8:1]  WE_ampl;
 output [8:1]  WE_time;
 
+input [3:1]  sel_LI_event;
 input [3:1]  sel_TOT_event;
 input [3:0]  TOT_delay;
 input [3:0]  delay_hold_U2;

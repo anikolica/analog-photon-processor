@@ -13,15 +13,15 @@
 )
 (iopad
     (topright
-	(inst name="corner4"	cell="PCORNER" )
+	(inst name="corner4"	cell="PCORNERA" )
     )
     (topleft
-	(inst name="corner2"	cell="PCORNER" )
+	(inst name="corner2"	cell="PCORNERA" )
     )
     (bottomleft
-	(inst name="corner1"	cell="PCORNER" )
+	(inst name="corner1"	cell="PCORNERA" )
     )
     (bottomright
-	(inst name="corner3"	cell="PCORNER" )
+	(inst name="corner3"	cell="PCORNERA" )
     )
 )

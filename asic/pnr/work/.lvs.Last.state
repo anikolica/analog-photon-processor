@@ -21,7 +21,7 @@ vuiLVSFormTable = '(
 	runsetField  "default"
 	extract  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/Assura/lvs_rcx/extract.rul"
 	compare  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/Assura/lvs_rcx/compare.rul"
-	switches  "DS_TO_PG_CHECK FILTER_DGS_TIED_MOS FLOATING_WELL_CHECK GATE_TO_PG_CHECK NW_RING STD_LIB_9_TRACK WELL_TO_PG_CHECK extract_dnwdio extract_pnwdio spice_extraction"
+	switches  "DS_TO_PG_CHECK FILTER_DGS_TIED_MOS FLOATING_WELL_CHECK GATE_TO_PG_CHECK NW_RING STD_LIB_9_TRACK WELL_TO_PG_CHECK spice_extraction"
 	bind  "/tape/cad_Tech/TSMC650A/V1.7A_1/1p9m6x1z1u/Assura/lvs_rcx/bind.rul"
 	rsfInclude  ""
 	varTag  "None"
@@ -30,24 +30,18 @@ vuiLVSFormTable = '(
 	varDesc  ""
 	avView  t
 	avCompareView  t
-	additionalFunctionsButton  t
-	schLibrary  "mklib"
-	schCell  "APP"
+	additionalFunctionsButton  nil
+	schLibrary  "2025_APP_FINAL"
+	schCell  "bogusLV2out"
 	schView  "schematic"
 	existingSchNetlist  nil
 	useVerilogTopCell  nil
-	layLibrary  "mklib"
-	layCell  "APP"
+	layLibrary  "2025_APP_FINAL"
+	layCell  "bogusLV2out"
 	layView  "layout"
 	layUseExistingNL  nil
-	avCompare  (":gen: breakAmbiguityThreshold( 8000 )" ":lay: filterDevice( \"CM\" )" ":sch: filterDevice(\"cds_thru\"  short(\"src\" \"dst\") )")
-	flattenCellButton  nil
-	joinableNetsButton  nil
-	outFileButton  nil
-	changeLabelButton  nil
-	mustJoinNetButton  nil
-	deleteCellTextButton  nil
-	avParameters  ("?avrpt t" "?diskListAuto 100" "?ercSetPwr (\"VDD\" \"VDDPST\" \"VDDPST!\")" "?ercSetGnd (\"VSS\" \"VSSPST\" \"VSSPST!\" \"VSS!\")" "?multiCPU 16")
+	avParameters  ("?avrpt t" "?diskListAuto 100" "?ercSetPwr (\"VDD\" \"VDDPST\" \"VDDPST!\" \"TACVDD\" \"TAVDD\" \"TAVDD_2\" \"VDD_2\")" "?ercSetGnd (\"VSS\" \"VSSPST\" \"VSSPST!\" \"VSS!\" \"GND\")" "?multiCPU 16")
+	avCompare  (":gen: blackBox(\"PAD50LU_Penn\" sch)" ":gen: breakAmbiguityThreshold( 8000 )" ":lay: filterDevice( \"CM\" )" ":sch: filterDevice(\"cds_thru\"  short(\"src\" \"dst\") )")
 )
 
 
@@ -55,6 +49,18 @@ vuiLVSFormTable = '(
 
 vuiLVSFormVarTable = '(
 )
+
+
+additionalFunctionsFieldsTable = '(
+	AFflattenCellFlag  nil
+	AFjoinableNetsFlag  nil
+	AFoutFileFlag  nil
+	AFchangeLabelFlag  nil
+	AFmustJoinNetFlag  nil
+	AFdeleteCellTextFlag  nil
+)
+
+
 vuiLVSFormAdditionalFunctionsTable = '(
      flattenCell  nil
      joinableNets nil
@@ -260,14 +266,14 @@ vuiLVSOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" t )
-             ( pwrlist "VDD VDDPST VDDPST!" )
+             ( pwrlist "VDD VDDPST VDDPST! TACVDD TAVDD TAVDD_2 VDD_2" )
              ( pwrfile "" )
      )
      (( ?ercSetGnd ) 
              ( "view" t )
              ( "edit" t )
              ( "use" t )
-             ( gndlist "VSS VSSPST VSSPST! VSS!" )
+             ( gndlist "VSS VSSPST VSSPST! VSS! GND" )
              ( gndfile "" )
      )
      (( ?errorOnMissingMaster ) 
@@ -766,15 +772,15 @@ vuiAVCGenOptions = '(
      (( blackBox ) 
              ( "view" t )
              ( "edit" t )
-             ( "use" nil )
-             ( blackBox nil )
+             ( "use" t )
+             ( blackBox "blackBox(\"PAD50LU_Penn\" sch)" )
      )
      (( blackBoxPinInfo ) 
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( comment nil )
-             ( blackBoxPinInfo nil )
+             ( comment " New BlackBox Cells Pin Information File " )
+             ( blackBoxPinInfo "" )
      )
      (( breakAmbiguityThreshold ) 
              ( "view" t )
@@ -799,9 +805,9 @@ vuiAVCGenOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( deviceName nil )
-             ( groupName nil )
-             ( variableName nil )
+             ( deviceName "" )
+             ( groupName "" )
+             ( variableName "" )
              ( createMultiFingerMOSListBox nil )
      )
      (( defineDerivedInstances ) 
@@ -867,7 +873,7 @@ vuiAVCGenOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( label nil )
+             ( label "Filter Reduce Statistics" )
              ( filterReduceStatistics t )
      )
      (( forceNFDefValue ) 
@@ -880,10 +886,10 @@ vuiAVCGenOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( formGate nil )
-             ( mos nil )
-             ( cells nil )
-             ( devicename nil )
+             ( formGate "parallel_series" )
+             ( mos "MOS" )
+             ( cells "" )
+             ( devicename "" )
              ( noldd nil )
              ( formGateListBox nil )
      )
@@ -891,7 +897,7 @@ vuiAVCGenOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( deviceType nil )
+             ( deviceType "RES" )
              ( groupModelsListBox nil )
      )
      (( hideBindWarnings ) 
@@ -946,7 +952,7 @@ vuiAVCGenOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( mergeParallel nil )
+             ( mergeParallel "" )
      )
      (( mergeSeries ) 
              ( "view" t )
@@ -1216,9 +1222,9 @@ vuiAVCLayOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( cell nil )
-             ( inst nil )
-             ( pins nil )
+             ( cell "" )
+             ( inst "" )
+             ( pins "" )
              ( fixDeviceListBox nil )
      )
      (( genericDevice ) 
@@ -1238,8 +1244,8 @@ vuiAVCLayOptions = '(
              ( "view" t )
              ( "edit" t )
              ( "use" nil )
-             ( label nil )
-             ( ignoreCell nil )
+             ( label "Ignore Cell(s)" )
+             ( ignoreCell "" )
              ( ignoreCellFile nil )
      )
      (( ignoreDefaultPowerGround ) 

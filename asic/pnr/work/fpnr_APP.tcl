@@ -1,7 +1,7 @@
 ## file to source before restoring a design -ncd
 ############################
 ## defOut command: select object and then run this -ncd
-## Note that defIn is pretty smart. It will compare objects being added
+## Note that defIn is pretobjectty smart. It will compare objects being added
 ## and NOT add them if they already exist
 ##    defOut -routing -selected my.def
 ##    defIn my.def
@@ -10,25 +10,45 @@
 ###defOut -cutRow -selected APP1.def
 
 ## 2025: Innovus commands that still work -ncd
+#get_pins -hierarchical *VSS*
+
+## Add dont touch to some pins to stop innovus from routing to them -ncd 2025
+#foreach pin [get_pins -hierarchical *] {
+#    if {[regexp {/(IOPAD|VSS|VSSPST|VDD)} $pin]} {
+#        puts "Freezing pin: $pin"
+#        set_dont_touch $pin
+#    }
+#}
+#
+
+# Can set a net to be dont touch so that innovus wont route it again.
+# set_dont_touch VSS
+
+
 #   editSelect
 #   editNet
 #   dbGet
 #     dbGet selected.net.name
 #     dbGet selected.cell.name
 #     dbGet head.libCells.name <cell_name>
-#     get_
+#     get_db 
 #     get
 # setAttribute -net VSS -skip_routing true
 # setAttribute -net VDD -skip_routing true
 #
 #  editDelete -net
+#  editDelete -selected
+#  get_db
+
 #  routeDesign -incremental XXX
-#  routeGlobalNet XXX
+#  routeGlobsource ../scripts/place.tclalNet XXX
 #  
 #  ecoRoute -fix_drc
+#  createNet POC   (This will create the net so that globalNetConnect will work)
+
+### To update OS librarys do this:
+#  set_db init_oa_ref_libs $userLib  (userLib was st to the list of OA libraries)
 #  
-
-
 
 set TSMC_PDK $env(TSMC_PDK)
 source ../scripts/variables.tcl
@@ -50,8 +70,7 @@ set glv::SIioaPath "/cad/Technology/TSMC650A.new/digital/Back_End/celtic/tadn65l
 ####set init_lef_file
 # DEFINE ADDITIONAL USER LIBRARIES HERE: must 1st create APP_lib in virtuoso 2025  -ncd
 # Must reference all libraries containing macro abstracts here -ncd 2025
-set userLib "APP_lib 2025_APP 2025_Chip_area"
-
+set userLib "APP_lib 2025_APP 2025_Chip_area 2025_LEF_ncd tpan65lpnv2od3_Penn"
 
 
 if {$ONLY_9TRACKS} {
@@ -72,15 +91,44 @@ if {$MIXED_TRACKS} {
 ## drc violations with followpins and routes persist and cannot be fixed even when changing back to ROUTED -ncd
 # set init_def_file APP_fixed.def
 
+
+
+## NOTE TSMC pads force us to use "verilog stitching" whereby one first places
+##      IO cells and their bondpads; Create a DEF file freezing placements;
+##      and then run a script to find nets attached to underlying IO cells 
+##      that should be attached to these bondpads; and then creates 
+##      verilog statements instantiating the bondpads. These instantiations 
+##      are then appended to the original synthesized verilog, and 
+##      innovus *restarted*; DEFin is used to recover placements. 
+##      The bondpads are now labeled with the correct nets.
+##
+##    This all being said, the set init_verilog statement are manually edit 
+##    to first provide the original synthesized logic: r2g.v and on the 
+##    second run innovus is provided with the 'stiched' 
+##    verilog: r2g_with_pads.v
+## A cat statement is provided that can be separately run in innous to create
+## the stiched verilog. But still needs hand edits to place the bondpad
+## instantiations inside the APP module: 
+
 ## point to verilog file -ncd
 set init_verilog ../../syn/output/r2g.v
+#set init_verilog r2g_with_pads.v
+
+## Run to create and Concatenate r2g.v and bondad_stitch.v (verilog for bondpads) -ncd 
+# source ../scripts/addPads_VERILOG.tcl
+# exec cat ../../syn/output/r2g.v bondpad_stitch.v > r2g_with_pads.v
+# defOut -floorplan -netlist stitched_floorplan.def
+# Now exit and restart innovus 
 
 ## added VSSPST -ncd
 #set init_pwr_net {VDD  AVDD VDDPST VSSPST VDDPST! VSSPST! VDD! VSS!}
 #set init_gnd_net {VSS AVSS VSSPST}
 
-set init_pwr_net {VDD VDDPST}
-set init_gnd_net {VSS VSSPST}
+
+
+## Need to declare all global nets here
+set init_pwr_net {VDD VDD_1 VDD_2 VDDPST TAVDD, TACVDD AVDD}
+set init_gnd_net {VSS VSSPST AVSS}
 
 
 
@@ -102,10 +150,13 @@ setDoAssign on
 ## Attempt to fix broken pdk vias -ncd
 #250612 setGenerateViaMode -auto true -deleteViaBeforeGeneration  all
 
-#stop
 
 ## -ncd
 init_design
+
+# If "stitching" run the following to recover IO cell and bondpad placement
+# defIn stitched_floorplan.def
+
 
 stop
 
@@ -137,7 +188,31 @@ win
 #setImportMode -bufferTieAssign true
 #set rda_Input(ui_settop) {0}
 #set rda_Input(ui_topcell) {}
-#commitConfig
+#commitConfigfloorPlan -coreMarginsBy die -site core -d 1200 1200 140 140 140 140 -adjustToSite
+fit
+
+
+## Add physical Instances -ncd 2025
+#addInst -cell AGIO_GND  -inst GND2
+
+## break ring into analog and digital sections -ncd 2025
+#addInst -physical -cell PRCUTA -inst BREAK1
+#addInst -physical -cell PRCUTA -inst BREAK2
+#addInst -physical -cell PRCUTA -inst BREAK3
+#addInst -physical -cell PRCUTA -inst BREAK4
+
+# Must now edit teh IoFile, APP.save.io to include these BREAK's -ncd 2025
+## Once loaded, you can move them around with the GUI ! -ncd
+
+
+#stop
+
+## Load IO pads and special routing
+loadIoFile 	APP.save.io     ; # padring corners plus some pads -ncd
+
+fit
+
+
 ##
 
 
@@ -155,34 +230,41 @@ win
 loadFPlan APP.fp                                    ; #
 #defIn APP_fixed.def
 #######################################################
-stop
+#stop
 
 
 ## 
-#floorPlan -coreMarginsBy die -site core -d 1860 1860 130 130 130 130 -adjustToSite
-floorPlan -coreMarginsBy die -site core -d 5000 5500 140 140 140 140 -adjustToSite
+#floorPlan -coreMarginsBy die -site core -d 5000 5500 140 140 140 140 -adjustToSite
+floorPlan -coreMarginsBy die -site core -d 5000 3000 140 140 140 140 -adjustToSite
+#floorPlan -coreMarginsBy die -site core -d 1200 1200 140 140 140 140 -adjustToSite
 fit
 
 
 ## Add physical Instances -ncd 2025
 #addInst -cell AGIO_GND  -inst GND2
 
+## break ring into analog and digital sections -ncd 2025
 addInst -physical -cell PRCUTA -inst BREAK1
 addInst -physical -cell PRCUTA -inst BREAK2
-#addInst -physical -cell PRCUT -inst BREAK3
-#addInst -physical -cell PRCUT -inst BREAK4
+addInst -physical -cell PRCUTA -inst BREAK3
+addInst -physical -cell PRCUTA -inst BREAK4
+addInst -physical -cell PRCUTA -inst BREAK5
+addInst -physical -cell PRCUTA -inst BREAK6
 
-# Must now edit teh IoFile, APP.save.io to include these BREAK's -ncd 2025
+# Must now edit the IoFile, APP.save.io to include these BREAK's -ncd 2025
 ## Once loaded, you can move them around with the GUI ! -ncd
 
 
-
+#stop
 
 ## Load IO pads and special routing
 loadIoFile 	APP.save.io     ; # padring corners plus some pads -ncd
+
 fit
 
-
+## DEF out floorplan with placed bondpads for later stitching to verilog -ncd 2025
+defOut -floorplan -netlist stitched_floorplan.def
+defIn stitched_floorplan.def
 
 ## add these - BUT DONT WANT THESE CONNECTED -> SO DONT  -ncd
 #globalNetConnect VDDPST -type pgpin -pin VDDPST -inst *
@@ -198,10 +280,10 @@ fit
 
 ## add corners and physical cells (not in verilog) -ncd
 if {$CORE_CHIP == "CHIP"} {
-	addInst -physical -cell PCORNER -inst corner1
-	addInst -physical -cell PCORNER -inst corner2
-	addInst -physical -cell PCORNER -inst corner3
-	addInst -physical -cell PCORNER -inst corner4
+	addInst -physical -cell PCORNERA -inst corner1
+	addInst -physical -cell PCORNERA -inst corner2
+	addInst -physical -cell PCORNERA -inst corner3
+	addInst -physical -cell PCORNERA -inst corner4
 	loadIoFile ../scripts/corner.io
 }
 fit
@@ -228,23 +310,36 @@ fit
         fit
 
 
-## Fill with analog filler -ncd
-	addIoFiller -cell PFILLER20A   -side left -from 765 -to 4735
-	addIoFiller -cell PFILLER10A   -side left -from 765 -to 4735
-	addIoFiller -cell PFILLER5A    -side left -from 765 -to 4735
-	addIoFiller -cell PFILLER1A    -side left -from 765 -to 4735
-	addIoFiller -cell PFILLER05A   -side left -from 765 -to 4735
-	addIoFiller -cell PFILLER0005A -side left -from 765 -to 4735 -fillAnyGap
 
-## Fill remaining ring with digital filler
-	addIoFiller -cell PFILLER20    
-	addIoFiller -cell PFILLER10    
-	addIoFiller -cell PFILLER5     
-	addIoFiller -cell PFILLER1     
-	addIoFiller -cell PFILLER05    
-	addIoFiller -cell PFILLER0005  -fillAnyGap
-	
+## Fill Digital sections first
+        addIoFiller -cell PFILLER20 -side top -from 3115 -to 4530
+        addIoFiller -cell PFILLER10 -side top -from 3115 -to 4530
+        addIoFiller -cell PFILLER5 -side top -from 3115 -to 4530
+        addIoFiller -cell PFILLER1 -side top -from 3115 -to 4530
+        addIoFiller -cell PFILLER05 -side top -from 3115 -to 4530
+        addIoFiller -cell PFILLER0005 -side top -from 3115 -to 4530 -fillAnyGap
+
+        addIoFiller -cell PFILLER20 -side bottom -from 3115 -to 4530
+        addIoFiller -cell PFILLER10 -side bottom -from 3115 -to 4530
+        addIoFiller -cell PFILLER5 -side bottom -from 3115 -to 4530
+        addIoFiller -cell PFILLER1 -side bottom -from 3115 -to 4530
+        addIoFiller -cell PFILLER05 -side bottom -from 3115 -to 4530
+        addIoFiller -cell PFILLER0005 -side bottom -from 3115 -to 4530 -fillAnyGap
 fit
+
+## Fill remainer with analog filler -ncd
+	addiofiller -cell PFILLER20A
+	addIoFiller -cell PFILLER10A
+	addIoFiller -cell PFILLER5A 
+	addIoFiller -cell PFILLER1A 
+	addIoFiller -cell PFILLER05A
+	addIoFiller -cell PFILLER0005A -fillAnyGap
+
+
+## Here is how to Delete the IO filler -ncd
+# deleteIoFiller -cell {PFILLER20 PFILLER10 PFILLER5 PFILLER1 PFILLER05 PFILLER0005 }
+# deleteIoFiller -cell {PFILLER20A PFILLER10A PFILLER5A PFILLER1A PFILLER05A PFILLER0005A }
+
 
 source ../scripts/variables.tcl
 ##globalNetConnect VDDH_FUSE -type pgpin -pin DVDD -inst vfuse1 
@@ -253,11 +348,53 @@ source ../scripts/variables.tcl
 #globalNetConnect VSS -type pgpin -pin GND -inst * -region {100 100 4900 5400  } -netlistOverride  
 
 
-globalNetConnect VDD -type pgpin -pin VDD -inst *
-globalNetConnect VSS -type pgpin -pin VSS -inst *
-globalNetConnect VSS -type pgpin -pin GND -inst *
+## THIS IS HOW TO DECLARE GLOBAL NETS -ncd 2025
+## globalNetConnect <globalNetName> -net <designNetName> -type net 
+globalNetConnect VSSPST -net VSSPST -type net -verbose
+globalNetConnect VDDPST -net VDDPST -type net -verbose
+globalNetConnect VDD -net VDD -type net -verbose
+
+#globalNetConnect VDD -type pgpin -pin VDD -inst PVDD1CDG -verbose
+foreach inst [get_cells -filter {ref_name == PVDD1CDG}] {
+  set instName [get_property $inst name]
+  globalNetConnect VDD -type pgpin -pin VDD -inst $instName -verbose
+}
 
 
+
+
+## Careful: VSS is local in analog ring  and global in digital ring -ncd 2025 
+globalNetConnect VSS -net VSS -type net -verbose
+## This gets all local VSS pins and attaches them to the now global net VSS -ncd 2025  
+globalNetConnect VSS -type pgpin -pin VSS -inst * -verbose
+
+## this works on my blackbox APP_chan -ncd 
+globalNetConnect VSS -type pgpin -pin GND -inst * -netlistOverride 
+
+
+## These take care of any macro with abstract having signal Type = power/ground -ncd 2025
+### FINAL VERSION OF globalNetConnect commands -ncd 2025  *****
+globalNetConnect VDD    -type pgpin -pin VDD    -inst * -override
+globalNetConnect VSS    -type pgpin -pin VSS    -inst * -override
+globalNetConnect VSS    -type pgpin -pin GND    -inst * -override
+# Dont need any globalNetConnect if the pins are maked as signalType = signal
+## connect APPchan1 pins to VDD_1 -ncd 2025 since pin is signal, not pgpin
+globalNetConnect VDD_1 -type net -net VDD_1 -pin VDD -instanceBasename APPchan1
+globalNetConnect VDD_2 -type net -net VDD_2 -pin VDDH -instanceBasename APPchan1
+
+
+
+
+
+
+
+
+
+
+## These are not possible due to LEF pins listed as "USE SIGNAL" -ncd
+#globalNetConnect TAVDD  -type pgpin -pin TAVDD  -inst * -override
+#globalNetConnect TACVDD -type pgpin -pin TACVDD -inst * -override
+#globalNetConnect POC    -type net   -pin POC    -inst * -override
 
 
 
@@ -265,9 +402,10 @@ globalNetConnect VSS -type pgpin -pin GND -inst *
 #setDrawView ameba  ; # Toggle innovus to wake it up! -ncd
 #setDrawView place
 
-# Set pins visible
+# Set pins visible and selectable
 setLayerPreference node_cell -isVisible 0
 setLayerPreference pinObj -isVisible 1
+setLayerPreference node_cell -isSelectable 1
 setDrawView fplan 
 
 
@@ -278,7 +416,7 @@ setDrawView fplan
 
 #selectInst amplifier1
 #setObjFPlanBox Instance amplifier1 1307.107 1229.966 1367.107 1294.971
-placeInstance amplifier1 1310 1200 R0 -fixed
+placeInstance amplifier1 272.5 650 R0 -fixed
 fit  ; # Toggle to wake up Innovus GUI ! -ncd
 
 ## defIn special routing -mcd
@@ -297,9 +435,7 @@ source ../scripts/route.tcl
 stop
 
 source ../scripts/dfm.tcl
-
-
-
+source  ../scripts/innovus2virtuoso.tcl
 
 #########################################################
 ################## EXTRAS ##############################
@@ -309,21 +445,39 @@ source ../scripts/dfm.tcl
 #addRing -skip_via_on_wire_shape Noshape -use_wire_group_bits 2 -use_interleaving_wire_group 1 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -use_wire_group 1 -type core_rings -jog_distance 2.0 -threshold 2.0 -nets {VDD VSS} -follow io -stacked_via_bottom_layer M1 -layer {bottom M7 top M7 right M6 left M6} -width 10 -spacing 5 -offset 10
 #uiSetTool ruler
 
+
+
+
 ## ADD STRIPES M9 10-5-10 every 100um -ncd
 #addStripe -skip_via_on_wire_shape Noshape -block_ring_top_layer_limit M7 -max_same_layer_jog_length 6 -padcore_ring_bottom_layer_limit M5 -set_to_set_distance 100 -skip_via_on_pin Standardcell -stacked_via_top_layer AP -padcore_ring_top_layer_limit M7 -spacing 5 -merge_stripes_value 2.0 -layer M6 -block_ring_bottom_layer_limit M5 -width 10 -nets {VDD VSS} -stacked_via_bottom_layer M1
 
 #screate_power_nets -nets VDD -voltage 1.2 -internaltop
 
 ## 2025 UPDATE from GUI -ncd
-## RINGS
+## RINGS for Analog VDD_1, VSS
 setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer M9 -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
-addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M9 bottom M9 left M8 right M8} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 10 bottom 10 left 10 right 10} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
+addRing -nets {VDD_1 VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
 
-## STRIPES
+
+## STRIPES (Net VDD_1, VSS)
 setAddStripeMode -ignore_block_check false -break_at none -route_over_rows_only false -rows_without_stripes_only false -extend_to_closest_target none -stop_at_last_wire_for_area false -partial_set_thru_domain false -ignore_nondefault_domains false -trim_antenna_back_to_shape none -spacing_type edge_to_edge -spacing_from_block 0 -stripe_min_length stripe_width -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size false -split_vias false -orthogonal_only true -allow_jog { padcore_ring  block_ring } -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape   }
-addStripe -nets {VDD VSS} -layer M8 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
+addStripe -nets {VDD_1 VSS} -layer M9 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
+
+##
+## RINGS for Digital VDD, VSS
+addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M6 bottom M6 left M7 right M7} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
+
+##### CREATE ROUTING BLOCKAGE around APP BLOCK then create stripes for VDD/VSS
+foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 0.0] {createRouteBlk -layer all -name myRtBlks -box $box}
+
+## STRIPES for Digital (Net VDD, VSS)
+addStripe -nets {VDD VSS} -layer M7 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
 
 
+
+
+### MAKE A SECOND ring NOV 2025 -ncd Digital 
+## Floorplan User Defined coordinate: 4100 2800 4800 2800 4800 225 4100 225
 
 ## cut core rows around macros in expanded area by "halo"  -ncd
 foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}

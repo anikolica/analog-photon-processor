@@ -13,6 +13,7 @@ foreach ioInst [dbGet selected] {
 	set orient [dbGet $ioInst.orient]
 	if {$orient == "R180"} {set y [expr $y + 31.5]}
 	if {$orient == "R90"} {set x [expr $x + 31.5]}
+#	addInst -physical -cell PAD50LU_Penn -inst pad_$name -loc $x $y -ori $orient -status fixed 		 
 	addInst -physical -cell PAD50LU -inst pad_$name -loc $x $y -ori $orient -status fixed 		 
 }
 deselectAll

@@ -49,19 +49,20 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 						 $TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tpdn65lpnv2od3_200a/tpdn65lpnv2od3wc.lib"
 
 # ADD MACROS BEORE EVERYTHING ELSE & set command to handle blackbox/macros  -NCD 2025
-<<<<<<< HEAD
-set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
 
+
+
+
+
+set ec::VERILOG_LIST    { PDB1A.v  X0814_opamp_N_P.v PDB1A_Penn.v  PDB3AC.v PVSS2AC.v PVSS2AC_ncd.v PVDD3AC.v PVDD3A.v APP.v global_nets.v}
+#set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
 
 ## This somehow causes genus to create re-named copies like PDB1A, PDB1A_55, etc.. why?
 #set ec::VERILOG_LIST    "APP.v X0814_opamp_N_P.v  addr.v clk_counter.v hcc_syncFifo_latC.v /
-#         /tape/cad_Tech/TSMC650A/digital/Front_End/verilog/tpan65lpnv2od3_140b/tpan65lpnv2od3.v"  ; # point to analop pads -ncd 2025
+#         /tape/cad_Tech/TSMC650A/digital/Front_End/verilog/tpan65lpnv2od3_140b/tpan65lpnv2od3.v"  ; # point to analog pads -ncd 2025
 
 
-=======
-set ec::VERILOG_LIST    { X0814_opamp_N_P.v PDB1A.v APP.v }
-#set ec::VERILOG_LIST    { X0814_opamp_N_P.v PDB1A.v APP.v addr.v clk_counter.v hcc_syncFifo_latC.v }
->>>>>>> 0ca4c2248f726c3240ee26142e05512fd02c6cf4
+
 set_db init_blackbox_for_undefined true
 
 #set_attribute init_blackbox_for_undefined false
@@ -82,9 +83,8 @@ set ec::LEFLIB " $TSMC_PDK/digital/Back_End/lef/tcbn65lp_200a/lef/tcbn65lp_6lmT1
 	            $TSMC_PDK/digital/Back_End/lef/tpdn65lpnv2od3_140b/mt_2/6lm/lef/antenna_6lm.lef \
 	            $TSMC_PDK/digital/Back_End/lef/tpan65lpnv2od3_200a/mt_2/6lm/lef/tpan65lpnv2od3_6lm.lef \
 	            $TSMC_PDK/digital/Back_End/lef/tpan65lpnv2od3_200a/mt_2/6lm/lef/antenna_6lm.lef \
-	            $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef    "
-
-
+	            $TSMC_PDK/digital/Back_End/lef/tcbn65lpbwp7thvt_141a/lef/tcbn65lpbwp7thvt_6lmT1.lef \
+                    /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/libs/lef/PVSS2AC_ncd.lef"
 
 				 
 #set ec::CAPTABLE "/homedir/bonacini/TSMC65/Libraries/tcbn65lp_200b/TSMCHOME/digital/Back_End/lef/tcbn65lp_200a/techfiles/captable/cln65lp_1p06m+alrdl_top2_rcworst.captable"
@@ -116,7 +116,7 @@ set path_disable_priority 0
 # set dont_downsize_components 1
 # set map_slackq 0
 # set final_remaps 0
-# set initial_target 0
+# set initial_target 
 # set crr 1
 set crr_max_tries 300  ; # higher the number, more iterations: not much runtime penalty
 
@@ -208,6 +208,22 @@ set_attribute hdl_infer_unresolved_from_logic_abstract true
 read_hdl $ec::VERILOG_LIST
 #set_top_module APP
 
+# Try to stop uniquify for all modules: avoid modname_1, modname_2, etc
+#foreach mod [get_db modules] {
+#    set_db module:$mod .minimize_uniquify true
+#}
+
+# Set ungrouping behavior to preserve module names for innovus -ncd 2025
+#set_db auto_ungroup none
+#set_db module:PDB1A .is_black_box true
+
+## Bottom line: if the verilog stub has a "tran" statement
+## the module will get uniquified -ncd
+
+##  Stop Genus from matching all verilog ports to liberty file ports for a cell -ncd 2025
+# set_dont_use PDB1A
+
+
 # report time and memory
 puts "\nEC INFO: Total cpu-time and memory after LOAD: [get_attr runtime /] sec., [get_attr memory_usage /] MBytes.\n"
 
@@ -222,7 +238,10 @@ elaborate APP   ; # Need to specify toplevel module now -ncd 2025
 
 # Try to preserve analog net 'opamp_out' that connects two analog Marcros
 # This will stop Genus from optimizing the Macros away -ncd 2025
-set_attribute preserve true opamp_out  
+set_attribute preserve true pad_opamp_out  
+set_attribute preserve true pad_inN  
+set_attribute preserve true pad_inP  
+
 set_attribute preserve true pad_ana0_i 
 set_attribute preserve true pad_ana1_i 
 
