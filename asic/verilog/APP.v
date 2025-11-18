@@ -498,7 +498,7 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
 
    
 // These single-ended pads will eventually be replace with differential pads -ncd   
-PDB1A ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1) ); 
+PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1) ); 
 
 PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1) ); 
 PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1) );
