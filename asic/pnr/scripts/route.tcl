@@ -7,6 +7,11 @@
 #                                                     
 #######################################################
 
+# routeDesign -numThreads 16
+
+# get_db system.cpu_available
+# getMultiCpuUsage
+
 source ../scripts/variables.tcl
 
 ## Stop routing VDD, VSS, VDDPST, TACVDD, AVSS, etc
