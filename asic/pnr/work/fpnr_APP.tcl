@@ -235,7 +235,8 @@ loadFPlan APP.fp                                    ; #
 
 ## 
 #floorPlan -coreMarginsBy die -site core -d 5000 5500 140 140 140 140 -adjustToSite
-floorPlan -coreMarginsBy die -site core -d 5000 3000 140 140 140 140 -adjustToSite
+#floorPlan -coreMarginsBy die -site core -d 5000 3000 140 140 140 140 -adjustToSite
+floorPlan -coreMarginsBy die -site core -d 4800 2800 140 140 140 140 -adjustToSite
 #floorPlan -coreMarginsBy die -site core -d 1200 1200 140 140 140 140 -adjustToSite
 fit
 
@@ -312,19 +313,19 @@ fit
 
 
 ## Fill Digital sections first
-        addIoFiller -cell PFILLER20 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER10 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER5 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER1 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER05 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER0005 -side top -from 3115 -to 4530 -fillAnyGap
+        addIoFiller -cell PFILLER20 -side top -from 3080 -to 4495
+        addIoFiller -cell PFILLER10 -side top -from 3080 -to 4495
+        addIoFiller -cell PFILLER5 -side top -from 3080 -to 4495
+        addIoFiller -cell PFILLER1 -side top -from 3080 -to 4495
+        addIoFiller -cell PFILLER05 -side top -from 3080 -to 4495
+        addIoFiller -cell PFILLER0005 -side top -from 3080 -to 4495 -fillAnyGap
 
-        addIoFiller -cell PFILLER20 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER10 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER5 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER1 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER05 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER0005 -side bottom -from 3115 -to 4530 -fillAnyGap
+        addIoFiller -cell PFILLER20 -side bottom -from 3080 -to 4495
+        addIoFiller -cell PFILLER10 -side bottom -from 3080 -to 4495
+        addIoFiller -cell PFILLER5 -side bottom -from 3080 -to 4495
+        addIoFiller -cell PFILLER1 -side bottom -from 3080 -to 4495
+        addIoFiller -cell PFILLER05 -side bottom -from 3080 -to 4495
+        addIoFiller -cell PFILLER0005 -side bottom -from 3080 -to 4495 -fillAnyGap
 fit
 
 ## Fill remainer with analog filler -ncd
@@ -459,7 +460,7 @@ setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_sho
 addRing -nets {VDD_1 VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
 
 
-## STRIPES (Net VDD_1, VSS)
+## STRIPES (Analog Net VDD_1, VSS)
 setAddStripeMode -ignore_block_check false -break_at none -route_over_rows_only false -rows_without_stripes_only false -extend_to_closest_target none -stop_at_last_wire_for_area false -partial_set_thru_domain false -ignore_nondefault_domains false -trim_antenna_back_to_shape none -spacing_type edge_to_edge -spacing_from_block 0 -stripe_min_length stripe_width -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size false -split_vias false -orthogonal_only true -allow_jog { padcore_ring  block_ring } -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape   }
 addStripe -nets {VDD_1 VSS} -layer M9 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
 
@@ -467,8 +468,15 @@ addStripe -nets {VDD_1 VSS} -layer M9 -direction vertical -width 10 -spacing 5 -
 ## RINGS for Digital VDD, VSS
 addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M6 bottom M6 left M7 right M7} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
 
+
+## add ring around APP_chan macro 
+selectInst APPchan1
+setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
+addRing -nets {VDD VSS} -type block_rings -around selected -layer {top M6 bottom M6 left M7 right M7} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 5 bottom 5 left 5 right 5} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+
 ##### CREATE ROUTING BLOCKAGE around APP BLOCK then create stripes for VDD/VSS
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 0.0] {createRouteBlk -layer all -name myRtBlks -box $box}
+
 
 ## STRIPES for Digital (Net VDD, VSS)
 addStripe -nets {VDD VSS} -layer M7 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
