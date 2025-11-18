@@ -6,6 +6,7 @@ catch { selectInstByCellName PVDD*POC }
 catch { selectInstByCellName PDB*A*  }
 catch { selectInstByCellName PVDD*A*  }
 catch { selectInstByCellName PVSS*A*  }
+
 foreach ioInst [dbGet selected] {
 	set name [string map { \{ _ \} _ \[ _ \] _} [dbGet $ioInst.name]]
 	set x [lindex [lindex [dbGet $ioInst.pt] 0] 0]
