@@ -373,6 +373,8 @@ globalNetConnect VSS -type pgpin -pin VSS -inst * -verbose
 globalNetConnect VSS -type pgpin -pin GND -inst * -netlistOverride 
 
 
+
+######################################################################################3
 ## These take care of any macro with abstract having signal Type = power/ground -ncd 2025
 ### FINAL VERSION OF globalNetConnect commands -ncd 2025  *****
 globalNetConnect VDD    -type pgpin -pin VDD    -inst * -override
