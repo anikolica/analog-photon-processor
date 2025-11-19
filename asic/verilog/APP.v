@@ -32,7 +32,7 @@ module APP(
 	   inout wire eventEdge_back_ch1, eventEdge_front_ch1, 
 	   output wire pad_CMP_ch1,       // proposed pad to see comparator out -ncd
 	   input wire pad_RST_INIT,       // proposed pad. External option to reset -ncd
-	   
+	   inout wire  Nhit_sum, Analog_sum,   // proposed trigger pads -ncd
 
 	   // *** Digital Pads -ncd  ***
 	   
@@ -498,18 +498,20 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
 
    
 // These single-ended pads will eventually be replace with differential pads -ncd   
-PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1) ); 
+PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );  // NOTE: In VDD_1 domain -ncd   
+PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_eventEdge_back (.AIO (eventEdge_back_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_eventEdge_front (.AIO (eventEdge_front_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_timePeak1 (.AIO (timePeak1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_timePeak2 (.AIO (timePeak2_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+PDB1AC_Penn ch1_timeValley1 (.AIO (timeValley1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+ 
 
-PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1) ); 
-PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1) );
-PDB1AC_Penn ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1) );
-PDB1AC_Penn ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1) );
-PDB1AC_Penn ch1_eventEdge_back (.AIO (eventEdge_back_ch1) );
-PDB1AC_Penn ch1_eventEdge_front (.AIO (eventEdge_front_ch1) );
-PDB1AC_Penn ch1_timePeak1 (.AIO (timePeak1_ch1) );
-PDB1AC_Penn ch1_timePeak2 (.AIO (timePeak2_ch1) );
-PDB1AC_Penn ch1_timeValley1 (.AIO (timeValley1_ch1) );
 
+   
 //PDB1A ch1_CMP (.AIO (CMP_ch1) );
 PDDW0408SCDG ch1_CMP( .I (CMP_ch1),  // Proposed OUTPUT pad to see Comparator output -ncd
 			.DS  (1'b1),
@@ -691,8 +693,12 @@ PVDD3A_Penn VDDA2(.AVDD(VDD_2), .TAVDD(TAVDD_2), .VSS(VSS) );
 PVSS2A_Penn VSSA1(.TAVDD(TAVDD_2), .VSS(VSS)  );  // T stand for Top -ncd
 PVSS2A_Penn VSSA2(.TAVDD(TAVDD_2), .VSS(VSS)  );  // T stand for Top -ncd
 
-PDB3A_Penn ch_signal (.AIO(pad_signal), .TAVDD(TAVDD_2), .VSS(VSS) ); // PMT channel 1
 
+// Analog Trigger pads 1.6v domain -ncd
+PDB1A_Penn ch1_Nhit_sum (.AIO (Nhit_sum), .TAVDD(TAVDD_2), .VSS(VSS) );
+PDB1A_Penn ch1_Analog_sum (.AIO (Analog_sum), .TAVDD(TAVDD_2), .VSS(VSS) );
+
+PDB3A_Penn ch_signal (.AIO(pad_signal), .TAVDD(TAVDD_2), .VSS(VSS) ); // Extra
 
    
 // Core Voltage Domain ("_1" is 1.2v )
@@ -729,7 +735,7 @@ PVSS2AC_Penn VSSAC10(.TACVDD(TACVDD_1), .VSS(VSS)  );  //
 //PCLAMPAC vddClampA (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v 
   
 //PDB1AC_Penn ch1_PMT (.AIO(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
-ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
+ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
 
 // PDB1AC_Penn ch2_PMT (.AIO(B0_ch2), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 2
     
