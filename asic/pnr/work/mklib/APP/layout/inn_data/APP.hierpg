@@ -1,0 +1,19 @@
+Version 1
+
+
+#########################################################
+#  PhysicalNet: <name> [-pwr|-gnd|-tiehi|-tielo]        #
+#########################################################
+PhysicalNet: TAVDD, -pwr
+PhysicalNet: AVDD -pwr
+PhysicalNet: AVSS -gnd
+
+#####################################################################################
+# <PGNets>                                                                          #
+#    <PGNet name="net_name">                                                        #
+#       <HNet name="hnet_name">                                                     #
+#          <Port hinst="hinst_name" name="port_name" direction="in|out|inout" />    #
+#       </HNet>                                                                     #
+#    </PGNet>                                                                       #
+# </PGNets>                                                                         #
+#####################################################################################

@@ -1,5 +1,5 @@
 ## official libraries defined here -ncd
-INCLUDE /tape/mitch_sim/cds_proto/tsmc/cds.lib
+INCLUDE /tape/mitch_sim/yjihao/tsmc/cds.lib
 ## swap in writeable techfile directory -ncd 2025
 #UNDEFINE tsmcN65
 #DEFINE tsmcN65 /tape/mitch_sim/cds_proto/tsmc/tsmcN65
@@ -22,12 +22,11 @@ DEFINE APP_specialTech /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-proc
 DEFINE apple /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/apple
 
 
-DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
 DEFINE 2025_LEF_ncd /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_LEF_ncd
 
-DEFINE mklib_jnk /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib_jnk
 
 DEFINE 2025_DeglobalizePads /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_DeglobalizePads
+
 DEFINE tpan65lpnv2od3_Penn /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn
 
 DEFINE tpan65lpnv2od3_Penn_bacup /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn_bacup
@@ -40,8 +39,11 @@ DEFINE mklib_test ./mklib_test
 ## TEMPORARY: want to remove tcbn65lp_90nm_mac only for innovus since there is some collision for TIEH/L and BUFFD1 cells -ncd
 ## Try changing the order so that tcbn65lp_90nm_mac is found AFTER tcbn65lp
 ## Works! -ncd  2025
+
 UNDEFINE tcbn65lp_90nm_mac
 DEFINE tcbn65lp_90nm_mac /tape/mitch_sim/dbraga/Jul/tcbn65lp_90nm_mac
+
 DEFINE 2025_APP_FINAL_backup_11NOV2025 /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_APP_FINAL_backup_11NOV2025
 DEFINE tpan65lpnv2od3_Penn_backup_November /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn_backup_November
 DEFINE TEMP_XFER /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/TEMP_XFER
+DEFINE mklib /tape/mitch_sim/yjihao/git/analog-photon-processor/asic/pnr/work/mklib
