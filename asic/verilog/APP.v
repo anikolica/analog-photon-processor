@@ -644,22 +644,25 @@ PDB1A ch2_CMP (.AIO (CMP_ch2) );
 // Digital Core power/gnd   
 PVDD1CDG VDD1(.VDD(VDD) ); // digital core logic 1.2v
 PVDD1CDG VDD2(.VDD(VDD) );
+PVDD1CDG VDD3(.VDD(VDD) );
+PVDD1CDG VDD4(.VDD(VDD) );
 
 PVSS1CDG VSS1(.VSS(VSS) );  // digital core logic return 0v
 PVSS1CDG VSS2(.VSS(VSS) );
 PVSS1CDG VSS3(.VSS(VSS) );
 PVSS1CDG VSS4(.VSS(VSS) );
 
-// For new top digital domain 
+// Additional VSS pads
 PVSS1CDG VSS5(.VSS(VSS) );
-PVDD1CDG VDD3(.VDD(VDD) );
-PVDD2CDG VDDPST3(.VDDPST(VDDPST) );
-PVSS2CDG VSSPST3(.VSSPST(VSSPST)); // VSSPST doesn't get exposed to VSS
-PVDD2POC POC2(.VDDPST(VDDPST) );
+PVSS1CDG VSS6(.VSS(VSS) );
 
-
-
-//PCLAMP1ANA vddClamp (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
+   
+PCLAMP1ANA vddClamp1 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
+PCLAMP1ANA vddClamp2 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
+PCLAMP1ANA vddClamp3 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
+PCLAMP1ANA vddClamp4 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
+// Need access to digital VDDPST (2.5v IO voltage) for Macros (BGR)
+PVDD2ANA VDDPST3 ( .AVDD(VDDPST) );
 
    
 // IO Digital power/gnd
@@ -669,7 +672,9 @@ PVDD2CDG VDDPST2(.VDDPST(VDDPST) );
 PVSS2CDG VSSPST1(.VSSPST(VSSPST)); // digital I/O return 0v 
 PVSS2CDG VSSPST2(.VSSPST(VSSPST)); // VSSPST doesn't get exposed to VSS
 
-//PCLAMP2ANA dvddClamp (.VSSESD(VSS), .VDDESD(DVDD) ); // ESD clamp for I/O voltage 2.5v  
+PCLAMP2ANA dvddClamp1 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core 1.2 (same function PCLAMP1ANA -ncd)  
+PCLAMP2ANA dvddClamp2 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp 
+PCLAMP2ANA dvddClamp3 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp 
    
 // Digital Power-on I/O ring sequencer (need one per power domain) 
 PVDD2POC POC1(.VDDPST(VDDPST) );
@@ -730,9 +735,19 @@ PVDD3AC_Penn VDDAC10(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) );
 PVSS2AC_Penn VSSAC9(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
 PVSS2AC_Penn VSSAC10(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
 
-
+// Need clamp between VDD_1 and VSS every ~1000um 
+PCLAMPA_Penn VDD_1CLAMP1 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP2 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP3 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP4 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP5 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP6 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP7 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP8 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP9 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP10 (.VDDESD(VDD_1), .VSSESD(VSS) );
+PCLAMPA_Penn VDD_1CLAMP11 (.VDDESD(VDD_1), .VSSESD(VSS) );
   
-//PCLAMPAC vddClampA (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v 
   
 //PDB1AC_Penn ch1_PMT (.AIO(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
 ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
@@ -745,7 +760,19 @@ PDB1AC_Penn ANA_OUT (.AIO(pad_opamp_out), .TACVDD(TACVDD_1), .VSS(VSS) ); //
 
 
 
+wire [7:0] armpeak_VTH, armvalley_VTH, peak_VTH, valley_VTH; // DAC programming bits   
+wire bgr_ref;       // Bandgap reference
 
+// Do DACs need analog power "VDD_1" ??   
+DAC DAC1 ( .vout(VTH_armpeak), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(armpeak_VTH) ) ;
+DAC DAC2 ( .vout(VTH_armvalley), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(armvalley_VTH) ) ;
+DAC DAC3 ( .vout(VTH_peak), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(peak_VTH) ) ;
+DAC DAC4 ( .vout(VTH_valley), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(valley_VTH) ) ;
+   
+
+wire vbg_ref;   
+BGR BGR1 ( .vbg(bgr_ref), .vdda_2p5(VDDPST),  .vssa_2p5(VSS)   );
+  
 
  
 endmodule // dummy_top

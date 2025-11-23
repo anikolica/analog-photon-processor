@@ -31,7 +31,7 @@ setenv CDS_Netlisting_Mode Analog
 
 setenv QRC_ENABLE_EXTRACTION
 
-
+setenv ASSURA_DEV_MAP /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/assura_devmap.txt
 
 
 
