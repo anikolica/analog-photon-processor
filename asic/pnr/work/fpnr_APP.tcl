@@ -316,20 +316,28 @@ fit
 
 
 ## Fill Digital sections first
-        addIoFiller -cell PFILLER20 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER10 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER5 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER1 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER05 -side top -from 3115 -to 4530
-        addIoFiller -cell PFILLER0005 -side top -from 3115 -to 4530 -fillAnyGap
+        addIoFiller -cell PFILLER20 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER10 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER5 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER1 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER05 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER0005 -side top -from 4060 -to 4880 -fillAnyGap
 
-        addIoFiller -cell PFILLER20 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER10 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER5 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER1 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER05 -side bottom -from 3115 -to 4530
-        addIoFiller -cell PFILLER0005 -side bottom -from 3115 -to 4530 -fillAnyGap
+        addIoFiller -cell PFILLER20 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER10 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER5 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER1 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER05 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER0005 -side bottom -from 4060 -to 4880 -fillAnyGap
 fit
+        addIoFiller -cell PFILLER20 -side right 
+        addIoFiller -cell PFILLER10 -side right 
+        addIoFiller -cell PFILLER5 -side right 
+        addIoFiller -cell PFILLER1 -side right 
+        addIoFiller -cell PFILLER05 -side right 
+        addIoFiller -cell PFILLER0005 -side right -fillAnyGap
+        
+
 
 ## Fill remainer with analog filler -ncd
 	addiofiller -cell PFILLER20A
