@@ -491,14 +491,23 @@ addRing -nets {VDD VSS VDD VSS VDD VSS} -type core_rings -follow io -layer {top 
 #deselectAll
 
 
-##### CREATE ROUTING BLOCKAGE around APP BLOCK then create stripes for VDD/VSS
+##### CREATE ROUTING BLOCKAGE around APP BLOCKs then create stripes for VDD/VSS
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 0.0] {createRouteBlk -layer all -name myRtBlks -box $box}
+
+### Create route blockage around GUI selected object -ncd 2025 
+createRouteBlk -box [dbGet selected.box]
+
+# Or to create Expanded blockages around seledcted object -ncd 2025
+set selBoxes [dbGet selected.box]
+set expBoxes [dbShape $selBoxes SIZE 2.0]
+createRouteBlk -layer all -name myRtBlks -box $expBoxes
+
 
 ## STRIPES for Digital (Net VDD, VSS)
 #addStripe -nets {VDD VSS} -layer M6 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
 
 
-# Add Digital Stripes VDD VSS : Extend stripes from Macro blockage to rectangular boundary -ncd 2025
+# Add Digital Stripes VDD VSS : Extend stripes from Macro blockage to rectangular boundary on M6 to be underneath M8-9  -ncd 2025
 deselectAll
 setAddStripeMode -ignore_block_check false -break_at none -route_over_rows_only false -rows_without_stripes_only false -extend_to_closest_target none -stop_at_last_wire_for_area false -partial_set_thru_domain false -ignore_nondefault_domains false -trim_antenna_back_to_shape none -spacing_type edge_to_edge -spacing_from_block 0 -stripe_min_length stripe_width -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size false -split_vias false -orthogonal_only true -allow_jog { padcore_ring  block_ring } -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape   }
 addStripe -nets {VDD VSS} -layer M6 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -area {150 130 4856 2665} -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
