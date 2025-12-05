@@ -24,6 +24,9 @@
 # Can set a net to be dont touch so that innovus wont route it again.
 # set_dont_touch VSS
 
+## To move selected objects all upward by 120 units -ncd 2025
+# move_obj -direction up -distance 120 [dbGet selected.name]
+
 
 #   editSelect
 #   editNet
@@ -236,8 +239,8 @@ loadFPlan APP.fp                                    ; #
 ## 
 #floorPlan -coreMarginsBy die -site core -d 5000 5500 140 140 140 140 -adjustToSite
 #floorPlan -coreMarginsBy die -site core -d 5000 3000 140 140 140 140 -adjustToSite
-floorPlan -coreMarginsBy die -site core -d 4800 2800 140 140 140 140 -adjustToSite
-#floorPlan -coreMarginsBy die -site core -d 1200 1200 140 140 140 140 -adjustToSite
+floorPlan -coreMarginsBy die -site core -d 5000 2800 140 140 140 140 -adjustToSite
+
 fit
 
 
@@ -313,20 +316,28 @@ fit
 
 
 ## Fill Digital sections first
-        addIoFiller -cell PFILLER20 -side top -from 3080 -to 4495
-        addIoFiller -cell PFILLER10 -side top -from 3080 -to 4495
-        addIoFiller -cell PFILLER5 -side top -from 3080 -to 4495
-        addIoFiller -cell PFILLER1 -side top -from 3080 -to 4495
-        addIoFiller -cell PFILLER05 -side top -from 3080 -to 4495
-        addIoFiller -cell PFILLER0005 -side top -from 3080 -to 4495 -fillAnyGap
+        addIoFiller -cell PFILLER20 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER10 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER5 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER1 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER05 -side top -from 4060 -to 4880
+        addIoFiller -cell PFILLER0005 -side top -from 4060 -to 4880 -fillAnyGap
 
-        addIoFiller -cell PFILLER20 -side bottom -from 3080 -to 4495
-        addIoFiller -cell PFILLER10 -side bottom -from 3080 -to 4495
-        addIoFiller -cell PFILLER5 -side bottom -from 3080 -to 4495
-        addIoFiller -cell PFILLER1 -side bottom -from 3080 -to 4495
-        addIoFiller -cell PFILLER05 -side bottom -from 3080 -to 4495
-        addIoFiller -cell PFILLER0005 -side bottom -from 3080 -to 4495 -fillAnyGap
+        addIoFiller -cell PFILLER20 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER10 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER5 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER1 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER05 -side bottom -from 4060 -to 4880
+        addIoFiller -cell PFILLER0005 -side bottom -from 4060 -to 4880 -fillAnyGap
 fit
+        addIoFiller -cell PFILLER20 -side right 
+        addIoFiller -cell PFILLER10 -side right 
+        addIoFiller -cell PFILLER5 -side right 
+        addIoFiller -cell PFILLER1 -side right 
+        addIoFiller -cell PFILLER05 -side right 
+        addIoFiller -cell PFILLER0005 -side right -fillAnyGap
+        
+
 
 ## Fill remainer with analog filler -ncd
 	addiofiller -cell PFILLER20A
@@ -373,18 +384,19 @@ globalNetConnect VSS -type pgpin -pin VSS -inst * -verbose
 globalNetConnect VSS -type pgpin -pin GND -inst * -netlistOverride 
 
 
+
+######################################################################################3
 ## These take care of any macro with abstract having signal Type = power/ground -ncd 2025
 ### FINAL VERSION OF globalNetConnect commands -ncd 2025  *****
 globalNetConnect VDD    -type pgpin -pin VDD    -inst * -override
+globalNetConnect VDD    -type pgpin -pin VDDESD -inst * -override
+globalNetConnect VSS    -type pgpin -pin VSSESD -inst * -override
 globalNetConnect VSS    -type pgpin -pin VSS    -inst * -override
 globalNetConnect VSS    -type pgpin -pin GND    -inst * -override
 # Dont need any globalNetConnect if the pins are maked as signalType = signal
 ## connect APPchan1 pins to VDD_1 -ncd 2025 since pin is signal, not pgpin
 globalNetConnect VDD_1 -type net -net VDD_1 -pin VDD -instanceBasename APPchan1
 globalNetConnect VDD_2 -type net -net VDD_2 -pin VDDH -instanceBasename APPchan1
-
-
-
 
 
 
@@ -456,36 +468,51 @@ source  ../scripts/innovus2virtuoso.tcl
 
 ## 2025 UPDATE from GUI -ncd
 ## RINGS for Analog VDD_1, VSS
-setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer M9 -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
-addRing -nets {VDD_1 VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
+setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
+addRing -nets {VDD_1 VSS VDD_1 VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 5 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
 
-## STRIPES (Analog Net VDD_1, VSS)
+## STRIPES (Net VDD_1, VSS)
 setAddStripeMode -ignore_block_check false -break_at none -route_over_rows_only false -rows_without_stripes_only false -extend_to_closest_target none -stop_at_last_wire_for_area false -partial_set_thru_domain false -ignore_nondefault_domains false -trim_antenna_back_to_shape none -spacing_type edge_to_edge -spacing_from_block 0 -stripe_min_length stripe_width -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size false -split_vias false -orthogonal_only true -allow_jog { padcore_ring  block_ring } -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape   }
 addStripe -nets {VDD_1 VSS} -layer M9 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
 
 ##
 ## RINGS for Digital VDD, VSS
-addRing -nets {VDD VSS} -type core_rings -follow io -layer {top M6 bottom M6 left M7 right M7} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None -use_wire_group 1 -use_wire_group_bits 2 -use_interleaving_wire_group 1
-
-
-## add ring around APP_chan macro 
-selectInst APPchan1
 setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
-addRing -nets {VDD VSS} -type block_rings -around selected -layer {top M6 bottom M6 left M7 right M7} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 5 bottom 5 left 5 right 5} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+addRing -nets {VDD VSS VDD VSS VDD VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 5 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
-##### CREATE ROUTING BLOCKAGE around APP BLOCK then create stripes for VDD/VSS
+
+
+## Add ring around APPchan1 for a Stripe-target 
+#deselectAll
+#selectInst APPchan1
+#setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
+#addRing -nets {VDD VSS} -type block_rings -around selected -layer {top M7 bottom M7 left M6 right M6} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+#deselectAll
+
+
+##### CREATE ROUTING BLOCKAGE around APP BLOCKs then create stripes for VDD/VSS
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 0.0] {createRouteBlk -layer all -name myRtBlks -box $box}
+
+### Create route blockage around GUI selected object -ncd 2025 
+createRouteBlk -box [dbGet selected.box]
+
+# Or to create Expanded blockages around seledcted object -ncd 2025
+set selBoxes [dbGet selected.box]
+set expBoxes [dbShape $selBoxes SIZE 2.0]
+createRouteBlk -layer all -name myRtBlks -box $expBoxes
 
 
 ## STRIPES for Digital (Net VDD, VSS)
-addStripe -nets {VDD VSS} -layer M7 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
+#addStripe -nets {VDD VSS} -layer M6 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
 
 
+# Add Digital Stripes VDD VSS : Extend stripes from Macro blockage to rectangular boundary on M6 to be underneath M8-9  -ncd 2025
+deselectAll
+setAddStripeMode -ignore_block_check false -break_at none -route_over_rows_only false -rows_without_stripes_only false -extend_to_closest_target none -stop_at_last_wire_for_area false -partial_set_thru_domain false -ignore_nondefault_domains false -trim_antenna_back_to_shape none -spacing_type edge_to_edge -spacing_from_block 0 -stripe_min_length stripe_width -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size false -split_vias false -orthogonal_only true -allow_jog { padcore_ring  block_ring } -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape   }
+addStripe -nets {VDD VSS} -layer M6 -direction vertical -width 10 -spacing 5 -set_to_set_distance 100 -area {150 130 4856 2665} -start_from left -switch_layer_over_obs false -max_same_layer_jog_length 2 -padcore_ring_top_layer_limit AP -padcore_ring_bottom_layer_limit M1 -block_ring_top_layer_limit AP -block_ring_bottom_layer_limit M1 -use_wire_group 0 -snap_wire_center_to_grid None
+fit
 
-
-### MAKE A SECOND ring NOV 2025 -ncd Digital 
-## Floorplan User Defined coordinate: 4100 2800 4800 2800 4800 225 4100 225
 
 ## cut core rows around macros in expanded area by "halo"  -ncd
 foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}
@@ -493,15 +520,12 @@ cutRow -selected -halo 6.0
 deselectAll
 
 ##### CREATE ROUTING BLOCKAGES and cut core rows around each macro ############ -ncd
-foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 7.0] {createRouteBlk -layer all -name myRtBlks -box $box}
+foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 5.0] {createRouteBlk -layer all -name myRtBlks -box $box}
 
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass pad].boxes] SIZE 0] {createRouteBlk -layer all -cutLayer all -name myBlksIO -box $box}
 
 
 
-
-## CUT ROWS around Macros, etc. -ncd
-#cutRow -halo 5.0    ; #   5.0 clearance around Macros -ncd
 ## ROUTE rows for standard cells -ncd
 sroute -connect {corePin}
 
