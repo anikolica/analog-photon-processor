@@ -19,9 +19,6 @@ DEFINE APP_lib_clean APP_lib_clean
 DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_lib
 DEFINE APP_specialTech /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_specialTech
 
-DEFINE apple /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/apple
-
-
 DEFINE 2025_LEF_ncd /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_LEF_ncd
 
 
@@ -29,12 +26,8 @@ DEFINE 2025_DeglobalizePads /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon
 
 DEFINE tpan65lpnv2od3_Penn /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn
 
-DEFINE tpan65lpnv2od3_Penn_bacup /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn_bacup
 DEFINE streameIN /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/streameIN
 DEFINE tpdn65lpnv2od3_Penn /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpdn65lpnv2od3_Penn
-DEFINE tpan65lpnv2od3_Penn_backup_October /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn_backup_October
-DEFINE mklib_test ./mklib_test
-
 
 ## TEMPORARY: want to remove tcbn65lp_90nm_mac only for innovus since there is some collision for TIEH/L and BUFFD1 cells -ncd
 ## Try changing the order so that tcbn65lp_90nm_mac is found AFTER tcbn65lp
@@ -43,7 +36,4 @@ DEFINE mklib_test ./mklib_test
 UNDEFINE tcbn65lp_90nm_mac
 DEFINE tcbn65lp_90nm_mac /tape/mitch_sim/dbraga/Jul/tcbn65lp_90nm_mac
 
-DEFINE 2025_APP_FINAL_backup_11NOV2025 /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_APP_FINAL_backup_11NOV2025
-DEFINE tpan65lpnv2od3_Penn_backup_November /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn_backup_November
-DEFINE TEMP_XFER /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/TEMP_XFER
 DEFINE mklib /tape/mitch_sim/yjihao/git/analog-photon-processor/asic/pnr/work/mklib
