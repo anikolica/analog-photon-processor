@@ -32,7 +32,7 @@ module APP(
 	   inout wire eventEdge_back_ch1, eventEdge_front_ch1, 
 	   output wire pad_CMP_ch1,       // proposed pad to see comparator out -ncd
 	   input wire pad_RST_INIT,       // proposed pad. External option to reset -ncd
-	   inout wire  Nhit_sum, Analog_sum,   // proposed trigger pads -ncd
+	   inout wire  Nhit_sum_ch1, Analog_sum_ch1,   // proposed trigger pads -ncd
 
 	   // *** Digital Pads -ncd  ***
 	   
@@ -431,7 +431,9 @@ wire  CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
 
 wire [8:1]  WE_ampl_ch1;
 wire [8:1]  WE_time_ch1;
-
+wire [8:1] twoPeaks_ch1;
+   
+   
 // PMT chan1   
 wire B0_ch1;
 wire CMP_ch1;
@@ -477,7 +479,7 @@ wire [3:0]  delay_hold_D1P;
 
 // swapped in gutted APP_chan --> APP_chan_gutted    
 APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
-     .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1),
+     .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1), .twoPeaks(twoPeaks_ch1),
      .timeValley1(timeValley1_ch1), .amplitudeValley1(amplitudeValley1_ch1),
      .amplitudePeak2(amplitudePeak2_ch1), .amplitudePeak1(amplitudePeak1_ch1),
      .eventEdge_back(eventEdge_back_ch1),
@@ -494,7 +496,7 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
      .delay_hold_U1P(delay_hold_U1P[3:0]),
      .delay_hold_U2(delay_hold_U2[3:0]),
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
-     .cycle(cycle)  );
+     .cycle(cycle), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
 
    
 // These single-ended pads will eventually be replace with differential pads -ncd   
@@ -604,15 +606,17 @@ PDB1A ch2_CMP (.AIO (CMP_ch2) );
 // sel_LI_event [3:1] input    Select LI event to read out with ADCs
 // cycle               input   Select continuous operation (Dont stop at 8 events)
 // WE_ampl [8:1] output  Flags: Amplitude done for each TOT event; 1 if writing memory
-//                                                                 0 when write is done 
+//         (Eight individual flags here)                           0 when write is done 
 //                                                                   Asychronous!   
 // 
 // WE_time [8:1] output  Flags: TAC done for each TOT event ; = 1 if writing memory
-//                                                              0 when write is done
+//    (Eight individual flags here)                             0 when write is done
 //                                                                Sychronous with CLK  
 // 
-// 
-// 
+// twoPeaks [8:1] output Flags: detected second peak; = 1 if 2nd peak detected 
+//      (Eight individual flags here)                   0 if only one peak detected
+//                                           (Asychronous! Have about ~100ns to read bits)     
+//   
 
    
    
@@ -700,8 +704,8 @@ PVSS2A_Penn VSSA2(.TAVDD(TAVDD_2), .VSS(VSS)  );  // T stand for Top -ncd
 
 
 // Analog Trigger pads 1.6v domain -ncd
-PDB1A_Penn ch1_Nhit_sum (.AIO (Nhit_sum), .TAVDD(TAVDD_2), .VSS(VSS) );
-PDB1A_Penn ch1_Analog_sum (.AIO (Analog_sum), .TAVDD(TAVDD_2), .VSS(VSS) );
+PDB1A_Penn ch1_Nhit_sum (.AIO (Nhit_sum_ch1), .TAVDD(TAVDD_2), .VSS(VSS) );
+PDB1A_Penn ch1_Analog_sum (.AIO (Analog_sum_ch1), .TAVDD(TAVDD_2), .VSS(VSS) );
 
 PDB3A_Penn ch_signal (.AIO(pad_signal), .TAVDD(TAVDD_2), .VSS(VSS) ); // Extra
 

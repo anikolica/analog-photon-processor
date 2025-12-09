@@ -530,6 +530,44 @@ foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass pad].boxes] SIZE
 sroute -connect {corePin}
 
 deleteRouteBlk -all 
+
+
+## Maybe ?? -ncd 2025
+getSrouteMode -allowWrongWayRoute -quiet
+getSrouteMode -viaThruToClosestRing -quiet
+getSrouteMode -extendNearestTarget -quiet
+getSrouteMode -targetNumber -quiet
+getSrouteMode -targetSearchDistance -quiet
+getSrouteMode -jogThresholdRatio -quiet
+getSrouteMode -blockPinConnectRingPinCorners -quiet
+getSrouteMode -blockPinRouteWithPinWidth -quiet
+getSrouteMode -padPinMinViaSize -quiet
+getSrouteMode -padPinSplit -quiet
+getSrouteMode -padRingLefConvention -quiet
+getSrouteMode -signalPinAsPG -quiet
+getSrouteMode -corePinJoinLimit -quiet
+getSrouteMode -corePinLength -quiet
+getSrouteMode -corePinLengthAsInstance -quiet
+getSrouteMode -corePinReferenceMacro -quiet
+getSrouteMode -treatEndcapAsCore -quiet
+getSrouteMode -secondaryPinMaxGap -quiet
+getSrouteMode -secondaryPinRailWidth -quiet
+getSrouteMode -srpgAonCellPin -quiet
+getSrouteMode -viaConnectToShape -quiet
+getSrouteMode -layerNormalCost -quiet
+getSrouteMode -layerWrongWayCost -quiet
+setSrouteMode -viaConnectToShape { stripe followpin }
+sroute -connect { blockPin padPin padRing corePin floatingStripe } -layerChangeRange { M1(1) M6(6) } -blockPinTarget { nearestTarget } -padPinPortConnect { allPort oneGeom } -padPinTarget { nearestTarget } -corePinTarget { firstAfterRowEnd } -floatingStripeTarget { blockring padring ring stripe ringpin blockpin followpin } -allowJogging 1 -crossoverViaLayerRange { M1(1) M6(6) } -nets { VDD VSS } -allowLayerChange 1 -blockPin useLef -targetViaLayerRange { M1(1) M6(6) }
+
+
+
+
+
+
+
+
+
+
 #########################################
 
 
