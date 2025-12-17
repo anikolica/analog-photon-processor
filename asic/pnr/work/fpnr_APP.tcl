@@ -21,8 +21,18 @@
 #}
 #
 
+
+## THIS SEQUENCE fixes drc's and routes missing nets. -ncd 2025
+# verify_drc
+# ecoRoute -fix_drc
+
+#THIS SEQUENCE reports all UNROUTED/missing connections -ncd 2025
+# verifyConnectivity -type regular -report unrouted.rpt
+
+
 # Can set a net to be dont touch so that innovus wont route it again.
 # set_dont_touch VSS
+
 
 ## To move selected objects all upward by 120 units -ncd 2025
 # move_obj -direction up -distance 120 [dbGet selected.name]
@@ -46,12 +56,32 @@
 #  routeDesign -incremental XXX
 #  routeGlobsource ../scripts/place.tclalNet XXX
 #  
+
+## this will fix drc errors -ncd 2025
 #  ecoRoute -fix_drc
+
+
 #  createNet POC   (This will create the net so that globalNetConnect will work)
 
 ### To update OS librarys do this:
 #  set_db init_oa_ref_libs $userLib  (userLib was st to the list of OA libraries)
 #  
+
+####################################################
+### TO GET RID OF tiny rectangles do this: -ncd 2025
+## THESE are created from the verilog port definitions
+## But I need to keep these to label pads in the end.
+## So,can remove these DEF pads as follows:
+##
+# defOut mydesign.def -floorplan -netlist -routing
+# Then edit to remove rectangles with 
+#    grep -v "( PIN " mydesign.def  > clean.def
+# Then 
+# defIn clean.def -nets -incremental_routing
+#
+####################################################
+
+
 
 set TSMC_PDK $env(TSMC_PDK)
 source ../scripts/variables.tcl
@@ -143,9 +173,6 @@ set init_layout_view layout
 
 
 set init_abstract_view abstract
-
-
-
 
 getenv ENCOUNTER_CONFIG_RELATIVE_CWD
 setDoAssign on
@@ -286,8 +313,8 @@ defIn stitched_floorplan.def
 if {$CORE_CHIP == "CHIP"} {
 	addInst -physical -cell PCORNERA -inst corner1
 	addInst -physical -cell PCORNERA -inst corner2
-	addInst -physical -cell PCORNERA -inst corner3
-	addInst -physical -cell PCORNERA -inst corner4
+	addInst -physical -cell PCORNER -inst corner3
+	addInst -physical -cell PCORNER -inst corner4
 	loadIoFile ../scripts/corner.io
 }
 fit
@@ -310,9 +337,14 @@ fit
 #fit
 
 	# deleteInst pad_* add Bondpads -ncd 2025  
-	source ../scripts/addPads.tcl 
-        fit
 
+# add bondpads over single-width IO pads
+source ../scripts/addPads.tcl 
+fit
+
+# add bondpads over double-width IO pads -ncd 2025
+source ../scripts/addPads_doubles.tcl 
+        fit
 
 
 ## Fill Digital sections first
@@ -397,6 +429,9 @@ globalNetConnect VSS    -type pgpin -pin GND    -inst * -override
 ## connect APPchan1 pins to VDD_1 -ncd 2025 since pin is signal, not pgpin
 globalNetConnect VDD_1 -type net -net VDD_1 -pin VDD -instanceBasename APPchan1
 globalNetConnect VDD_2 -type net -net VDD_2 -pin VDDH -instanceBasename APPchan1
+
+globalNetConnect VDDPST -type net -net VDDPST -pin vdda_2p5 -instanceBasename BGR1
+
 
 
 

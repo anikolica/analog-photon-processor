@@ -14,14 +14,12 @@
 
 module APP(
 	   // Declare all global nets for innovus 
-	   inout wire POC, VDDPST, VDD, VSS, VSSPST,      // digital pad globals
-	   inout wire  TAVDD, TACVDD,                     // analog pad globals
+	   inout wire VDDPST, VDD, VSS, VSSPST, VDDPST_BGR,   // digital pads globals
 
-	   inout wire  TAVDD_1 , TACVDD_1,                  // analog pad Local domains
-	   inout wire  TAVDD_2 , TACVDD_2,                  // analog pad Local domains
+	   inout wire TAVDD_2,               // analog pad 1.6v domain chip Left
+	   inout wire TACVDD_1T,             // analog pad Local 1.2v domain chip Top
+	   inout wire TACVDD_1B,             // analog pad Local 1.2v domain chip  Bottom
 
-	   inout wire VDD_1 , VDD_2,                       // analog 1.2v and 1.6v chipside pins
- 	   
            // *** For top-level LABELING to work need top level nets here -ncd ***
 	   inout wire pad_inN, pad_inP, pad_opamp_out, 
 	   inout wire pad_B0_ch1,                  
@@ -433,7 +431,8 @@ wire [8:1]  WE_ampl_ch1;
 wire [8:1]  WE_time_ch1;
 wire [8:1] twoPeaks_ch1;
    
-   
+ 
+/*  -ncd remove these locals, they may be causing innovus tiny rectangles -ncd   
 // PMT chan1   
 wire B0_ch1;
 wire CMP_ch1;
@@ -448,7 +447,7 @@ wire eventEdge_front_ch1;
 wire TOT_INTEGRAL_ch1;
 wire cycle;
 wire LI_INTEGRAL;
-
+*/
   
    
 /*
@@ -500,16 +499,20 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
 
    
 // These single-ended pads will eventually be replace with differential pads -ncd   
-PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );  // NOTE: In VDD_1 domain -ncd   
-PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_eventEdge_back (.AIO (eventEdge_back_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_eventEdge_front (.AIO (eventEdge_front_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_timePeak1 (.AIO (timePeak1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_timePeak2 (.AIO (timePeak2_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
-PDB1AC_Penn ch1_timeValley1 (.AIO (timeValley1_ch1), .TACVDD(TACVDD_1), .VSS(VSS) );
+// ON CHIP TOP SIDE
+PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
+PDB1AC_Penn ch1_timeValley1 (.AIO (timeValley1_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+PDB1AC_Penn ch1_timePeak2 (.AIO (timePeak2_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );  // NOTE: In VDD_1 domain -ncd   
+PDB1AC_Penn ch1_timePeak1 (.AIO (timePeak1_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+
+// ON CHIP BOTTOM SIDE
+PDB1AC_Penn ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+PDB1AC_Penn ch1_eventEdge_back (.AIO (eventEdge_back_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+PDB1AC_Penn ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+PDB1AC_Penn ch1_eventEdge_front (.AIO (eventEdge_front_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+
  
 
 
@@ -665,8 +668,10 @@ PCLAMP1ANA vddClamp1 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltag
 PCLAMP1ANA vddClamp2 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
 PCLAMP1ANA vddClamp3 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
 PCLAMP1ANA vddClamp4 (.VSSESD(VSS), .VDDESD(VDD) ); // ESD clamp for core voltage 1.2v  
+
+
 // Need access to digital VDDPST (2.5v IO voltage) for Macros (BGR)
-PVDD2ANA VDDPST3 ( .AVDD(VDDPST) );
+PVDD2ANA VDDPST3 ( .AVDD(VDDPST_BGR) );
 
    
 // IO Digital power/gnd
@@ -711,33 +716,36 @@ PDB3A_Penn ch_signal (.AIO(pad_signal), .TAVDD(TAVDD_2), .VSS(VSS) ); // Extra
 
    
 // Core Voltage Domain ("_1" is 1.2v )
-PVDD3AC_Penn VDDAC1(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC2(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC3(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC4(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+// ON CHIP TOP SIDE
+PVDD3AC_Penn VDDAC1(.AVDD(VDD_1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC2(.AVDD(VDD_1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC3(.AVDD(VDD_1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC4(.AVDD(VDD_1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
 
-PVDD3AC_Penn VDDAC5(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC6(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC7(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC8(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
+PVSS2AC_Penn VSSAC1(.TACVDD(TACVDD_1T), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC2(.TACVDD(TACVDD_1T), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC3(.TACVDD(TACVDD_1T), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC4(.TACVDD(TACVDD_1T), .VSS(VSS)  );  // 
+
+PVDD3AC_Penn VDDAC9(.AVDD(VDD_1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
+PVSS2AC_Penn VSSAC10(.TACVDD(TACVDD_1T), .VSS(VSS)  );  // 
+
+
+// ON CHIP BOTTOM SIDE
+PVDD3AC_Penn VDDAC5(.AVDD(VDD_1), .TACVDD(TACVDD_1B), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC6(.AVDD(VDD_1), .TACVDD(TACVDD_1B), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC7(.AVDD(VDD_1), .TACVDD(TACVDD_1B), .VSS(VSS) ); 
+PVDD3AC_Penn VDDAC8(.AVDD(VDD_1), .TACVDD(TACVDD_1B), .VSS(VSS) ); 
    
-PVSS2AC_Penn VSSAC1(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC2(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC3(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC4(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC5(.TACVDD(TACVDD_1B), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC6(.TACVDD(TACVDD_1B), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC7(.TACVDD(TACVDD_1B), .VSS(VSS)  );  // 
+PVSS2AC_Penn VSSAC8(.TACVDD(TACVDD_1B), .VSS(VSS)  );  // 
 
-PVSS2AC_Penn VSSAC5(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC6(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC7(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC8(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-
+PVSS2AC_Penn VSSAC9(.TACVDD(TACVDD_1B), .VSS(VSS)  );  // 
+PVDD3AC_Penn VDDAC10(.AVDD(VDD_1), .TACVDD(TACVDD_1B), .VSS(VSS) ); 
 
    
-PVDD3AC_Penn VDDAC9(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-PVDD3AC_Penn VDDAC10(.AVDD(VDD_1), .TACVDD(TACVDD_1), .VSS(VSS) ); 
-
-PVSS2AC_Penn VSSAC9(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
-PVSS2AC_Penn VSSAC10(.TACVDD(TACVDD_1), .VSS(VSS)  );  // 
 
 // Need clamp between VDD_1 and VSS every ~1000um 
 PCLAMPA_Penn VDD_1CLAMP1 (.VDDESD(VDD_1), .VSSESD(VSS) );
@@ -754,13 +762,13 @@ PCLAMPA_Penn VDD_1CLAMP11 (.VDDESD(VDD_1), .VSSESD(VSS) );
   
   
 //PDB1AC_Penn ch1_PMT (.AIO(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
-ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
+ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
 
 // PDB1AC_Penn ch2_PMT (.AIO(B0_ch2), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 2
     
-PDB1AC_Penn ANA_P (.AIO(pad_inP), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
-PDB1AC_Penn ANA_N (.AIO(pad_inN), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
-PDB1AC_Penn ANA_OUT (.AIO(pad_opamp_out), .TACVDD(TACVDD_1), .VSS(VSS) ); // 
+PDB1AC_Penn ANA_P (.AIO(pad_inP), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
+PDB1AC_Penn ANA_N (.AIO(pad_inN), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
+PDB1AC_Penn ANA_OUT (.AIO(pad_opamp_out), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
 
 
 
@@ -775,7 +783,7 @@ DAC DAC4 ( .vout(VTH_valley), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .v
    
 
 wire vbg_ref;   
-BGR BGR1 ( .vbg(bgr_ref), .vdda_2p5(VDDPST),  .vssa_2p5(VSS)   );
+BGR BGR1 ( .vbg(bgr_ref), .vdda_2p5(VDDPST_BGR),  .vssa_2p5(VSS)   );
   
 
  

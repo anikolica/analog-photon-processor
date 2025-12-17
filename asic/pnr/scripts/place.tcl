@@ -34,7 +34,7 @@ addDeCapCellCandidates  DCAP32 275
 ## about 2000 decaps
 #addDeCap -totCap 500000 -cells DCAP32  -area 0 0  1730 1730 
 ## about 4000 
-addDeCap -totCap 1000000 -cells DCAP32  -area 0 0  1730 1730 
+addDeCap -totCap 1000000 -cells DCAP32  -area 0 0  4900 2680  -addFixAttr
 
 
 
@@ -93,6 +93,8 @@ saveNetlist ../output/place.v
 ## -ncd
 setOaxMode -allowBitConnection true
 
-# dont save to OA yet -ncd
-saveDesign -cellview "output [dbGet top.name] place " -enc ../output/place.enc
+# dont save to OA yet since cannot write to techfile -ncd 2025
+#saveDesign -cellview "output [dbGet top.name] place " -enc ../output/place.enc
+saveDesign ../output/place.enc
+
 ## 

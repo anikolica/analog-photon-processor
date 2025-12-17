@@ -16,6 +16,7 @@ source ../scripts/variables.tcl
 
 ## Stop routing VDD, VSS, VDDPST, TACVDD, AVSS, etc
 ## Uses this: "setAttribute -net <netname> -skip_routing true 
+#source ../scripts/excludeRoutingNets.tcl
 source ../scripts/excludeRoutingNets.tcl
 
 
@@ -116,8 +117,11 @@ win
 ##set_clock_uncertainty 0 -from [all_clocks] -to [all_clocks]
 win
 
-# dont save to OA yet -ncd
-saveDesign -cellview "output [dbGet top.name] postCTS" -enc ../output/postCTS.enc
+# dont save to OA yet because cannot write to techfile -ncd 2025
+#saveDesign -cellview "output [dbGet top.name] postCTS" -enc ../output/postCTS.enc
+saveDesign ../output/postCTS.enc
+
+
 
 timeDesign -postRoute -prefix postCTS -outDir ../report/timingReports -timingDebugReport
 timeDesign -hold -postRoute -prefix postCTS -outDir ../report/timingReports -timingDebugReport
@@ -175,6 +179,6 @@ saveNetlist ../output/route.v
 #saveOaDesign $oaLibName [dbGet top.name] route
 
 # dont save to OA yet -ncd
-saveDesign -cellview "output [dbGet top.name] route" -enc ../output/route.enc
-
+#saveDesign -cellview "output [dbGet top.name] route" -enc ../output/route.enc
+saveDesign ../output/route.enc
 

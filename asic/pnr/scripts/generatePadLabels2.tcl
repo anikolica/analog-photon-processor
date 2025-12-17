@@ -44,6 +44,7 @@ array set pinMap {
     PVSS2CDG      VSSPST
     PVSS3CDG      VSS
     PVDD2POC      VDDPST
+    ESD_PDB1AC_Penn PAD
 }
 
 array set netMap {}
