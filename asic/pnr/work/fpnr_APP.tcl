@@ -514,15 +514,21 @@ addStripe -nets {VDD VSS} -layer M6 -direction vertical -width 10 -spacing 5 -se
 fit
 
 
-## cut core rows around macros in expanded area by "halo"  -ncd
-foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}
-cutRow -selected -halo 6.0
-deselectAll
 
 ##### CREATE ROUTING BLOCKAGES and cut core rows around each macro ############ -ncd
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass block].boxes] SIZE 5.0] {createRouteBlk -layer all -name myRtBlks -box $box}
 
 foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass pad].boxes] SIZE 0] {createRouteBlk -layer all -cutLayer all -name myBlksIO -box $box}
+
+## cut core rows around macros in expanded area by "halo"  -ncd
+foreach inst [ dbGet [ dbGet -p2 top.insts.cell.baseClass block].name ] {selectInst $inst}
+cutRow -selected -halo 6.0
+deselectAll
+
+
+
+
+
 
 
 
@@ -530,6 +536,37 @@ foreach box [dbShape [dbGet [dbGet -p2 top.insts.cell.baseClass pad].boxes] SIZE
 sroute -connect {corePin}
 
 deleteRouteBlk -all 
+
+## Maybe ?? -ncd 2025
+getSrouteMode -allowWrongWayRoute -quiet
+getSrouteMode -viaThruToClosestRing -quiet
+getSrouteMode -extendNearestTarget -quiet
+getSrouteMode -targetNumber -quiet
+getSrouteMode -targetSearchDistance -quiet
+getSrouteMode -jogThresholdRatio -quiet
+getSrouteMode -blockPinConnectRingPinCorners -quiet
+getSrouteMode -blockPinRouteWithPinWidth -quiet
+getSrouteMode -padPinMinViaSize -quiet
+getSrouteMode -padPinSplit -quiet
+getSrouteMode -padRingLefConvention -quiet
+getSrouteMode -signalPinAsPG -quiet
+getSrouteMode -corePinJoinLimit -quiet
+getSrouteMode -corePinLength -quiet
+getSrouteMode -corePinLengthAsInstance -quiet
+getSrouteMode -corePinReferenceMacro -quiet
+getSrouteMode -treatEndcapAsCore -quiet
+getSrouteMode -secondaryPinMaxGap -quiet
+getSrouteMode -secondaryPinRailWidth -quiet
+getSrouteMode -srpgAonCellPin -quiet
+getSrouteMode -viaConnectToShape -quiet
+getSrouteMode -layerNormalCost -quiet
+getSrouteMode -layerWrongWayCost -quiet
+setSrouteMode -viaConnectToShape { stripe followpin }
+sroute -connect { blockPin padPin padRing corePin floatingStripe } -layerChangeRange { M1(1) M6(6) } -blockPinTarget { nearestTarget } -padPinPortConnect { allPort oneGeom } -padPinTarget { nearestTarget } -corePinTarget { firstAfterRowEnd } -floatingStripeTarget { blockring padring ring stripe ringpin blockpin followpin } -allowJogging 1 -crossoverViaLayerRange { M1(1) M6(6) } -nets { VDD VSS } -allowLayerChange 1 -blockPin useLef -targetViaLayerRange { M1(1) M6(6) }
+
+
+
+
 #########################################
 
 
