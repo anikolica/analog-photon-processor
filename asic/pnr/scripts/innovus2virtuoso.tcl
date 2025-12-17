@@ -1,4 +1,20 @@
 
+#### 2025 -ncd
+## IMPORTANT: Must first create target Virtuoso OA library (eg, "mklib") that
+##            has a writable techfile. So create directory called "mklib"
+##            and cp the techfile (tcbn65lp/tech.db) into that directory.
+##            
+##            Then add DEFINE mklib ./mklib to your cds.lib file.
+
+## Location of tcbn65lp techfile:
+## cp /tape/cad_Tech/TSMC650A/digital/Back_End/cdk/tcbn65lp_200a_oa/1p9m6x1z1u/tcbn65lp/tech.db .
+
+## ./tsmc65p_local/tech.db is a copy of the original techfile above.
+## Create directory mklib if it does not exist, 
+## then copy in fresh version of techfile
+exec mkdir -p mklib; exec cp ./tsmc65p_local/tech.db mklib/
+
+
 set TSMC_PDK $env(TSMC_PDK)
 source ../scripts/variables.tcl
 
@@ -14,18 +30,25 @@ source ../scripts/generatePadLabels2.tcl  ; # copilot verions
 write_sdf -min_view av_min -max_view av_max -typ_view av_typ  ../output/dfm.sdf
 saveNetlist ../output/dfm.v
 
-saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
+# dont save to OA yet because cannot write to techfile -ncd 2025
+#saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
+saveDesign ../output/dfm.enc
+
 
 ## Enables updates to the tech file after the design has been loaded. -ncd 2025
 #setOaxMode -allowTechUpdate true
 
 #update_oa_lib mklib -tech_attach_to_reference  ; # give permission to attach new vias to mklib instead of tsmcN65 -ncd 2025   
 
+## NEEDED TO WRITE OUT VIAS TO DEF FILE -ncd 2025
+##setWriteDefViaMode all
 
 set dbgLefDefOutVersion 5.8
 global dbgLefDefOutVersion
-defOut -floorplan -netlist -routing dfm.def
-##defOut -floorplan -netlist -routing APP.def
+#defOut -floorplan -netlist -routing dfm.def
+defOut -floorplan -routing dfm.def -usedVia
+
+
 
 #### save verilog
 saveNetlist lvs.v -excludeLeafCell -includePowerGround -excludeCellInst PRCUTA 

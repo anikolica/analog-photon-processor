@@ -9,6 +9,11 @@
 
 source ../scripts/variables.tcl
 
+## Stop routing VDD, VSS, VDDPST, TACVDD, AVSS, etc
+## Uses this: "setAttribute -net <netname> -skip_routing true 
+#source ../scripts/excludeRoutingNets.tcl
+source ../scripts/excludeRoutingNets.tcl
+
 
 # via optimization 
 setNanoRouteMode  -drouteFixAntenna false
@@ -62,7 +67,7 @@ if {$MIXED_TRACKS} {
 }
 
 win
-
+stop
 # clean up any DRC violations -ncd 2025
 ecoRoute -target
 
@@ -94,7 +99,10 @@ verifyProcessAntenna
 
 saveNetlist ../output/dfm.v
 #saveDesign ../output/dfm.enc
-saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
+
+### dont save to OA yet because cannot write to techfile -ncd 2025
+#saveDesign -cellview "output [dbGet top.name] dfm " -enc ../output/dfm.enc
+saveDesign ../output/dfm.enc
 
 
 ## This is dangerous -ncd 2025
