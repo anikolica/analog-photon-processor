@@ -37,7 +37,7 @@ set TSMC_PDK $env(TSMC_PDK)
 set CORE_CHIP 	CHIP
 set DFT OFF
 
-set ec::RTL_PATH        ../verilog/
+set ec::RTL_PATH        {../verilog/ ../verilog/analog_if}
 set ec::LIB_PATH        "$TSMC_PDK"
 
 
@@ -54,7 +54,10 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 
 
 
-set ec::VERILOG_LIST    { PDB1A.v  X0814_opamp_N_P.v PDB1A_Penn.v  PDB3AC.v PVSS2AC.v PVSS2AC_ncd.v PVDD3AC.v PVDD3A.v APP.v global_nets.v}
+set ec::VERILOG_LIST    { analog_if.v cmp_sync.v cmp_latch.v \
+			  PDB1A.v  X0814_opamp_N_P.v PDB1A_Penn.v  \
+			  PDB3AC.v PVSS2AC.v PVSS2AC_ncd.v PVDD3AC.v \
+			  PVDD3A.v APP.v global_nets.v}
 #set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
 
 ## This somehow causes genus to create re-named copies like PDB1A, PDB1A_55, etc.. why?
@@ -244,6 +247,15 @@ set_attribute preserve true pad_inP
 
 set_attribute preserve true pad_ana0_i 
 set_attribute preserve true pad_ana1_i 
+
+set_attribute preserve true valid_up_o[0]
+set_attribute preserve true valid_up_o[1]
+set_attribute preserve true valid_up_o[2]
+set_attribute preserve true valid_up_o[3]
+set_attribute preserve true valid_down_o[0]
+set_attribute preserve true valid_down_o[1]
+set_attribute preserve true valid_down_o[2]
+set_attribute preserve true valid_down_o[3]
 
 
 # report time and memory
