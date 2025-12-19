@@ -248,14 +248,14 @@ set_attribute preserve true pad_inP
 set_attribute preserve true pad_ana0_i 
 set_attribute preserve true pad_ana1_i 
 
-set_attribute preserve true valid_up_o[0]
-set_attribute preserve true valid_up_o[1]
-set_attribute preserve true valid_up_o[2]
-set_attribute preserve true valid_up_o[3]
-set_attribute preserve true valid_down_o[0]
-set_attribute preserve true valid_down_o[1]
-set_attribute preserve true valid_down_o[2]
-set_attribute preserve true valid_down_o[3]
+set_attribute preserve true valid_up[0]
+set_attribute preserve true valid_up[1]
+set_attribute preserve true valid_up[2]
+set_attribute preserve true valid_up[3]
+set_attribute preserve true valid_down[0]
+set_attribute preserve true valid_down[1]
+set_attribute preserve true valid_down[2]
+set_attribute preserve true valid_down[3]
 
 
 # report time and memory
