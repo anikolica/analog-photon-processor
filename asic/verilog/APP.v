@@ -136,7 +136,7 @@ module APP(
    wire [15:0] tstamp;
    wire [15:0] tstampOut;
    
-   wire       anaOut;
+   wire       anaOut_o;
 
    wire       clk;
    wire       rstb;
@@ -185,10 +185,13 @@ module APP(
 			.C  (b_i[3]),      // signal
 			.PE (1'b1), .IE(1'b1) );
 */
+   wire       ana0_i;
    PDDW0408SCDG padana0( .I(1'b0), .DS(1'b1), .OEN(1'b1),
 			.PAD(pad_ana0_i),    // Input pad
 			.C  (ana0_i),      // signal
 			.PE (1'b1), .IE(1'b1) );
+   
+   wire       ana1_i;
    PDDW0408SCDG padana1( .I(1'b0), .DS(1'b1), .OEN(1'b1),
 			.PAD(pad_ana1_i),    // Input pad
 			.C  (ana1_i),      // signal
@@ -432,10 +435,12 @@ wire [8:1]  WE_time_ch1;
 wire [8:1] twoPeaks_ch1;
    
  
-/*  -ncd remove these locals, they may be causing innovus tiny rectangles -ncd   
+
 // PMT chan1   
 wire B0_ch1;
 wire CMP_ch1;
+   
+/*  -ncd remove these locals, they may be causing innovus tiny rectangles -ncd   
 wire timePeak1_ch1;
 wire timePeak2_ch1;
 wire timeValley1_ch1;
@@ -445,7 +450,9 @@ wire amplitudePeak1_ch1;
 wire eventEdge_back_ch1;
 wire eventEdge_front_ch1;
 wire TOT_INTEGRAL_ch1;
+ */
 wire cycle;
+   /*
 wire LI_INTEGRAL;
 */
   
@@ -476,6 +483,10 @@ wire [3:0]  delay_hold_U1;
 wire [3:0]  delay_hold_D1;
 wire [3:0]  delay_hold_D1P;
 
+   wire     WE_TOTback_ch1;
+
+   wire     VDD_1, VDD_2;
+   
 // swapped in gutted APP_chan --> APP_chan_gutted    
 APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
      .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1), .twoPeaks(twoPeaks_ch1),
@@ -485,7 +496,7 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
      .eventEdge_front(eventEdge_front_ch1),
      .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL_ch1),
      .sel_LI_event(sel_LI_event[3:1]), .LI_INTEGRAL(LI_INTEGRAL_ch1),
-     .GND(VSS), .VDD(VDD_1), .VDDH(VDD_2), .B0(B0_ch1), .CLK(CLK), .RE(RE),
+     .GND(VSS), .VDD(VDD_1), .VDDH(VDD_2), .B0(B0_ch1), .CLK(clk), .RE(RE),
      .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
      .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
      .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
@@ -497,6 +508,21 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
      .cycle(cycle), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
 
+   wire [3:0] valid_up, valid_down;
+   wire [7:0] cnt_up_0, cnt_up_1, cnt_up_2, cnt_up_3,
+	      cnt_down_0, cnt_down_1, cnt_down_2, cnt_down_3;
+   
+   analog_if ai ( .cmp_i( CMP_ch1 ), .valid_up_o( valid_up ),
+		  .cnt8_up_0_o( cnt_up_0 ), .cnt8_up_1_o( cnt_up_1 ), 
+		  .cnt8_up_2_o( cnt_up_2 ), .cnt8_up_3_o( cnt_up_3 ), 
+		  .valid_down_o( valid_down ),
+		  .cnt8_down_0_o( cnt_down_0 ), .cnt8_down_1_o( cnt_down_1 ), 
+		  .cnt8_down_2_o( cnt_down_2 ), .cnt8_down_3_o( cnt_down_3 ),
+		  .clk( clk ), 
+		  .rstb( RST_INIT )   // XXX - Check polarity!!!
+		  );
+   
+   
    
 // These single-ended pads will eventually be replace with differential pads -ncd   
 // ON CHIP TOP SIDE

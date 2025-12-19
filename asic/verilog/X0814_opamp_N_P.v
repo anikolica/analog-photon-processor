@@ -2,9 +2,9 @@
 `timescale 1 ps / 1 ps
 
 module X0814_opamp_N_P ( 
-  input  VINm, 
-  input  VINp, 
-  inout  VOUT
+  input wire VINm, 
+  input wire VINp, 
+  inout wire VOUT
   );
 
 //   pullup (weak1) pu1 (REF);

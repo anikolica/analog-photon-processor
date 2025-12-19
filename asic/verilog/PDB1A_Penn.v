@@ -1,8 +1,8 @@
 // verilog stub required for genus to not remove physical-only macros/pads -ncd 
 `celldefine
 module PDB1A_Penn (AIO, TAVDD, VSS);
-   inout AIO;
-   inout TAVDD, VSS;
+   inout wire AIO;
+   inout wire TAVDD, VSS;
    
 
    // Behavioral placeholder ? no internal modeling
