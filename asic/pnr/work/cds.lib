@@ -9,7 +9,9 @@ INCLUDE /tape/mitch_sim/cds_proto/tsmc/cds.lib
 ### Maybe should added createLib command in import.tcl to accomodate this.
 DEFINE output ../output
 DEFINE FEOADesignlib FEOADesignlib
-#Removed by ddDeleteObj: DEFINE APP_lib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/APP_lib
+
+
+
 # tsmc65 seal-ring -ncd 2025
 DEFINE TSMC_SEAL_RING /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/TSMC_SEAL_RING
 DEFINE 2025_RingOutPads /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_RingOutPads
@@ -25,7 +27,10 @@ DEFINE apple /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic
 DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
 DEFINE 2025_LEF_ncd /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_LEF_ncd
 
-#Removed by ddDeleteObj: DEFINE mklib_jnk /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib_jnk
+# Another Library with writable techfile -ncd
+DEFINE mklib_jnk ./mklib_jnk
+
+
 
 DEFINE 2025_DeglobalizePads /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/2025_DeglobalizePads
 DEFINE tpan65lpnv2od3_Penn /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn
@@ -34,7 +39,8 @@ DEFINE tpan65lpnv2od3_Penn_bacup /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-p
 DEFINE streameIN /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/streameIN
 DEFINE tpdn65lpnv2od3_Penn /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpdn65lpnv2od3_Penn
 DEFINE tpan65lpnv2od3_Penn_backup_October /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tpan65lpnv2od3_Penn_backup_October
-#Removed by ddDeleteObj: DEFINE mklib_test ./mklib_test
+
+
 
 
 ## TEMPORARY: want to remove tcbn65lp_90nm_mac only for innovus since there is some collision for TIEH/L and BUFFD1 cells -ncd
@@ -61,3 +67,6 @@ DEFINE 2025_Chip_area_backup1DEC2025 /tape/mitch_sim/cds_proto/tsmc/git_APP/anal
 
 ## Local copy of the tcbn65lp library
 DEFINE tcbn65lp_local ./tsmc65p_local
+
+
+DEFINE mklib_apple ./mklib_apple
