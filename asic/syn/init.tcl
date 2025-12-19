@@ -54,7 +54,8 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 
 
 
-set ec::VERILOG_LIST    { PDB1A.v  X0814_opamp_N_P.v PDB1A_Penn.v  PDB3AC.v PVSS2AC.v PVSS2AC_ncd.v PVDD3AC.v PVDD3A.v APP.v global_nets.v}
+set ec::VERILOG_LIST    { APP.v }
+#set ec::VERILOG_LIST    { PDB1A.v  X0814_opamp_N_P.v PDB1A_Penn.v  PDB3AC.v PVSS2AC.v PVSS2AC_ncd.v PVDD3AC.v PVDD3A.v APP.v global_nets.v}
 #set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
 
 ## This somehow causes genus to create re-named copies like PDB1A, PDB1A_55, etc.. why?
