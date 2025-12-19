@@ -54,7 +54,7 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 
 ## Remove verilog macros that are not (I think) needed.
 set ec::VERILOG_LIST    { analog_if.v cmp_sync.v cmp_latch.v \
-			  }
+			  APP.v}
 
 
 #set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
