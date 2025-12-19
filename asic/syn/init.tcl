@@ -248,6 +248,11 @@ set_attribute preserve true pad_inP
 set_attribute preserve true pad_ana0_i 
 set_attribute preserve true pad_ana1_i 
 
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[0]
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[1]
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[2]
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[3]
+
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[0]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[1]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[2]
@@ -288,6 +293,11 @@ set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[0]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[1]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[2]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[3]
+
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[0]
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[1]
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[2]
+set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[3]
 
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[0]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[1]
