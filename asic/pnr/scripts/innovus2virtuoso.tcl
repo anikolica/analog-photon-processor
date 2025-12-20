@@ -12,7 +12,7 @@
 ## ./tsmc65p_local/tech.db is a copy of the original techfile above.
 ## Create directory mklib if it does not exist, 
 ## then copy in fresh version of techfile
-exec mkdir -p mklib; exec cp ./tsmc65p_local/tech.db mklib/
+exec mkdir -p mklib_apple; exec cp ./tsmc65p_local/tech.db mklib/tech.db
 
 
 set TSMC_PDK $env(TSMC_PDK)
