@@ -12,7 +12,24 @@
 ## ./tsmc65p_local/tech.db is a copy of the original techfile above.
 ## Create directory mklib if it does not exist, 
 ## then copy in fresh version of techfile
-exec mkdir -p mklib_apple; exec cp ./tsmc65p_local/tech.db mklib/tech.db
+
+##exec mkdir -p mklib_apple; exec cp ./tsmc65p_local/tech.db mklib/tech.db
+
+#NEW UNDERSTANDING 2026: TSMC65 has two compatible techfile Libraries:
+# tsmcN65 for the analog PDK
+# tcbn65lp for the digital PDK (This is oldstyle 'mixed' techfile+parts)
+# They are compatible 
+# Neither techfile is writable.
+# So Created a local version by dumping tcbn65lp techfile and using it to
+# create a local writable copy: "tcbn65lp_LOCAL"
+# Then Create  'mklib' and attach it to this LOCAL copy. 
+# Virtuose GUI can do the dump and create new tech library.
+#      Tools-> technology file  manager: dump, and New
+#
+## It is (perhaps) a bit cleaner to do it this way: create mklib and attach
+## it to the local techfile copy tcbn65lp_LOCAL. This way the techfile and 
+## user library remain separate.
+
 
 
 set TSMC_PDK $env(TSMC_PDK)
