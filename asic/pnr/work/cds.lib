@@ -92,3 +92,6 @@ DEFINE tcbn65lp_LOCAL /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-proce
 #Removed by ddDeleteObj: DEFINE mkllib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mkllib
 DEFINE mklib /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib
 DEFINE mklib_12Dec2025 /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib_12Dec2025
+DEFINE tcbn65lp_newLocal /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/tcbn65lp_newLocal
+DEFINE mklib_tmp /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/mklib_tmp
+DEFINE streamIn1 /tape/mitch_sim/cds_proto/tsmc/git_APP/analog-photon-processor/asic/pnr/work/streamIn1
