@@ -24,14 +24,24 @@ module APP(
 	   inout wire pad_inN, pad_inP, pad_opamp_out, 
 	   inout wire pad_B0_ch1,                  
 	   inout wire pad_signal, 
-	   inout wire LI_INTEGRAL_ch1, TOT_INTEGRAL_ch1,
-	   inout wire timePeak1_ch1, timePeak2_ch1, timeValley1_ch1, 
-	   inout wire amplitudeValley1_ch1, amplitudePeak2_ch1, amplitudePeak1_ch1, 
-	   inout wire eventEdge_back_ch1, eventEdge_front_ch1, 
+
+	   inout wire LI_INTEGRAL_ch1_N, LI_INTEGRAL_ch1_P, 
+           inout wire TOT_INTEGRAL_ch1_N, TOT_INTEGRAL_ch1_P,
+	   inout wire timePeak1_ch1_N, timePeak1_ch1_P, 
+           inout wire timePeak2_ch1_N,timePeak2_ch1_P,
+           inout wire timeValley1_ch1_N, timeValley1_ch1_P, 
+	   inout wire amplitudeValley1_ch1_N, amplitudeValley1_ch1_P,
+           inout wire amplitudePeak2_ch1_N,   amplitudePeak2_ch1_P, 
+           inout wire amplitudePeak1_ch1_N,   amplitudePeak1_ch1_P, 
+	   inout wire eventEdge_back_ch1_N,   eventEdge_back_ch1_P,
+           inout wire eventEdge_front_ch1_N,  eventEdge_front_ch1_P, 
+
 	   output wire pad_CMP_ch1,       // proposed pad to see comparator out -ncd
 	   input wire pad_RST_INIT,       // proposed pad. External option to reset -ncd
+	   input wire LI, LI_bar,
 	   inout wire  Nhit_sum_ch1, Analog_sum_ch1,   // proposed trigger pads -ncd
-
+	   inout wire P_ch1, N_ch1,           // LVDS CLK Receiver -ncd
+	   
 	   // *** Digital Pads -ncd  ***
 	   
 	   input wire  pad_a0_i,
@@ -427,7 +437,7 @@ module APP(
 
 
 //   *********************** -ncd *****************
-wire  CLK, RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
+wire   RE, RST_INIT, VTH_armpeak, VTH_armvalley, VTH_peak,
       VTH_valley, Vbase, vcomp;
 
 wire [8:1]  WE_ampl_ch1;
@@ -440,21 +450,24 @@ wire [8:1] twoPeaks_ch1;
 wire B0_ch1;
 wire CMP_ch1;
    
-/*  -ncd remove these locals, they may be causing innovus tiny rectangles -ncd   
+
 wire timePeak1_ch1;
 wire timePeak2_ch1;
 wire timeValley1_ch1;
+wire TOT_INTEGRAL_ch1;
+wire LI_INTEGRAL_ch1;
+
 wire amplitudeValley1_ch1;
 wire amplitudePeak2_ch1;
 wire amplitudePeak1_ch1;
 wire eventEdge_back_ch1;
 wire eventEdge_front_ch1;
-wire TOT_INTEGRAL_ch1;
- */
+
 wire cycle;
-   /*
-wire LI_INTEGRAL;
-*/
+
+
+   
+
   
    
 /*
@@ -483,9 +496,14 @@ wire [3:0]  delay_hold_U1;
 wire [3:0]  delay_hold_D1;
 wire [3:0]  delay_hold_D1P;
 
-   wire     WE_TOTback_ch1;
+wire   WE_TOTback_ch1;
+wire   VDD_1, VDD_2;
+wire   LI_RST1_ch1, LI_RST2_ch1;
+wire   cycle_LI_ch1;   
+wire   ch1_timePeak1_P, ch1_timePeak1_N;
+wire   LI_ch1;
+   
 
-   wire     VDD_1, VDD_2;
    
 // swapped in gutted APP_chan --> APP_chan_gutted    
 APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
@@ -495,9 +513,9 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
      .eventEdge_back(eventEdge_back_ch1),
      .eventEdge_front(eventEdge_front_ch1),
      .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL_ch1),
-     .sel_LI_event(sel_LI_event[3:1]), .LI_INTEGRAL(LI_INTEGRAL_ch1),
+     .sel_LI_event(sel_LI_event[3:1]), .LI(LI_ch1), .LI_bar(LI), .LI_INTEGRAL(LI_INTEGRAL_ch1),
      .GND(VSS), .VDD(VDD_1), .VDDH(VDD_2), .B0(B0_ch1), .CLK(clk), .RE(RE),
-     .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
+     .RST_INIT(RST_INIT), .LI_RST1(LI_RST1_ch1), .LI_RST2(LI_RST2_ch1), .TOT_delay(TOT_delay[3:0]),
      .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
      .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
      .delay_hold_D1(delay_hold_D1[3:0]),
@@ -506,7 +524,7 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
      .delay_hold_U1P(delay_hold_U1P[3:0]),
      .delay_hold_U2(delay_hold_U2[3:0]),
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
-     .cycle(cycle), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
+     .cycle(cycle), .cycle_LI(cycle_LI_ch1), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
 
    wire [3:0] valid_up, valid_down;
    wire [7:0] cnt_up_0, cnt_up_1, cnt_up_2, cnt_up_3,
@@ -526,21 +544,46 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
    
 // These single-ended pads will eventually be replace with differential pads -ncd   
 // ON CHIP TOP SIDE
-PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
-PDB1AC_Penn ch1_timeValley1 (.AIO (timeValley1_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
-PDB1AC_Penn ch1_timePeak2 (.AIO (timePeak2_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
-PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );  // NOTE: In VDD_1 domain -ncd   
-PDB1AC_Penn ch1_timePeak1 (.AIO (timePeak1_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+//PDB1AC_Penn ch1_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) ); 
+//PDB1AC_Penn ch1_timeValley1 (.AIO (timeValley1_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+//PDB1AC_Penn ch1_timePeak2 (.AIO (timePeak2_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+//PDB1AC_Penn ch1_LI_INTEGRAL (.AIO (LI_INTEGRAL_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );  // NOTE: In VDD_1 domain -ncd   
+//PDB1AC_Penn ch1_timePeak1 (.AIO (timePeak1_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) );
+
+// Differntial Pads TOP SIDE  
+ESD_DIFF_Penn2 ch1_TOT_INTEGRAL (.A(TOT_INTEGRAL_ch1 ), .P(TOT_INTEGRAL_ch1_P ), .N(TOT_INTEGRAL_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_timeValley1 (.A(timeValley1_ch1 ), .P(timeValley1_ch1_P ), .N(timeValley1_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_timePeak2 (.A(timePeak2_ch1 ), .P(timePeak2_ch1_P ), .N(timePeak2_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_LI_INTEGRAL (.A(LI_INTEGRAL_ch1 ), .P(LI_INTEGRAL_ch1_P ), .N(LI_INTEGRAL_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_timePeak1 (.A(timePeak1_ch1 ), .P(ch1_timePeak1_P ), .N(ch1_timePeak1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+
+wire    i_sink_in_10u_ch1;     // NEED to find a current source to connect this to -ncd
+
+   
+   
+// LVDS CLK (Placing this on chip LEFT side in 1.6v domain So that Standard LVDS does not get Clipped too much )
+CLK_DIFF_Penn ch1_LVDS_CLK (.CLK( clk ), .P(P_ch1), .N(N_ch1), .i_sink_in_10u(i_sink_in_10u_ch1), .vddd_2p5(VDDPST_BGR), .TACVDD(TACVDD_1T), .VDD(VDD_1), .VSS(VSS) );
+
+
 
 // ON CHIP BOTTOM SIDE
-PDB1AC_Penn ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
-PDB1AC_Penn ch1_eventEdge_back (.AIO (eventEdge_back_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
-PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
-PDB1AC_Penn ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
-PDB1AC_Penn ch1_eventEdge_front (.AIO (eventEdge_front_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+//PDB1AC_Penn ch1_amplitudeValley1 (.AIO (amplitudeValley1_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+//PDB1AC_Penn ch1_eventEdge_back (.AIO (eventEdge_back_ch1k_), .TACVDD(TACVDD_1B), .VSS(VSS) );
+//PDB1AC_Penn ch1_amplitudePeak1 (.AIO (amplitudePeak1_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+//PDB1AC_Penn ch1_amplitudePeak2 (.AIO (amplitudePeak2_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
+//PDB1AC_Penn ch1_eventEdge_front (.AIO (eventEdge_front_ch1), .TACVDD(TACVDD_1B), .VSS(VSS) );
 
- 
+// Differntial Pads  BOTTOM SIDE
+ESD_DIFF_Penn2 ch1_amplitudeValley1 (.A(amplitudeValley1_ch1 ), .P(amplitudeValley1_ch1_P ), .N(amplitudeValley1_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_eventEdge_back   (.A(eventEdge_back_ch1 ), .P(eventEdge_back_ch1_P ), .N(eventEdge_back_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_amplitudePeak1   (.A(amplitudePeak1_ch1 ), .P(amplitudePeak1_ch1_P ), .N(amplitudePeak1_ch1_N ), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_amplitudePeak2   (.A(amplitudePeak2_ch1), .P(amplitudePeak2_ch1_P ), .N( amplitudePeak2_ch1_N), .DifRef( ), .TACVDD(TACVDD_1B), .VSS(VSS) );
+ESD_DIFF_Penn2 ch1_eventEdge_front  (.A(eventEdge_front_ch1), .P(eventEdge_front_ch1_P), .N(eventEdge_front_ch1_N), .DifRef(), .TACVDD(TACVDD_1B), .VSS(VSS) );
 
+
+
+
+   
 
    
 //PDB1A ch1_CMP (.AIO (CMP_ch1) );
@@ -633,7 +676,9 @@ PDB1A ch2_CMP (.AIO (CMP_ch2) );
 // TOT_delay     [3:0] input   Digital delay to align TOT comparator 
 // sel_TOT_event [3:1] input   Select TOT event to read out with ADCs
 // sel_LI_event [3:1] input    Select LI event to read out with ADCs
-// cycle               input   Select continuous operation (Dont stop at 8 events)
+// cycle               input   Select continuous operation for TOT Integral & peakDetector (Dont stop at 8 events)
+// cycle_LI            input   Select continuous operation for LongIntegrator   (Dont stop at 8 events)
+// LI_RST1, LI_RST2    input   Reset Long Integrators (ping, pong)
 // WE_ampl [8:1] output  Flags: Amplitude done for each TOT event; 1 if writing memory
 //         (Eight individual flags here)                           0 when write is done 
 //                                                                   Asychronous!   
@@ -788,9 +833,10 @@ PCLAMPA_Penn VDD_1CLAMP11 (.VDDESD(VDD_1), .VSSESD(VSS) );
   
   
 //PDB1AC_Penn ch1_PMT (.AIO(B0_ch1), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 1
+// PDB1AC_Penn ch2_PMT (.AIO(B0_ch2), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 2
+
 ESD_PDB1AC_Penn ch1_PMT (.PAD(pad_B0_ch1), .CORE(B0_ch1), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
 
-// PDB1AC_Penn ch2_PMT (.AIO(B0_ch2), .TACVDD(TACVDD_1), .VSS(VSS) ); // PMT channel 2
     
 PDB1AC_Penn ANA_P (.AIO(pad_inP), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
 PDB1AC_Penn ANA_N (.AIO(pad_inN), .TACVDD(TACVDD_1T), .VSS(VSS) ); // 
@@ -798,7 +844,7 @@ PDB1AC_Penn ANA_OUT (.AIO(pad_opamp_out), .TACVDD(TACVDD_1T), .VSS(VSS) ); //
 
 
 
-wire [7:0] armpeak_VTH, armvalley_VTH, peak_VTH, valley_VTH; // DAC programming bits   
+wire [7:0] armpeak_VTH, armvalley_VTH, peak_VTH, valley_VTH, vcomp_VTH, Vbase_VTH; // DAC programming bits   
 wire bgr_ref;       // Bandgap reference
 
 // Do DACs need analog power "VDD_1" ??   
@@ -806,7 +852,10 @@ DAC DAC1 ( .vout(VTH_armpeak), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .
 DAC DAC2 ( .vout(VTH_armvalley), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(armvalley_VTH) ) ;
 DAC DAC3 ( .vout(VTH_peak), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(peak_VTH) ) ;
 DAC DAC4 ( .vout(VTH_valley), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(valley_VTH) ) ;
-   
+DAC DAC5 ( .vout(vcomp), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(vcomp_VTH) ) ;
+DAC DAC6 ( .vout(Vbase), .vdda_1p2(VDD_1), .vrefn(VSS), .vrefp(bgr_ref), .vssa(VSS), .d(Vbase_VTH) ) ;
+
+//Do we want vcomp and Vbase (600mv)  from a DAC or external Pad? -ncd    
 
 wire vbg_ref;   
 BGR BGR1 ( .vbg(bgr_ref), .vdda_2p5(VDDPST_BGR),  .vssa_2p5(VSS)   );

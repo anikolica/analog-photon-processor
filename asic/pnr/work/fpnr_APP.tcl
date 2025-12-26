@@ -21,6 +21,11 @@
 #}
 #
 
+# To delete followpin routing and stripes -ncd 2025
+# editDelete -shape FOLLOWPIN
+# editDelete -shape STRIPE
+# editDelete -shape RING
+
 
 ## THIS SEQUENCE fixes drc's and routes missing nets. -ncd 2025
 # verify_drc
@@ -344,6 +349,10 @@ fit
 
 # add bondpads over double-width IO pads -ncd 2025
 source ../scripts/addPads_doubles.tcl 
+        fit
+
+# add bondpads over  "addPads_ESD_DIFF_Penn2.tcl" IO differntial pads -ncd 2025
+source ../scripts/addPads_ESD_DIFF_Penn2.tcl
         fit
 
 
