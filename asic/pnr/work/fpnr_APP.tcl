@@ -347,13 +347,18 @@ fit
 source ../scripts/addPads.tcl 
 fit
 
-# add bondpads over double-width IO pads -ncd 2025
+
+#### add bondpads over double-width IO pads -ncd 2025
 source ../scripts/addPads_doubles.tcl 
         fit
 
-# add bondpads over  "addPads_ESD_DIFF_Penn2.tcl" IO differntial pads -ncd 2025
 source ../scripts/addPads_ESD_DIFF_Penn2.tcl
         fit
+
+source ../scripts/addPads_CLK_DIFF_Penn.tcl
+        fit
+##########
+
 
 
 ## Fill Digital sections first
@@ -436,6 +441,7 @@ globalNetConnect VSS    -type pgpin -pin VSS    -inst * -override
 globalNetConnect VSS    -type pgpin -pin GND    -inst * -override
 # Dont need any globalNetConnect if the pins are maked as signalType = signal
 ## connect APPchan1 pins to VDD_1 -ncd 2025 since pin is signal, not pgpin
+globalNetConnect VSS -type net -net VSS -pin GND -instanceBasename APPchan1
 globalNetConnect VDD_1 -type net -net VDD_1 -pin VDD -instanceBasename APPchan1
 globalNetConnect VDD_2 -type net -net VDD_2 -pin VDDH -instanceBasename APPchan1
 
@@ -513,7 +519,7 @@ source  ../scripts/innovus2virtuoso.tcl
 ## 2025 UPDATE from GUI -ncd
 ## RINGS for Analog VDD_1, VSS
 setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
-addRing -nets {VDD_1 VSS VDD_1 VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 5 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+addRing -nets {VDD_1 VSS VDD_1 VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 20 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
 
 ## STRIPES (Net VDD_1, VSS)
@@ -523,7 +529,7 @@ addStripe -nets {VDD_1 VSS} -layer M9 -direction vertical -width 10 -spacing 5 -
 ##
 ## RINGS for Digital VDD, VSS
 setAddRingMode -ring_target default -extend_over_row 0 -ignore_rows 0 -avoid_short 0 -skip_crossing_trunks none -stacked_via_top_layer AP -stacked_via_bottom_layer M1 -via_using_exact_crossover_size 1 -orthogonal_only true -skip_via_on_pin {  standardcell } -skip_via_on_wire_shape {  noshape }
-addRing -nets {VDD VSS VDD VSS VDD VSS} -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 5 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
+addRing -nets { VDD VSS VDD VSS VDD VSS VDD VSS  } -type core_rings -follow io -layer {top M8 bottom M8 left M9 right M9} -width {top 10 bottom 10 left 10 right 10} -spacing {top 5 bottom 5 left 5 right 5} -offset {top 20 bottom 20 left 5 right 20} -center 0 -threshold 0 -jog_distance 0 -snap_wire_center_to_grid None
 
 
 

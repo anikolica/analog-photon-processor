@@ -32,12 +32,12 @@ vuiLVSFormTable = '(
 	avCompareView  t
 	additionalFunctionsButton  nil
 	schLibrary  "tpan65lpnv2od3_Penn"
-	schCell  "CLK_DIFF_Penn"
+	schCell  "ESD_DIFF_Penn2"
 	schView  "schematic"
 	existingSchNetlist  nil
 	useVerilogTopCell  nil
 	layLibrary  "tpan65lpnv2od3_Penn"
-	layCell  "CLK_DIFF_Penn"
+	layCell  "ESD_DIFF_Penn2"
 	layView  "layout"
 	layUseExistingNL  nil
 	avParameters  ("?avrpt t" "?diskListAuto 100" "?ercSetPwr (\"VDD\" \"VDDPST\" \"VDDPST!\" \"TACVDD\" \"TAVDD\" \"TAVDD_2\" \"VDD_2\" \"VDDESD\")" "?ercSetGnd (\"VSS\" \"VSSPST\" \"VSSPST!\" \"VSS!\" \"GND\" \"VSSESD\")" "?multiCPU 16")
