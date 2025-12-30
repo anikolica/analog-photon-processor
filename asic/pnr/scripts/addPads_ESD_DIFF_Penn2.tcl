@@ -39,11 +39,11 @@ foreach ioInst [dbGet selected] {
     if {$orient == "R180"} {
         ## First pad at x+25
         addInst -physical -cell PAD50LU -inst pad_${name}_a \
-            -loc [expr {$x + 50}] [expr {$y + 101.5}] -ori $orient -status fixed
+            -loc [expr {$x + 50}] [expr {$y + 111.1}] -ori $orient -status fixed
 
         ## Second pad at x+125
         addInst -physical -cell PAD50LU -inst pad_${name}_b \
-            -loc [expr {$x + 150}] [expr {$y + 101.5}] -ori $orient -status fixed
+            -loc [expr {$x + 150}] [expr {$y + 111.1}] -ori $orient -status fixed
     } 
 
     
