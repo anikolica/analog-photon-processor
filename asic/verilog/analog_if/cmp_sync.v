@@ -3,9 +3,9 @@
   
 module cmp_sync (
 		 input wire cmp_i,            // async !!!
-		 input wire [3:0] cmp_acks_up_i,
+		 input wire [3:0] cmp_acks_i,
 
-		 output wire [3:0] ups_o,
+		 output wire [3:0] cmp_syncs_o,
 
 		 //input wire clk,
 		 input wire rstb
@@ -13,11 +13,11 @@ module cmp_sync (
 
 	
    reg [3:0] ping;
-   reg [3:0] ups;
+   reg [3:0] cmp_syncs;
 
-   wire [3:0] rst_ups;
+   wire [3:0] rst_syncs;
    
-   assign ups_o = ups;
+   assign cmp_syncs_o = cmp_syncs;
 
 
    always @(posedge cmp_i, negedge rstb)
@@ -52,22 +52,22 @@ module cmp_sync (
    genvar i;
    generate
       for (i=0; i<4; i=i+1 ) begin : pings
-	 assign rst_ups[i] = (rstb == 1'b0) | ((cmp_acks_up_i[i] == 1'b1) && 
-					       (ups[i] == 1'b1));
+	 assign rst_syncs[i] = (rstb == 1'b0) | ((cmp_acks_i[i] == 1'b1) && 
+					       (cmp_syncs[i] == 1'b1));
 
-	 always @( posedge cmp_i, posedge rst_ups[i] )
+	 always @( posedge cmp_i, posedge rst_syncs[i] )
 	   begin
-	      if ( rst_ups[i] == 1'b1) begin
+	      if ( rst_syncs[i] == 1'b1) begin
 		 if ( rstb == 1'b0 ) begin
-		    ups[i] <= 1'b0;
+		    cmp_syncs[i] <= 1'b0;
 		 end
 		 else begin
-		    if ( cmp_acks_up_i[i] == 1'b1 ) ups[i] <= 1'b0;
+		    if ( cmp_acks_i[i] == 1'b1 ) cmp_syncs[i] <= 1'b0;
 		 end
 	      end
 	      else
 		if ( cmp_i == 1'b1 )
-		  if ( ping[i] ) ups[i] <= 1'b1;
+		  if ( ping[i] ) cmp_syncs[i] <= 1'b1;
 	   end // always @ ( posedge cmp_i, posedge rst_ping_up )
       end
    endgenerate

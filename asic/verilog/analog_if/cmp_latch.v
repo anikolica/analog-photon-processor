@@ -7,9 +7,9 @@
  * changing near the clock edge.  TB Fixed!
  */
 module cmp_latch (
-		 input wire  [3:0] ups_i, // async !!!
+		 input wire  [3:0] cmp_syncs_i, // async !!!
 		  
-		 output wire [3:0] cmp_acks_up_o,
+		 output wire [3:0] cmp_acks_o,
 
 		 input wire clk,
 		 input wire  rstb
@@ -19,10 +19,10 @@ module cmp_latch (
 //   reg ping_up;
 //   reg pong_up;
 
-   reg [3:0] cmp_acks_up;
+   reg [3:0] cmp_acks;
    
 
-   assign cmp_acks_up_o = cmp_acks_up;
+   assign cmp_acks_o = cmp_acks;
 
 
    genvar    i;
@@ -33,12 +33,12 @@ module cmp_latch (
 	   begin
 	      if ( rstb == 1'b0 )
 		begin
-		   cmp_acks_up[i] <= 1'b0;
+		   cmp_acks[i] <= 1'b0;
 		end
 	      else
 		begin
-		   if ( ups_i[i] == 1'b1 ) cmp_acks_up[i] <= 1'b1;
-		   else cmp_acks_up[i] <= 1'b0;
+		   if ( cmp_syncs_i[i] == 1'b1 ) cmp_acks[i] <= 1'b1;
+		   else cmp_acks[i] <= 1'b0;
 		end
 	   end // always @ (posedge clk, negedge rstb)
       end // block: acks

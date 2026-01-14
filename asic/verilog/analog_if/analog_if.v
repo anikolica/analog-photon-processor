@@ -38,10 +38,10 @@
    wire [3:0] cmp_acks_up;
    wire [3:0] ups;
    
-   cmp_sync cs_up( .cmp_i( cmp_i ), .cmp_acks_up_i( cmp_acks_up ),
-		.ups_o ( ups ), .rstb( rstb ) );
+   cmp_sync cs_up( .cmp_i( cmp_i ), .cmp_acks_i( cmp_acks_up ),
+		.cmp_syncs_o ( ups ), .rstb( rstb ) );
 
-   cmp_latch cl_up( .ups_i( ups ), .cmp_acks_up_o( cmp_acks_up ),
+   cmp_latch cl_up( .cmp_syncs_i( ups ), .cmp_acks_o( cmp_acks_up ),
 		 .clk( clk ), .rstb( rstb ));
 
    reg [7:0]  cnt8_up_0;
@@ -90,10 +90,10 @@
    wire [3:0] cmp_acks_down;
    wire [3:0] downs;
    
-   cmp_sync cs_down( .cmp_i( ~cmp_i ), .cmp_acks_up_i( cmp_acks_down ),
-		.ups_o ( downs ), .rstb( rstb ) );
+   cmp_sync cs_down( .cmp_i( ~cmp_i ), .cmp_acks_i( cmp_acks_down ),
+		.cmp_syncs_o ( downs ), .rstb( rstb ) );
 
-   cmp_latch cl_down( .ups_i( downs ), .cmp_acks_up_o( cmp_acks_down ),
+   cmp_latch cl_down( .cmp_syncs_i( downs ), .cmp_acks_o( cmp_acks_down ),
 		 .clk( clk ), .rstb( rstb ));
 
    reg [7:0]  cnt8_down_0;
