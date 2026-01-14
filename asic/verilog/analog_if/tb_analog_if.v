@@ -1,4 +1,4 @@
-`timescale 100ps/1ps
+`timescale 10ps/1ps
 // `default_nettype none
 
   module tb_analog_if();
@@ -26,7 +26,7 @@
 	clk = 1'b0;
 	
 	forever
-	  #100 clk = ~clk;
+	  #1000 clk = ~clk;
      end
 
    initial
@@ -37,34 +37,72 @@
 	//cmp_ack_ping = 1'b0;
 	//cmp_ack_pong = 1'b0;
 
-	#10 rstb = 1'b1;
+	#100 rstb = 1'b1;
 
-	#10 cmp = 1'b1;
-	#205 cmp = 1'b0;
+	#100 cmp = 1'b1;
+	#2050 cmp = 1'b0;
 
-	#500 //cmp_ack_ping = 1'b1;
-	#500 //cmp_ack_ping = 1'b0;
+	#5000 //cmp_ack_ping = 1'b1;
+	#5000 //cmp_ack_ping = 1'b0;
 
-	#1000 cmp = 1'b1;
-	#5 cmp = 1'b0;
+	#10000 cmp = 1'b1;
+	#50 cmp = 1'b0;
 
-	#500 //cmp_ack_pong = 1'b1;
+	#5000 //cmp_ack_pong = 1'b1;
 
-	#500 cmp = 1'b1;
+	#5000 cmp = 1'b1;
 	//cmp_ack_pong = 1'b0;
-	#5 cmp = 1'b0;
-	#5 cmp = 1'b1;
-	#5 cmp = 1'b0;
-	#5 cmp = 1'b1;
-	#5 cmp = 1'b0;
-	#5 cmp = 1'b1;
-	#5 cmp = 1'b0;
+	#50 cmp = 1'b0;
+	#50 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	#50 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	#50 cmp = 1'b1;
+	#50 cmp = 1'b0;
 
-	#25000 cmp = 1'b1;
-	#5 cmp = 1'b0;
+	#250000 cmp = 1'b1;
+	#50 cmp = 1'b0;
+
+	#4290 cmp = 1'b1;
+	#50 cmp = 1'b0;
+
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
 	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
 	
-	#50000 $finish;
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#1951 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	
+	#10000 $finish;
 	
      end
 
