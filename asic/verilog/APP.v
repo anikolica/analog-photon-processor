@@ -14,33 +14,33 @@
 
 module APP(
 	   // Declare all global nets for innovus 
-	   inout wire VDDPST, VDD, VSS, VSSPST, VDDPST_BGR,   // digital pads globals
+	   inout wire  VDDPST, VDD, VSS, VSSPST, VDDPST_BGR, // digital pads globals
 
-	   inout wire TAVDD_2,               // analog pad 1.6v domain chip Left
-	   inout wire TACVDD_1T,             // analog pad Local 1.2v domain chip Top
-	   inout wire TACVDD_1B,             // analog pad Local 1.2v domain chip  Bottom
+	   inout wire  TAVDD_2, // analog pad 1.6v domain chip Left
+	   inout wire  TACVDD_1T, // analog pad Local 1.2v domain chip Top
+	   inout wire  TACVDD_1B, // analog pad Local 1.2v domain chip  Bottom
 
            // *** For top-level LABELING to work need top level nets here -ncd ***
-	   inout wire pad_inN, pad_inP, pad_opamp_out, 
-	   inout wire pad_B0_ch1,                  
-	   inout wire pad_signal, 
+	   inout wire  pad_inN, pad_inP, pad_opamp_out, 
+	   inout wire  pad_B0_ch1, 
+	   inout wire  pad_signal, 
 
-	   inout wire LI_INTEGRAL_ch1_N, LI_INTEGRAL_ch1_P, 
-           inout wire TOT_INTEGRAL_ch1_N, TOT_INTEGRAL_ch1_P,
-	   inout wire timePeak1_ch1_N, timePeak1_ch1_P, 
-           inout wire timePeak2_ch1_N,timePeak2_ch1_P,
-           inout wire timeValley1_ch1_N, timeValley1_ch1_P, 
-	   inout wire amplitudeValley1_ch1_N, amplitudeValley1_ch1_P,
-           inout wire amplitudePeak2_ch1_N,   amplitudePeak2_ch1_P, 
-           inout wire amplitudePeak1_ch1_N,   amplitudePeak1_ch1_P, 
-	   inout wire eventEdge_back_ch1_N,   eventEdge_back_ch1_P,
-           inout wire eventEdge_front_ch1_N,  eventEdge_front_ch1_P, 
+	   inout wire  LI_INTEGRAL_ch1_N, LI_INTEGRAL_ch1_P, 
+           inout wire  TOT_INTEGRAL_ch1_N, TOT_INTEGRAL_ch1_P,
+	   inout wire  timePeak1_ch1_N, timePeak1_ch1_P, 
+           inout wire  timePeak2_ch1_N,timePeak2_ch1_P,
+           inout wire  timeValley1_ch1_N, timeValley1_ch1_P, 
+	   inout wire  amplitudeValley1_ch1_N, amplitudeValley1_ch1_P,
+           inout wire  amplitudePeak2_ch1_N, amplitudePeak2_ch1_P, 
+           inout wire  amplitudePeak1_ch1_N, amplitudePeak1_ch1_P, 
+	   inout wire  eventEdge_back_ch1_N, eventEdge_back_ch1_P,
+           inout wire  eventEdge_front_ch1_N, eventEdge_front_ch1_P, 
 
-	   output wire pad_CMP_ch1,       // proposed pad to see comparator out -ncd
-	   input wire pad_RST_INIT,       // proposed pad. External option to reset -ncd
-	   input wire LI, LI_bar,
-	   inout wire  Nhit_sum_ch1, Analog_sum_ch1,   // proposed trigger pads -ncd
-	   inout wire P_ch1, N_ch1,           // LVDS CLK Receiver -ncd
+	   output wire pad_CMP_ch1, // proposed pad to see comparator out -ncd
+	   input wire  pad_RST_INIT, // proposed pad. External option to reset -ncd
+	   input wire  LI, LI_bar,
+	   inout wire  Nhit_sum_ch1, Analog_sum_ch1, // proposed trigger pads -ncd
+	   inout wire  P_ch1, N_ch1, // LVDS CLK Receiver -ncd
 	   
 	   // *** Digital Pads -ncd  ***
 	   
@@ -89,6 +89,8 @@ module APP(
 	   input wire  pad_rstb_i
 		 );
 
+	   localparam CLK_NBITS = 8;  // Number of bits in TimeStamp
+	   
 
 
     // Declare global nets used in layout but not exposed in Verilog
@@ -507,7 +509,7 @@ wire   LI_ch1;
 
    
 // swapped in gutted APP_chan --> APP_chan_gutted    
-APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTback_ch1),
+APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time_ch1),
      .timePeak1(timePeak1_ch1), .timePeak2(timePeak2_ch1), .twoPeaks(twoPeaks_ch1),
      .timeValley1(timeValley1_ch1), .amplitudeValley1(amplitudeValley1_ch1),
      .amplitudePeak2(amplitudePeak2_ch1), .amplitudePeak1(amplitudePeak1_ch1),
@@ -527,19 +529,47 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_TOTb
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
      .cycle(cycle), .cycle_LI(cycle_LI_ch1), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
 
+   /*
+    * DIGITAL Blocks
+    */
+   wire [CLK_NBITS-1:0] clk_cnt;
+   
+   clk_cnter #(.CLK_NBITS(CLK_NBITS)) clock_cnt (
+		  .clk_cnt_o( clk_cnt ),
+		  .clk( clk ), 
+		  .rstb( rstb )
+		  );
+			 
+
    wire [3:0] valid_up, valid_down;
-   wire [7:0] cnt_up_0, cnt_up_1, cnt_up_2, cnt_up_3,
+   wire [CLK_NBITS-1:0] cnt_up_0, cnt_up_1, cnt_up_2, cnt_up_3,
 	      cnt_down_0, cnt_down_1, cnt_down_2, cnt_down_3;
    
-   analog_if ai ( .cmp_i( CMP_ch1 ), .valid_up_o( valid_up ),
+   analog_if #(.CLK_NBITS(CLK_NBITS)) ai ( 
+                  .cmp_i( CMP_ch1 ), .clk_cnt_i( clk_cnt ),
+                  .valid_up_o( valid_up ),
 		  .cnt8_up_0_o( cnt_up_0 ), .cnt8_up_1_o( cnt_up_1 ), 
 		  .cnt8_up_2_o( cnt_up_2 ), .cnt8_up_3_o( cnt_up_3 ), 
 		  .valid_down_o( valid_down ),
 		  .cnt8_down_0_o( cnt_down_0 ), .cnt8_down_1_o( cnt_down_1 ), 
 		  .cnt8_down_2_o( cnt_down_2 ), .cnt8_down_3_o( cnt_down_3 ),
 		  .clk( clk ), 
-		  .rstb( RST_INIT )   // XXX - Check polarity!!!
+		  .rstb( rstb )
 		  );
+
+   controller #(.CLK_NBITS(CLK_NBITS)) cntl (
+                  .clk_cnt_i( clk_cnt ),
+                  .valid_up_i( valid_up ),
+		  .cnt8_up_0_i( cnt_up_0 ), .cnt8_up_1_i( cnt_up_1 ), 
+		  .cnt8_up_2_i( cnt_up_2 ), .cnt8_up_3_i( cnt_up_3 ), 
+		  .valid_down_i( valid_down ),
+		  .cnt8_down_0_i( cnt_down_0 ), .cnt8_down_1_i( cnt_down_1 ), 
+		  .cnt8_down_2_i( cnt_down_2 ), .cnt8_down_3_i( cnt_down_3 ),
+		  
+		  .clk( clk ), 
+		  .rstb( rstb )
+		  );
+					    
    
    
    
@@ -605,38 +635,6 @@ PDDW0408SCDG padRST_INIT( .I (1'b0),  // Proposed INPUT pad to provide external 
 			.IE  (1'b1) );
 
    
-
-/*  remove second channel -ncd 
-APP_chan APPchan2 (.CMP(CMP_ch2), .WE_ampl(WE_ampl_ch2), .WE_time(WE_TOTback_ch2),
-     .timePeak1(timePeak1_ch2), .timePeak2(timePeak2_ch2),
-     .timeValley1(timeValley1_ch2), .amplitudeValley1(amplitudeValley1_ch2),
-     .amplitudePeak2(amplitudePeak2_ch2), .amplitudePeak1(amplitudePeak1_ch2),
-     .eventEdge_back(eventEdge_back_ch2),
-     .eventEdge_front(eventEdge_front_ch2),
-     .sel_TOT_event(sel_TOT_event[3:1]), .TOT_INTEGRAL(TOT_INTEGRAL_ch2),
-     .GND(GND), .VDD(VDD), .VDDH(VDDH), .B0(B0_ch2), .CLK(CLK), .RE(RE),
-     .RST_INIT(RST_INIT), .TOT_delay(TOT_delay[2:0]),
-     .VTH_armpeak(VTH_armpeak), .VTH_armvalley(VTH_armvalley),
-     .VTH_peak(VTH_peak), .VTH_valley(VTH_valley), .Vbase(Vbase),
-     .delay_hold_D1(delay_hold_D1[3:0]),
-     .delay_hold_D1P(delay_hold_D1P[3:0]),
-     .delay_hold_U1(delay_hold_U1[3:0]),
-     .delay_hold_U1P(delay_hold_U1P[3:0]),
-     .delay_hold_U2(delay_hold_U2[3:0]),
-     .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp));
-
-PDB1A ch2_TOT_INTEGRAL (.AIO (TOT_INTEGRAL_ch2) ); 
-PDB1A ch2_amplitudePeak1 (.AIO (amplitudePeak1_ch2) );
-PDB1A ch2_amplitudePeak2 (.AIO (amplitudePeak2_ch2) );
-PDB1A ch2_amplitudeValley1 (.AIO (amplitudeValley1_ch2) );
-PDB1A ch2_eventEdge_back (.AIO (eventEdge_back_ch2) );
-PDB1A ch2_eventEdge_front (.AIO (eventEdge_front_ch2) );
-PDB1A ch2_timePeak1 (.AIO (timePeak1_ch2) );
-PDB1A ch2_timePeak2 (.AIO (timePeak2_ch2) );
-PDB1A ch2_timeValley1 (.AIO (timeValley1_ch2) );
-PDB1A ch2_CMP (.AIO (CMP_ch2) );
-*/
-
 
    
   
@@ -863,4 +861,5 @@ BGR BGR1 ( .vbg(bgr_ref), .vdda_2p5(VDDPST_BGR),  .vssa_2p5(VSS)   );
   
 
  
-endmodule // dummy_top
+endmodule // APP
+

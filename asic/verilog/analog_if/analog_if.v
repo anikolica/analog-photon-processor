@@ -1,36 +1,26 @@
 `timescale 100ps/1ps
 `default_nettype none
 
-  module analog_if (
-		    input wire cmp_i,           // async !!
+  module analog_if #(parameter CLK_NBITS=8) (
+		    input wire 	      cmp_i, // async !!
+
+		    input wire [CLK_NBITS-1:0] clk_cnt_i,
 
 		    output wire [3:0] valid_up_o,
-		    output wire [7:0] cnt8_up_0_o,
-		    output wire [7:0] cnt8_up_1_o,
-		    output wire [7:0] cnt8_up_2_o,
-		    output wire [7:0] cnt8_up_3_o,
+		    output wire [CLK_NBITS-1:0] cnt8_up_0_o,
+		    output wire [CLK_NBITS-1:0] cnt8_up_1_o,
+		    output wire [CLK_NBITS-1:0] cnt8_up_2_o,
+		    output wire [CLK_NBITS-1:0] cnt8_up_3_o,
 
 		    output wire [3:0] valid_down_o,
-		    output wire [7:0] cnt8_down_0_o,
-		    output wire [7:0] cnt8_down_1_o,
-		    output wire [7:0] cnt8_down_2_o,
-		    output wire [7:0] cnt8_down_3_o,
+		    output wire [CLK_NBITS-1:0] cnt8_down_0_o,
+		    output wire [CLK_NBITS-1:0] cnt8_down_1_o,
+		    output wire [CLK_NBITS-1:0] cnt8_down_2_o,
+		    output wire [CLK_NBITS-1:0] cnt8_down_3_o,
 
-		    input wire clk,
-		    input wire rstb
+		    input wire 	      clk,
+		    input wire 	      rstb
 		    );
-
-
-   /*
-    * Clock counter
-    */
-   reg [7:0] clk_cnt;
-
-   always @(posedge clk, negedge rstb ) begin
-      if ( rstb == 1'b0 ) clk_cnt <= 8'h00;
-      else clk_cnt <= clk_cnt + 1'b1;
-   end
-
 
    /*
     * Rising edge of comparitor
@@ -44,10 +34,10 @@
    cmp_latch cl_up( .cmp_syncs_i( ups ), .cmp_acks_o( cmp_acks_up ),
 		 .clk( clk ), .rstb( rstb ));
 
-   reg [7:0]  cnt8_up_0;
-   reg [7:0]  cnt8_up_1;
-   reg [7:0]  cnt8_up_2;
-   reg [7:0]  cnt8_up_3;
+   reg [CLK_NBITS-1:0]  cnt8_up_0;
+   reg [CLK_NBITS-1:0]  cnt8_up_1;
+   reg [CLK_NBITS-1:0]  cnt8_up_2;
+   reg [CLK_NBITS-1:0]  cnt8_up_3;
 
    reg [3:0] valid_up;
 
@@ -60,22 +50,22 @@
    
 
 //   initial
-//     $monitor( "%0t: ups = %h valid = %h", $time, ups, valid );
+//     $monitor( "%0t: ups = %h valid = %h", $time, ups, valid_up );
 
    always @(posedge clk, negedge rstb ) begin
       if ( rstb == 1'b0 ) begin
-	 cnt8_up_0 <= 8'h00;
-	 cnt8_up_1 <= 8'h00;
-	 cnt8_up_2 <= 8'h00;
-	 cnt8_up_3 <= 8'h00;
+	 cnt8_up_0 <= {CLK_NBITS{1'b0}};
+	 cnt8_up_1 <= {CLK_NBITS{1'b0}};
+	 cnt8_up_2 <= {CLK_NBITS{1'b0}};
+	 cnt8_up_3 <= {CLK_NBITS{1'b0}};
 
 	 valid_up <= 4'b0000;
       end
       else begin
-	 if ( ups[0] ) cnt8_up_0 <= clk_cnt;
-	 if ( ups[1] ) cnt8_up_1 <= clk_cnt;
-	 if ( ups[2] ) cnt8_up_2 <= clk_cnt;
-	 if ( ups[3] ) cnt8_up_3 <= clk_cnt;
+	 if ( ups[0] ) cnt8_up_0 <= clk_cnt_i;
+	 if ( ups[1] ) cnt8_up_1 <= clk_cnt_i;
+	 if ( ups[2] ) cnt8_up_2 <= clk_cnt_i;
+	 if ( ups[3] ) cnt8_up_3 <= clk_cnt_i;
 
 	 valid_up <= ups;
       end // else: !if( rstb == 1'b0 )
@@ -96,10 +86,10 @@
    cmp_latch cl_down( .cmp_syncs_i( downs ), .cmp_acks_o( cmp_acks_down ),
 		 .clk( clk ), .rstb( rstb ));
 
-   reg [7:0]  cnt8_down_0;
-   reg [7:0]  cnt8_down_1;
-   reg [7:0]  cnt8_down_2;
-   reg [7:0]  cnt8_down_3;
+   reg [CLK_NBITS-1:0]  cnt8_down_0;
+   reg [CLK_NBITS-1:0]  cnt8_down_1;
+   reg [CLK_NBITS-1:0]  cnt8_down_2;
+   reg [CLK_NBITS-1:0]  cnt8_down_3;
 
    reg [3:0] valid_down;
 
@@ -112,22 +102,22 @@
    
 
 //   initial
-//     $monitor( "%0t: ups = %h valid = %h", $time, ups, valid );
+//     $monitor( "%0t: downs = %h valid = %h", $time, downs, valid_down );
 
    always @(posedge clk, negedge rstb ) begin
       if ( rstb == 1'b0 ) begin
-	 cnt8_down_0 <= 8'h00;
-	 cnt8_down_1 <= 8'h00;
-	 cnt8_down_2 <= 8'h00;
-	 cnt8_down_3 <= 8'h00;
+	 cnt8_down_0 <= {CLK_NBITS{1'b0}};
+	 cnt8_down_1 <= {CLK_NBITS{1'b0}};
+	 cnt8_down_2 <= {CLK_NBITS{1'b0}};
+	 cnt8_down_3 <= {CLK_NBITS{1'b0}};
 
 	 valid_down <= 4'b0000;
       end
       else begin
-	 if ( downs[0] ) cnt8_down_0 <= clk_cnt;
-	 if ( downs[1] ) cnt8_down_1 <= clk_cnt;
-	 if ( downs[2] ) cnt8_down_2 <= clk_cnt;
-	 if ( downs[3] ) cnt8_down_3 <= clk_cnt;
+	 if ( downs[0] ) cnt8_down_0 <= clk_cnt_i;
+	 if ( downs[1] ) cnt8_down_1 <= clk_cnt_i;
+	 if ( downs[2] ) cnt8_down_2 <= clk_cnt_i;
+	 if ( downs[3] ) cnt8_down_3 <= clk_cnt_i;
 
 	 valid_down <= downs;
       end // else: !if( rstb == 1'b0 )
