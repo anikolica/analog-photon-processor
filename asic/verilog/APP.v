@@ -212,8 +212,9 @@ module APP(
 			.PAD(pad_clk_i),  // Input pad
 			.C  (clk),        // signal
 			.PE (1'b1), .IE(1'b1) );
-   
-   PDDW0408SCDG padRSTb( .I(1'b0), .DS(1'b1), .OEN(1'b1),
+
+   /* Pull-Up for active low reset! */
+   PDUW0408SCDG padRSTb( .I(1'b0), .DS(1'b1), .OEN(1'b1),
 			.PAD(pad_rstb_i),  // Input pad
 			.C  (rstb),        // signal
 			.PE (1'b1), .IE(1'b1) );
