@@ -106,7 +106,9 @@
 	
      end
 
-   analog_if ai ( .cmp_i( cmp ), .valid_up_o( valid_up ),
+   wire [7:0] clk_cnt;
+   
+   analog_if ai ( .cmp_i( cmp ), .clk_cnt_i( clk_cnt ), .valid_up_o( valid_up ),
 		  .cnt8_up_0_o( cnt8_up_0 ), .cnt8_up_1_o( cnt8_up_1 ),
 		  .cnt8_up_2_o( cnt8_up_2 ), .cnt8_up_3_o( cnt8_up_3 ),
 		  .valid_down_o( valid_down ),
@@ -114,7 +116,10 @@
 		  .cnt8_down_2_o( cnt8_down_2 ), .cnt8_down_3_o( cnt8_down_3 ),
 		  .clk( clk ), .rstb( rstb )
 		  );
+
+   clk_cnter cc ( .clk_cnt_o( clk_cnt ), .clk( clk ), .rstb( rstb ) );
    
+		 
    
 endmodule // tb_cmp_sync
 
