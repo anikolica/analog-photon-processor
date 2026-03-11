@@ -60,6 +60,15 @@
 	#50 cmp = 1'b1;
 	#50 cmp = 1'b0;
 
+	#4175 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	#50 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	#50 cmp = 1'b1;
+	#50 cmp = 1'b0;
+	#50 cmp = 1'b1;
+	#50 cmp = 1'b0;
+
 	#250000 cmp = 1'b1;
 	#50 cmp = 1'b0;
 
@@ -119,7 +128,17 @@
 
    clk_cnter cc ( .clk_cnt_o( clk_cnt ), .clk( clk ), .rstb( rstb ) );
    
-		 
+   controller ctrl ( .clk_cnt_i( clk_cnt ),
+		     .valid_up_i( valid_up ), .cnt8_up_0_i( cnt8_up_0 ),
+		      .cnt8_up_1_i( cnt8_up_1 ), .cnt8_up_2_i( cnt8_up_2),
+		      .cnt8_up_3_i( cnt8_up_3 ),
+		     .valid_down_i( valid_down ), .cnt8_down_0_i( cnt8_down_0 ),
+		      .cnt8_down_1_i( cnt8_down_1 ), .cnt8_down_2_i( cnt8_down_2),
+		      .cnt8_down_3_i( cnt8_down_3 ),
+		     .WE_ampl_i( 8'h00 ), .WE_time_i( 8'h00 ),
+		     .clk( clk ), .rstb( rstb )
+		     );
+   
    
 endmodule // tb_cmp_sync
 
