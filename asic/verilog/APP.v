@@ -553,7 +553,6 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
 		  .valid_down_o( valid_down ),
 		  .cnt8_down_0_o( cnt_down_0 ), .cnt8_down_1_o( cnt_down_1 ), 
 		  .cnt8_down_2_o( cnt_down_2 ), .cnt8_down_3_o( cnt_down_3 ),
-		  .WE_ampl_i( WE_ampl_ch1 ), .WE_time_i( WE_time_ch1 )
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );
@@ -566,6 +565,7 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
 		  .valid_down_i( valid_down ),
 		  .cnt8_down_0_i( cnt_down_0 ), .cnt8_down_1_i( cnt_down_1 ), 
 		  .cnt8_down_2_i( cnt_down_2 ), .cnt8_down_3_i( cnt_down_3 ),
+		  .WE_time_i( WE_time_ch1 ),
 		  
 		  .clk( clk ), 
 		  .rstb( rstb )

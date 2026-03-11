@@ -16,7 +16,6 @@
 		    input wire [CLK_NBITS-1:0] cnt8_down_2_i,
 		    input wire [CLK_NBITS-1:0] cnt8_down_3_i,
 
-		    input wire [7:0] 	       WE_ampl_i, 
 		    input wire [7:0] 	       WE_time_i,
 					      
 		    input wire 		       clk,
