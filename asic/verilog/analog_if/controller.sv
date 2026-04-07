@@ -229,7 +229,18 @@
       end // else: !if( rstb == 1'b0 )
    end // always @ (posedge clk, negedge rstb )
 
-   
+   // Instantiate analog memory core
+   amem_core amem_core_tb (
+      .clk(clk),
+      .rstb(rstb),
+      .wr_ptr_i(w_ptr_down),
+      .incr_rd_ptr_i(1'b0),
+      .decr_rd_ptr_i(1'b0),
+      .circular_en_i(1'b1),
+      .WE_time_i(WE_time_i),
+      .adc_done_i(1'b0),
+      .read_next_i(1'b0)
+   );   
    
 endmodule // controller
 

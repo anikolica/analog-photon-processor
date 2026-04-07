@@ -119,35 +119,56 @@ async def test_behav_csv(APP_tb):
 async def test_amem_basic(APP_tb):
     """
     Basic test for analog memory core.
-    Tests reset behavior and TOT pulses with different metadata values.
+    Send 4 pulses, decode write pointer and WE_time, change states
     """
     # Initial setup
-    APP_tb.amem_core_tb.TOT.value = 0
-    APP_tb.amem_core_tb.resetb_full.value = 0
-    APP_tb.amem_core_tb.metadata.value = 0x00
+    APP_tb.vcomp.value = 0
+    APP_tb.rstb.value = 1
     
     # Wait after initial setup
     await Timer(100, 'ns')
     
     # Reset pulse
-    APP_tb.amem_core_tb.resetb_full.value = 1
+    APP_tb.rstb.value = 0
     await Timer(50, 'ns')
-    APP_tb.amem_core_tb.resetb_full.value = 0
+    APP_tb.rstb.value = 1
     await Timer(100, 'ns')
 
-    # Single TOT pulse test
-    APP_tb.amem_core_tb.metadata.value = 0x87
-    APP_tb.amem_core_tb.TOT.value = 1
+    # Single narrow TOT pulse
+    APP_tb.vcomp.value = 1
+    await Timer(5, 'ns')
+    APP_tb.vcomp.value = 0
+    await Timer(20, 'ns')
+    #APP_tb.wr_ptr.value = 0x1
+    await Timer(80, 'ns')
+    APP_tb.WE_time_i = 0b00000001
+    await Timer(100, 'ns')
+    APP_tb.WE_time_i = 0b00000000
+    await Timer(100, 'ns')
+
+    # Three closely spaced TOT pulses
+    APP_tb.vcomp.value = 1
+    await Timer(17, 'ns')
+    APP_tb.vcomp.value = 0
+    await Timer(23, 'ns')
+    APP_tb.WE_time_i = 0b00000010
+    #APP_tb.wr_ptr.value = 0x2
+    await Timer(20, 'ns')
+
+    APP_tb.vcomp.value = 1
+    await Timer(23, 'ns')
+    APP_tb.vcomp.value = 0
+    await Timer(7, 'ns')
+    APP_tb.vcomp.value = 1
     await Timer(10, 'ns')
-    APP_tb.amem_core_tb.TOT.value = 0
-    await Timer(200, 'ns')
+    #APP_tb.wr_ptr.value = 0x3
+    APP_tb.vcomp.value = 0
+    await Timer(10, 'ns')
+    #APP_tb.wr_ptr.value = 0x4
+    APP_tb.WE_time_i = 0b00001110
+    await Timer(20, 'ns')
+    APP_tb.WE_time_i = 0b00001100
+    await Timer(40, 'ns')
+    APP_tb.WE_time_i = 0b00000000
+    await Timer(100, 'ns')
 
-    # Multiple TOT pulses test
-    for i in range(8):
-        APP_tb.amem_core_tb.TOT.value = 1
-        await Timer(10, 'ns')
-        APP_tb.amem_core_tb.TOT.value = 0
-        await Timer(10, 'ns')
-        APP_tb.amem_core_tb.metadata.value = 0xff
-
-    await Timer(200, 'ns')
