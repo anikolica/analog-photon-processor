@@ -4,6 +4,7 @@ SIM ?= ius
 VERILOG_SOURCES+=   ../verilog/amem_core.v \
             ../verilog/app_1ch_behav.v \
             ../verilog/prio_enc_mod8.v \
+            ../verilog/one_shot_3.v \
             ../verilog/clock_div.v \
             ../verilog/oneshot.v \
             ../verilog/analog_if/controller.sv \

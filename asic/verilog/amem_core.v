@@ -18,33 +18,36 @@
 `timescale 100ps/1ps
 `default_nettype none
 
-module amem_core(
-    // Intra-chip signals (controller, register map)
+module amem_core #(parameter DEPTH=8)(
+    // Intra-chip signals (controller, register map, trigger)
     input wire [2:0] wr_ptr_i, // from controller.sv
-    input wire incr_rd_ptr_i, // trigger increment read pointer
-    input wire decr_rd_ptr_i, // trigger decrement read pointer
+    input wire [(DEPTH-1):0] valid_cells_i, // analog mem locations to read, 
+                                           // from trigger
 	input wire circular_en_i, // chip reg setting to "cycle", 1 -> continuous
-
-	// Signals to/from APP analog measurement circuitry
-	input wire [7:0] WE_time_i, // TACs done on falling edge
-	output wire read_en_o, // goes to RE
-	output wire [2:0] event_mux_o, // goes to sel_TOT_event[3:1], outside world
+    input wire LI_valid_i, // asserted at start of LI and deasserted at end
+    input wire triggered_mode_i, // 1 -> triggered, 0 -> untriggered
+	input wire [(DEPTH-1):0] WE_time_i, // TACs done on falling edge
+	output wire read_en_o, // goes to RE in analog memory
+	output wire [3:0] event_mux_o, // to sel_TOT_event[3:1], and outside world
+                                   // XXX - sel_TOT_event needs a "Z" state !!
 	
 	// Signals to/from outside world
 	input wire clk,
 	input wire rstb,
+    input wire trigger_i, // Valid trigger signal from outside world
 	input wire adc_done_i, // FPGA done taking a sample
 	input wire read_next_i, // FPGA asking to advance to next location
 	output wire sample_ready_o, // APP indicating MUX is set
-	output wire amem_empty_o, // no new data
-	output wire amem_full_o // asserted if circular_en = 0 and 8 locations full
-                            // also wired to stopB internally to pause storage
+	output wire amem_empty_o, // wr_ptr = rd_ptr + 1
+	output wire amem_full_o // asserted if circular_en = 0 and 8 locations full,
+                            // or if rd_ptr = wr_ptr. 
+                            // Also wired to stopB internally to pause storage
 );
 
     // Registers
     reg [2:0] read_pointer_reg = 3'b000;
     reg [2:0] read_pointer_next_reg = 3'b000;
-    reg [2:0] event_mux_reg = 3'b000;
+    reg [3:0] event_mux_reg = 4'b0000;
 	assign event_mux_o = event_mux_reg;
 
     reg empty_reg = 1'b1;
@@ -59,37 +62,23 @@ module amem_core(
 
     wire [2:0] WE_last;
     wire WE_valid;
+
+    reg trigger_one_shot = 1'b0;
+    wire mux_done;
     
     // States
     reg [4:0] curr_state = 5'b00000;
     reg [4:0] next_state = 5'b00000;
     localparam [4:0]
                 INIT  = 0,
-                WAIT0 = 1,
-                READ0 = 2,
-                DONE0 = 3,
-                WAIT1 = 4,
-                READ1 = 5,
-                DONE1 = 6,
-                WAIT2 = 7,
-                READ2 = 8,
-                DONE2 = 9,
-                WAIT3 = 10,
-                READ3 = 11,
-                DONE3 = 12,
-                WAIT4 = 13,
-                READ4 = 14,
-                DONE4 = 15,
-                WAIT5 = 16,
-                READ5 = 17,
-                DONE5 = 18,
-                WAIT6 = 19,
-                READ6 = 20,
-                DONE6 = 21,
-                WAIT7 = 22,
-                READ7 = 23,
-                DONE7 = 24,
-                // unused: 25--30
+                UPDATE_PTR = 1,
+                EMPTY_FULL = 2,
+                WAIT_READ = 3,
+                SWITCH_MUX = 4,
+                WAIT_STABLE = 5,
+                READY_TO_READ = 6,
+                MUX_OFF = 7,
+                // unused: 8--30
                 ERROR = 31;
 
     // Keep track of how many analog memories have been written to.
@@ -104,6 +93,13 @@ module amem_core(
         .valid(WE_valid)
     );
 
+    one_shot_3 mux_timeout(
+        .clk(clk),
+        .rstb(rstb),
+        .trigger(trigger_one_shot),
+        .pulse(mux_done)
+    );
+
     // State update
     always @ (posedge clk or negedge rstb)
     begin
@@ -113,94 +109,109 @@ module amem_core(
             curr_state <= next_state;
     end
 
-    // Read pointer update
-    always @ (posedge clk or negedge rstb)
-    begin
-        if (!rstb)
-        begin
-            read_pointer_reg <= 3'b000;
-            read_pointer_next_reg <= 3'b000;
-        end
-        else
-        begin
-            // triggered mode allowed to change read pointer
-            if (incr_rd_ptr_i)
-                read_pointer_reg <= read_pointer_next_reg + 1;
-            else if (decr_rd_ptr_i)
-                read_pointer_reg <= read_pointer_next_reg - 1;
-            else
-                read_pointer_reg <= read_pointer_next_reg;
-        end
-    end
-
     // State machine for main read loop
-    // Go through WAITx, READx, DONEx for each state
-    // If we got to WAITx and READx, FPGA should finish sampling
-    // If we get to DONEx and triggers have happened, then
-    // jump to corrent new x+n state
     always @ (*)
 	begin
         case (curr_state)
             INIT: 
             begin
                 // Wait for first write after rstb.
-                // write_pointer from analog_if points to NEXT location.
-                if (WE_valid && WE_last == 3'b000 && wr_ptr_i == 4'b0001) 
-                    next_state = WAIT0; // XXX -- what happens if read
-                                         // pointer updates from trigger?
+                // write pointer from analog_if points to NEXT location to write.
+                // read pointer points to location currently reading. 
+                empty_reg = 1'b1; // empty because wr_ptr = rd_ptr + 1 (mod 8)
+                full_reg = 1'b0; // not full   
+                read_en_reg = 1'b0; // do not read     
+                event_mux_reg = 4'b1000; // hi-Z state    
+                sample_ready_reg = 1'b0; // sample not ready
+                read_pointer_reg = 3'b111; // INIT starts at last location
+                read_pointer_next_reg = 3'b000; 
+                if ((wr_ptr_i != 4'b0000) && WE_valid) // if wr_ptr ++ AND WE_valid (TACs done)
+                    next_state = UPDATE_PTR; 
             end
-            WAIT0:
+            UPDATE_PTR:
             begin
-                // signal outside world that there is data
-                // set read pointer and internal MUX
-                // wait for FPGA to signal it's ready to sample
-                empty_reg = 1'b0; // not empty
-                read_pointer_next_reg = 3'b000;
-                event_mux_reg = 3'b000; // XXX -- need explicit settling time?
-                if (read_next_i)
-                    next_state = READ0;
-            end
-            READ0:
-            begin
-                sample_ready_reg = 1'b1; // ready to FPGA
-                read_en_reg = 1'b1;      // RE to APP
-                if (adc_done_i)
-                    next_state = DONE0;
-            end
-            DONE0:
-            begin
-                sample_ready_reg = 1'b0;
-                read_en_reg = 1'b0;
-                // if trigger overrides read pointer, branch
-                if (read_pointer_reg != read_pointer_next_reg)
+                if (!triggered_mode_i)
                 begin
-                    case (read_pointer_reg)
-                        3'b000: next_state = WAIT1;
-                        3'b001: next_state = WAIT2;
-                        3'b010: next_state = WAIT3;
-                        3'b011: next_state = WAIT4;
-                        3'b100: next_state = WAIT5;
-                        3'b101: next_state = WAIT6;
-                        3'b110: next_state = WAIT7;
-                        3'b111: next_state = WAIT0;
-                    endcase
+                    if (read_pointer_reg != WE_last)
+                    begin
+                        read_pointer_reg = read_pointer_reg + 1;
+                        next_state = EMPTY_FULL;
+                    end
+                    else
+                        next_state = EMPTY_FULL;
                 end
-                else if (WE_valid && WE_last == 3'b001 && wr_ptr_i == 4'b0010) 
-                    next_state = WAIT1;
-            end                
-            // XXX -- repeat WAIT/READ/DONE 1 ... 7
-            // XXX -- account for circular_en = 0 with full_reg = 1
+                else if (triggered_mode_i)
+                begin
+                    // XXX - in triggered mode, update read_pointer_reg w/ valid_cells_i
+                end
+            end
+            EMPTY_FULL:
+            begin // update empty/full based on wr_ptr, WE_valid (TACs), valid_cells_i (trigger)
+                if (wr_ptr_i == read_pointer_reg) // full condition
+                begin
+                    full_reg = 1'b1;
+                    empty_reg = 1'b0;   
+                    next_state = WAIT_READ; 
+                end
+                else if (wr_ptr_i == read_pointer_reg + 1) // empty condition
+                begin
+                    full_reg = 1'b0;
+                    empty_reg = 1'b1;
+                end
+                else // else not empty and not full
+                begin
+                    full_reg = 1'b0;
+                    empty_reg = 1'b0;
+                    next_state = WAIT_READ;
+                end
+            end
+            WAIT_READ:
+            begin // wait for FPGA to request a read
+                if (read_next_i)
+                begin
+                    next_state = SWITCH_MUX;
+                end
+            end
+            SWITCH_MUX:
+            begin
+                event_mux_reg = read_pointer_reg;
+                trigger_one_shot = 1'b1; // XXX -- programmable wait, or memory_ready_i
+                next_state = WAIT_STABLE;
+            end
+            WAIT_STABLE:
+            begin
+                trigger_one_shot = 1'b0;
+                if (!mux_done)
+                    next_state = READY_TO_READ;
+            end
+            READY_TO_READ:
+            begin            
+                sample_ready_reg = 1'b1;
+                if (adc_done_i)
+                begin
+                    next_state = MUX_OFF;
+                end
+            end
+            MUX_OFF:
+            begin
+                event_mux_reg = 4'b1000; // hi-Z
+                sample_ready_reg = 1'b0;
+                next_state = UPDATE_PTR; // repeat until empty/full
+            end
             default: 
             begin
                 empty_reg = 1'b1; // empty
-                full_reg = 1'b0;  // not full
-                read_en_reg = 1'b0;
-                sample_ready_reg = 1'b0;
-                read_pointer_next_reg = 3'b111;
+                full_reg = 1'b0; // not full   
+                read_en_reg = 1'b0; // do not read     
+                event_mux_reg = 4'b1000; // hi-Z state    
+                sample_ready_reg = 1'b0; // sample not ready
+                read_pointer_reg = 3'b111; // INIT starts at last location
+                read_pointer_next_reg = 3'b000;
                 next_state = INIT;
             end
             // XXX -- if back edge TAC and mem/mempong setting do not agree,
             // do nothing or ERROR ?
+            // XXX -- account for circular_en = 0 with full_reg = 1
         endcase
     end
 

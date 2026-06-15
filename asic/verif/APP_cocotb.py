@@ -170,5 +170,33 @@ async def test_amem_basic(APP_tb):
     APP_tb.WE_time_i = 0b00001100
     await Timer(40, 'ns')
     APP_tb.WE_time_i = 0b00000000
+    await Timer(500, 'ns')
+
+    # Read out everything
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 0;
+    await Timer(1000, 'ns') # ADC reading ...
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
     await Timer(100, 'ns')
+
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 0;
+    await Timer(1000, 'ns') # ADC reading ...
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
+    await Timer(100, 'ns')
+
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 0;
+    await Timer(1000, 'ns') # ADC reading ...
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
+    await Timer(200, 'ns')
 
