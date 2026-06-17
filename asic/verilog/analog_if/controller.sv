@@ -17,7 +17,10 @@
 		    input wire [CLK_NBITS-1:0] cnt8_down_3_i,
 
 		    input wire [7:0] 	       WE_time_i,
-					      
+
+		    output wire [2:0] 	       w_ptr_up_o,
+		    output wire [2:0] 	       w_ptr_down_o,
+
 		    input wire 		       clk,
 		    input wire 		       rstb
 		    );
@@ -33,11 +36,13 @@
     *   Wrap (for now -- need to add control)
     */
    reg [2:0] w_ptr_up;
+   assign w_ptr_up_o = w_ptr_up;
+   
 
    always @(posedge clk, negedge rstb ) begin
       if ( rstb == 1'b0 )
 	begin
-	   w_ptr_up <= 8'h00;
+	   w_ptr_up <= 3'h0;
 	   
 	   ts_up[0] <= 8'h00;
 	   ts_up[1] <= 8'h00;
@@ -52,41 +57,41 @@
 	 // ONE valid
 	 if ( valid_up_i == 4'b0001 ) begin
 	    ts_up[w_ptr_up] <= cnt8_up_0_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 8;
+	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
 	 end
 	 else if ( valid_up_i == 4'b0010 ) begin
 	    ts_up[w_ptr_up] <= cnt8_up_1_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 8;
+	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
 	 end
 	 else if ( valid_up_i == 4'b0100 ) begin
 	    ts_up[w_ptr_up] <= cnt8_up_2_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 8;
+	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
 	 end
 	 else if ( valid_up_i == 4'b1000 ) begin
 	    ts_up[w_ptr_up] <= cnt8_up_3_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 8;
+	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
 	 end
 	 else
 	   // TWO valids
 	   if ( valid_up_i == 4'b0011 ) begin
 	      ts_up[w_ptr_up] <= cnt8_up_0_i;
 	      ts_up[w_ptr_up+1'b1] <= cnt8_up_1_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 8;
+	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
 	   end
 	   else if ( valid_up_i == 4'b0110 ) begin
 	      ts_up[w_ptr_up] <= cnt8_up_1_i;
 	      ts_up[w_ptr_up+1'b1] <= cnt8_up_2_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 8;
+	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
 	   end
 	   else if ( valid_up_i == 4'b1100 ) begin
 	      ts_up[w_ptr_up] <= cnt8_up_2_i;
 	      ts_up[w_ptr_up+1'b1] <= cnt8_up_3_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 8;
+	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
 	   end
 	   else if ( valid_up_i == 4'b1001 ) begin
 	      ts_up[w_ptr_up] <= cnt8_up_3_i;
 	      ts_up[w_ptr_up+1'b1] <= cnt8_up_0_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 8;
+	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
 	   end
 	   else
 	     // THREE valids
@@ -94,19 +99,19 @@
 		ts_up[w_ptr_up] <= cnt8_up_0_i;
 		ts_up[w_ptr_up+3'h1] <= cnt8_up_1_i;
 		ts_up[w_ptr_up+3'h2] <= cnt8_up_2_i;
-		w_ptr_up <= (w_ptr_up + 3'h3) % 8;
+		w_ptr_up <= (w_ptr_up + 3'h3) % 4'h8;
 	     end
 	     else if ( valid_up_i == 4'b1110 ) begin
 		ts_up[w_ptr_up] <= cnt8_up_1_i;
 		ts_up[w_ptr_up+3'h1] <= cnt8_up_2_i;
 		ts_up[w_ptr_up+3'h2] <= cnt8_up_3_i;
-		w_ptr_up <= (w_ptr_up + 3'h3) % 8;
+		w_ptr_up <= (w_ptr_up + 3'h3) % 4'h8;
 	     end
 	     else if ( valid_up_i == 4'b1101 ) begin
 		ts_up[w_ptr_up] <= cnt8_up_2_i;
 		ts_up[w_ptr_up+3'h1] <= cnt8_up_3_i;
 		ts_up[w_ptr_up+3'h2] <= cnt8_up_0_i;
-		w_ptr_up <= (w_ptr_up + 3'h3) % 8;
+		w_ptr_up <= (w_ptr_up + 3'h3) % 4'h8;
 	     end
 	     else if ( valid_up_i == 4'b1011 ) begin
 		ts_up[w_ptr_up] <= cnt8_up_3_i;
@@ -120,7 +125,7 @@
 		  ts_up[w_ptr_up+3'h1] <= cnt8_up_1_i;
 		  ts_up[w_ptr_up+3'h2] <= cnt8_up_2_i;
 		  ts_up[w_ptr_up+3'h3] <= cnt8_up_3_i;
-		  w_ptr_up <= (w_ptr_up + 3'h4) % 8;
+		  w_ptr_up <= (w_ptr_up + 3'h4) % 4'h8;
 	       end
       end // else: !if( rstb == 1'b0 )
    end // always @ (posedge clk, negedge rstb )
@@ -136,11 +141,12 @@
     *   Wrap (for now -- need to add control)
     */
    reg [2:0] w_ptr_down;
+   assign w_ptr_down_o = w_ptr_down;
 
    always @(posedge clk, negedge rstb ) begin
       if ( rstb == 1'b0 )
 	begin
-	   w_ptr_down <= 8'h00;
+	   w_ptr_down <= 3'h0;
 	   
 	   ts_down[0] <= 8'h00;
 	   ts_down[1] <= 8'h00;
