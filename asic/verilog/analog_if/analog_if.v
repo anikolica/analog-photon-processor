@@ -1,6 +1,16 @@
 `timescale 100ps/1ps
 `default_nettype none
 
+  /*
+   analog_if synchronizes the comparitor signal from the analog domain to the system clock.
+   It also captures the value of the clock counter when the comparitor signal goes high and
+   again when it goes low.   Because there can be multiple comparitor threshold crossings in
+   a single clock cycle, up to four counts are provided for.  A 4-bit vector is also provided
+   to indicate which of the four counts are valid.
+   
+   It is guaranteed that if there are multiple threshold crossings, the valid bits will be
+   adjacent, mod 4.
+   */
   module analog_if #(parameter CLK_NBITS=8) (
 		    input wire 	      cmp_i, // async !!
 
@@ -22,6 +32,9 @@
 		    input wire 	      rstb
 		    );
 
+// XXX - need to write a pair of assertions to guarantee the valid bits are always adjacent.
+
+   
    /*
     * Rising edge of comparitor
     */
