@@ -22,6 +22,9 @@ if {[catch {
 	# Write SDC file
 	write_sdc > $ec::outDir/r2g.sdc
 
+	# write sdf file
+	write_sdf -edges check_edge -delimiter "/" > $ec::outDir/r2g.sdf
+
 	# Write RC script file
 	# ptk 250225 Genus 231 doesn't like write_script
 	#write_script > $ec::outDir/r2g.g
