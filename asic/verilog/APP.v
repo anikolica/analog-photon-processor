@@ -557,6 +557,9 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
 		  .rstb( rstb )
 		  );
 
+   wire [2:0] w_ptr_up;
+   wire [2:0] w_ptr_down;
+   
    controller #(.CLK_NBITS(CLK_NBITS)) cntl (
                   .clk_cnt_i( clk_cnt ),
                   .valid_up_i( valid_up ),
@@ -566,7 +569,8 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
 		  .cnt8_down_0_i( cnt_down_0 ), .cnt8_down_1_i( cnt_down_1 ), 
 		  .cnt8_down_2_i( cnt_down_2 ), .cnt8_down_3_i( cnt_down_3 ),
 		  .WE_time_i( WE_time_ch1 ),
-		  
+	
+	          .w_ptr_up_o( w_ptr_up ), .w_ptr_down_o( w_ptr_down ),
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );
