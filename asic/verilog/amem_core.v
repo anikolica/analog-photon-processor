@@ -74,11 +74,12 @@ module amem_core #(parameter DEPTH=8)(
                 UPDATE_PTR = 1,
                 EMPTY_FULL = 2,
                 WAIT_READ = 3,
-                SWITCH_MUX = 4,
-                WAIT_STABLE = 5,
-                READY_TO_READ = 6,
-                MUX_OFF = 7,
-                // unused: 8--30
+                SWITCH_MUX_ON = 4,
+                SWITCH_MUX_WAIT = 5,
+                WAIT_STABLE = 6,
+                READY_TO_READ = 7,
+                MUX_OFF = 8,
+                // unused: 9--30
                 ERROR = 31;
 
     // Keep track of how many analog memories have been written to.
@@ -169,18 +170,22 @@ module amem_core #(parameter DEPTH=8)(
             begin // wait for FPGA to request a read
                 if (read_next_i)
                 begin
-                    next_state = SWITCH_MUX;
+                    next_state = SWITCH_MUX_ON;
                 end
             end
-            SWITCH_MUX:
+            SWITCH_MUX_ON:
             begin
                 event_mux_reg = read_pointer_reg;
                 trigger_one_shot = 1'b1; // XXX -- programmable wait, or memory_ready_i
+                next_state = SWITCH_MUX_WAIT;
+            end
+            SWITCH_MUX_WAIT:
+            begin
+                trigger_one_shot = 1'b0;
                 next_state = WAIT_STABLE;
             end
             WAIT_STABLE:
             begin
-                trigger_one_shot = 1'b0;
                 if (!mux_done)
                     next_state = READY_TO_READ;
             end
