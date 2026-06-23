@@ -16,7 +16,7 @@
 module LI_control(
 		    input wire [3:0] 	       valid_up_i,
 		    
-		    input wire [7:0] 	       LI length_i, // Length of LI in clocks
+		    input wire [7:0] 	       LI_length_i, // Length of LI in clocks
 		    
 		    output wire 	       LI_start_o, // pulses at beginning of LI
 		    output wire 	       LI_end_o, // pulses at end of LI
