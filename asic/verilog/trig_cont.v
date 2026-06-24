@@ -34,14 +34,12 @@ module trig_cont(
    // Handle trigger start pointer
    always @(posedge clk, negedge rstb )
      begin
-	if ( rstb == 1'b0 ) begin
-	   trig_start <= w_ptr_i;
-	   trig_idx <= w_ptr_i;
+	if ( rstb == 1'b0 ) begin  // I don't like the constants, but oh well
+	   trig_start <= 3'b000;   
 	end
 	else begin
 	   if ( LI_start_i ) begin
 	      trig_start <= w_ptr_i;
-	      trig_idx <= w_ptr_i;
 	   end
 	end
      end
@@ -68,32 +66,40 @@ module trig_cont(
    always @(posedge clk, negedge rstb )
      begin
 	if ( rstb == 1'b0 ) begin
+	   trig_idx <= 3'b000;     // I don't like the constant
 	   trigd <= 8'h00;
 	   in_trig <= 1'b0;
 	   LI_end_seen <= 1'b0;
 	end	   
 	else begin
+	   if ( LI_end_i && in_trig ) LI_end_seen <= 1'b1;
+
+	   if ( read_en_i && event_mux_i[3] )  // clear trigd on read
+	     trigd[event_mux_i[2:0]] <= 1'b0;
+	   // Don't need to clear skipped events as they will not
+	   // have been triggered, by definition.
+	   
 	   if ( trigger_i ) begin
 	      in_trig <= 1'b1;
 	      trigd[trig_idx] <= 1'b1;
 	      trig_idx <= trig_idx + 1'b1;
 	   end
 	   else begin
-	      if ( LI_end_i ) LI_end_seen <= 1'b1;
-
-	      if ( read_en_i && event_mux_i[3] )  // clear trigd on read
-		trigd[event_mux_i[2:0]] <= 1'b0;
-		      
-	      if ( in_trig ) begin
-		 trigd[trig_idx] <= 1'b1;   // We can keep setting this
+	      if ( ! in_trig )
+		;                 // If not in triggered LI, do nothing
+	      else begin          // We are in a trigger LI
+		 if ( trig_idx != w_ptr_i ) begin // NOT caught up to wr ptr
+		    trigd[trig_idx] <= 1'b1;   // We can keep setting this
+		    
 		 if ( (trig_idx + 1'b1) == w_ptr_i ) // We have them all
 		   if ( LI_end_seen ) begin       // At end of LI clear in_trig
 		      in_trig <= 1'b0;
 		      LI_end_seen <= 1'b0;
+		      trig_idx <= trig_start;
 		   end
-		   else
+		   else         // NOT LI_end_send
 		     ;		// 
-		 else
+		 else  // not at end with trigger active
 		   trig_idx <= trig_idx + 1'b1;
 	      end // if ( in_trig )
 	   end // else: !if( trigger_i )
