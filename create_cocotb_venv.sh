@@ -46,7 +46,7 @@ source $VENV_PATH/bin/activate
 
 # === Install cocotb ===
 pip install --upgrade pip setuptools wheel
-pip install cocotb
+pip install cocotb==1.9.2
 
 # === Done ===
 echo "✅ Python $PYTHON_VERSION, OpenSSL $OPENSSL_VERSION, libffi $LIBFFI_VERSION, and cocotb installed in virtualenv at $VENV_PATH"
