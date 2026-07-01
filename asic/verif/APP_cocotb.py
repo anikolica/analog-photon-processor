@@ -119,35 +119,78 @@ async def test_behav_csv(APP_tb):
 async def test_amem_basic(APP_tb):
     """
     Basic test for analog memory core.
-    Tests reset behavior and TOT pulses with different metadata values.
+    Send 4 pulses, decode write pointer and WE_time, change states
     """
     # Initial setup
-    APP_tb.amem_core_tb.TOT.value = 0
-    APP_tb.amem_core_tb.resetb_full.value = 0
-    APP_tb.amem_core_tb.metadata.value = 0x00
+    APP_tb.vcomp.value = 0
+    APP_tb.rstb.value = 1
     
     # Wait after initial setup
     await Timer(100, 'ns')
     
     # Reset pulse
-    APP_tb.amem_core_tb.resetb_full.value = 1
+    APP_tb.rstb.value = 0
     await Timer(50, 'ns')
-    APP_tb.amem_core_tb.resetb_full.value = 0
+    APP_tb.rstb.value = 1
     await Timer(100, 'ns')
 
-    # Single TOT pulse test
-    APP_tb.amem_core_tb.metadata.value = 0x87
-    APP_tb.amem_core_tb.TOT.value = 1
+    # Single narrow TOT pulse
+    APP_tb.vcomp.value = 1 # 250ns
+    await Timer(5, 'ns')
+    APP_tb.vcomp.value = 0 # 255ns
+    await Timer(20, 'ns')
+    APP_tb.WE_time_i = 0b00000001 # 275ns
+    await Timer(25, 'ns')
+    APP_tb.WE_time_i = 0b00000000 # 300ns
+    await Timer(100, 'ns')
+
+    # Three closely spaced TOT pulses
+    APP_tb.vcomp.value = 1 # 400ns
+    await Timer(17, 'ns')
+    APP_tb.vcomp.value = 0 # 417ns
+    await Timer(23, 'ns')
+    APP_tb.WE_time_i = 0b00000010 # 440ns
+    await Timer(13, 'ns')
+
+    APP_tb.vcomp.value = 1 # 453ns
+    await Timer(27, 'ns')
+    APP_tb.vcomp.value = 0 # 480ns
+    APP_tb.WE_time_i = 0b00000000
+    await Timer(7, 'ns')
+    APP_tb.vcomp.value = 1 # 487ns
     await Timer(10, 'ns')
-    APP_tb.amem_core_tb.TOT.value = 0
-    await Timer(200, 'ns')
+    APP_tb.vcomp.value = 0 # 497ns
+    await Timer(20, 'ns')
+    APP_tb.WE_time_i = 0b00001100 # 517ns
+    await Timer(23, 'ns')
+    APP_tb.WE_time_i = 0b00000000 # 540 ns
+    await Timer(1200, 'ns')
 
-    # Multiple TOT pulses test
-    for i in range(8):
-        APP_tb.amem_core_tb.TOT.value = 1
-        await Timer(10, 'ns')
-        APP_tb.amem_core_tb.TOT.value = 0
-        await Timer(10, 'ns')
-        APP_tb.amem_core_tb.metadata.value = 0xff
+    # Read out everything
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 0;
+    await Timer(2000, 'ns') # ADC reading ...
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
+    await Timer(100, 'ns')
 
-    await Timer(200, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 0;
+    await Timer(2000, 'ns') # ADC reading ...
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
+    await Timer(100, 'ns')
+
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.read_next_i = 0;
+    await Timer(2000, 'ns') # ADC reading ...
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 1;
+    await Timer(20, 'ns')
+    APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
+    await Timer(1000, 'ns')
+

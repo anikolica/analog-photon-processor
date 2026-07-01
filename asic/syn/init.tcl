@@ -54,7 +54,9 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 
 ## Remove verilog macros that are not (I think) needed.
 set ec::VERILOG_LIST    { analog_if.v cmp_sync.v cmp_latch.v \
-			  APP.v}
+			      clk_cnter.v trig_cont.v controller.sv \
+			      #amem_core.v prio_enc_mod8.v one_shot_3.v \
+			  APP.v  }
 
 
 #set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
@@ -247,6 +249,24 @@ set_attribute preserve true pad_inP
 set_attribute preserve true pad_ana0_i 
 set_attribute preserve true pad_ana1_i 
 
+set_attribute preserve true /designs/APP/nets/read_en
+set_attribute preserve true /designs/APP/nets/sample_ready_o
+set_attribute preserve true /designs/APP/nets/amem_empty_o
+set_attribute preserve true /designs/APP/nets/amem_full_o
+set_attribute preserve true /designs/APP/nets/event_mux[0]
+set_attribute preserve true /designs/APP/nets/event_mux[1]
+set_attribute preserve true /designs/APP/nets/event_mux[2]
+set_attribute preserve true /designs/APP/nets/event_mux[3]
+
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[0]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[1]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[2]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[3]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[4]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[5]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[6]
+set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[7]
+
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[0]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[1]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[2]
@@ -338,6 +358,18 @@ set_attribute preserve true /designs/APP/instances_hier/ai/nets/downs[1]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/downs[2]
 set_attribute preserve true /designs/APP/instances_hier/ai/nets/downs[3]
 
+set_attribute preserve true /designs/APP/nets/w_ptr_up[0]
+set_attribute preserve true /designs/APP/nets/w_ptr_up[1]
+set_attribute preserve true /designs/APP/nets/w_ptr_up[2]
+
+#set_attribute preserve true /designs/APP/instances_hier/cntl
+#set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_up_reg[0]
+#set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_up_reg[1]
+#set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_up_reg[2]
+#set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_down_reg[0]
+#set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_down_reg[1]
+#set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_down_reg[2]
+
 
 # report time and memory
 puts "\nEC INFO: Total cpu-time and memory after ELAB: [get_attr runtime /] sec., [get_attr memory_usage /] MBytes.\n"
@@ -425,3 +457,6 @@ set ec::DESIGN [find * -design *]
 # this line is only an example on how to set part of the design on 7-tracks
 #set_attribute library_domain sc7thvt CSR
 ##set_attribute library_domain sc7thvt core_digital/slave/slave*/synch*
+
+#set_attribute preserve true /designs/APP/instances_hier/cntl
+#set_attribute preserve true /designs/APP/instances_hier/amem_core_tb

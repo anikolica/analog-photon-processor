@@ -44,7 +44,7 @@ module APP(
 	   
 	   // *** Digital Pads -ncd  ***
 	   
-	   input wire  pad_a0_i,
+	   input wire  pad_trig_i,
 	   /*
 	   input wire  pad_a1_i,
 	   input wire  pad_a2_i,
@@ -150,15 +150,17 @@ module APP(
    
    wire       anaOut_o;
 
+   wire       trigger;
+   
    wire       clk;
    wire       rstb;
 
    /*****************************************************
     *             Input pads                            *
     *****************************************************/
-   PDDW0408SCDG padA0( .I(1'b0), .DS(1'b1), .OEN(1'b1),
-			.PAD(pad_a0_i),    // Input pad
-			.C  (a_i[0]),      // signal
+   PDDW0408SCDG padTrig( .I(1'b0), .DS(1'b1), .OEN(1'b1),
+			.PAD(pad_trig_i),    // Input pad
+			.C  (trigger),      // signal
 			.PE (1'b1), .IE(1'b1) );
 /*
    PDDW0408SCDG padA1( .I(1'b0), .DS(1'b1), .OEN(1'b1),
@@ -506,6 +508,7 @@ wire   cycle_LI_ch1;
 wire   ch1_timePeak1_P, ch1_timePeak1_N;
 wire   LI_ch1;
    
+wire       read_en;
 
    
 // swapped in gutted APP_chan --> APP_chan_gutted    
@@ -527,7 +530,9 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
      .delay_hold_U1P(delay_hold_U1P[3:0]),
      .delay_hold_U2(delay_hold_U2[3:0]),
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
-     .cycle(cycle), .cycle_LI(cycle_LI_ch1), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
+     .cycle(cycle), .cycle_LI(cycle_LI_ch1), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1),
+     .ana_read_en( read_en )
+			  );
 
    /*
     * DIGITAL Blocks
@@ -553,11 +558,19 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
 		  .valid_down_o( valid_down ),
 		  .cnt8_down_0_o( cnt_down_0 ), .cnt8_down_1_o( cnt_down_1 ), 
 		  .cnt8_down_2_o( cnt_down_2 ), .cnt8_down_3_o( cnt_down_3 ),
-		  .WE_ampl_i( WE_ampl_ch1 ), .WE_time_i( WE_time_ch1 )
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );
 
+   wire [2:0] w_ptr_up;
+   wire [2:0] w_ptr_down;
+
+   wire [3:0] event_mux;
+   wire       sample_ready_o;
+   wire       amem_empty_o;
+   wire       amem_full_o;
+   
+   
    controller #(.CLK_NBITS(CLK_NBITS)) cntl (
                   .clk_cnt_i( clk_cnt ),
                   .valid_up_i( valid_up ),
@@ -566,7 +579,16 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
 		  .valid_down_i( valid_down ),
 		  .cnt8_down_0_i( cnt_down_0 ), .cnt8_down_1_i( cnt_down_1 ), 
 		  .cnt8_down_2_i( cnt_down_2 ), .cnt8_down_3_i( cnt_down_3 ),
-		  
+		  .WE_time_i( WE_time_ch1 ),
+		  .trigger_i( trigger ),
+	
+	          .w_ptr_up_o( w_ptr_up ), .w_ptr_down_o( w_ptr_down ),
+                  .read_en_o( read_en ),
+		  .event_mux_o( event_mux ),
+		  .sample_ready_o( sample_ready_o ),
+		  .amem_empty_o( amem_empty_o ),
+		  .amem_full_o( amem_full_o ),
+					     
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );

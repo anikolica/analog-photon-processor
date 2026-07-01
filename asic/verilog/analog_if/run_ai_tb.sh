@@ -16,4 +16,6 @@ else
 fi
 
 xrun $GUI_OPT -access +rw tb_analog_if.v analog_if.v cmp_sync.v \
-     cmp_latch.v clk_cnter.v controller.sv
+     cmp_latch.v clk_cnter.v controller.sv \
+     ../LI_control.v ../trig_cont.v \
+     ../amem_core.v ../prio_enc_mod8.v ../one_shot_3.v
