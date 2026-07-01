@@ -30,7 +30,7 @@ module trig_cont(
 
    reg [7:0] trigd;
    assign trigd_o = trigd;
-
+/*
    // Handle trigger start pointer
    always @(posedge clk, negedge rstb )
      begin
@@ -59,10 +59,11 @@ module trig_cont(
 	     trig_end <= w_ptr_i;
 	end
      end
+*/
+//   reg in_trig;
+//   reg LI_end_seen;
 
-   reg in_trig;
-   reg LI_end_seen;
-   
+   /*
    always @(posedge clk, negedge rstb )
      begin
 	if ( rstb == 1'b0 ) begin
@@ -105,7 +106,125 @@ module trig_cont(
 	   end // else: !if( trigger_i )
 	end // else: !if( rstb == 1'b0 )
      end // always @ (posedge clk, negedge rstb )
+*/
+
+   reg [1:0] state;
+   reg [1:0] next_state;
+   reg [7:0] next_trigd;
+   reg [2:0] next_trig_start;
+   reg [2:0] next_trig_end;
+   reg [2:0] next_trig_idx;
+   reg [2:0] last_wptr;
+   reg [2:0] next_last_wptr;
    
+   
+  localparam [1:0]
+                IDLE  = 2'h0,
+                WAIT_TRIG = 2'h1,
+                WAIT_LI_END = 2'h2,
+                MARK_TOTS = 2'h3;
+   
+  
+   always @(*) begin
+      if ( rstb == 1'b0 ) begin
+	 next_state = IDLE;
+	 next_trigd = 8'h0;
+	 next_trig_start = 3'h00;
+	 next_trig_end = 3'h00;
+	 next_trig_idx = 3'h00;
+	 next_last_wptr = 3'h00;
+      end
+      
+      next_trig_start = trig_start;
+      next_trig_end = trig_end;
+      next_trig_idx = trig_idx;
+      next_state = state;
+      next_trigd = trigd;
+      next_last_wptr = last_wptr;
+      
+
+//      next_trigd = 8'h00;
+//      next_state = IDLE;
+            
+      if ( read_en_i && event_mux_i[3] )  // clear trigd on read
+	next_trigd = trigd & ~(1'b1 << event_mux_i[2:0]);
+
+      if ( last_wptr != w_ptr_i )
+	next_last_wptr = w_ptr_i;
+      
+      case ( state )
+	// We are not marking ToT as triggered and we are not in an LI window
+	IDLE: begin
+	   // Marking ToTs as triggered
+	   if ( trig_idx != trig_end ) begin
+	      next_trigd = trigd | (1'b1 << trig_idx);
+	      next_trig_idx = trig_idx + 1'b1;
+	   end
+	   
+	   if ( LI_start_i ) begin
+	      next_trig_start = last_wptr;
+	      next_state = WAIT_TRIG;
+	   end
+	   else
+	     next_state = IDLE;
+	end // case: IDLE
+	
+	// We are in LI window waint for a trigger or LI end
+	WAIT_TRIG: begin
+	   if ( trigger_i ) begin
+	      next_trig_idx = trig_start;
+	      next_state = WAIT_LI_END;
+	   end
+	   else begin
+	      // Marking ToTs as triggered
+	      if ( trig_idx != trig_end ) begin
+		 next_trigd = trigd | (1'b1 << trig_idx);
+		 next_trig_idx = trig_idx + 1'b1;
+	      end
+
+	      if ( LI_end_i ) next_state = IDLE;
+	      else next_state = WAIT_TRIG;
+	   end
+	end // case: WAIT_TRIG
+	
+	// We are waiting for the end of LI window
+	WAIT_LI_END: begin
+	   next_trig_end = last_wptr;
+	   // Marking ToTs as triggered
+	   if ( trig_idx != trig_end ) begin
+	      next_trigd = trigd | (1'b1 << trig_idx);
+	      next_trig_idx = trig_idx + 1'b1;
+	   end
+	     
+	   if ( LI_end_i ) next_state = IDLE;
+	   else next_state = WAIT_LI_END;
+	end // case: WAIT_LI_END
+
+      endcase // case ( state )
+   end // always @ (*)
+   
+   always @(posedge clk, negedge rstb )
+     if ( rstb == 1'b0 ) begin
+	state <= IDLE;
+	trigd <= 8'h00;
+	trig_start <= 3'h0;
+	trig_end <= 3'h0;
+	trig_idx <= 3'h0;
+	last_wptr <= 3'h0;
+     end
+     else begin
+	state <= next_state;
+	trigd <= next_trigd;
+	trig_start <= next_trig_start;
+	trig_end <= next_trig_end;
+	trig_idx <= next_trig_idx;
+	last_wptr <= next_last_wptr;
+     end
+   
+   
+	  
+	
+	     
 	
 		
    
