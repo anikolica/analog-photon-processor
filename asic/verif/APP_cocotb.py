@@ -6,7 +6,7 @@ import csv
 import cocotb 
 from cocotb import triggers, result, utils, clock 
 from cocotb.clock import Clock 
-from cocotb.triggers import Timer, RisingEdge, FallingEdge, Edge 
+from cocotb.triggers import Timer, RisingEdge, FallingEdge, Edge, ClockCycles 
 from cocotb.result import TestSuccess, TestFailure, ReturnValue 
 from cocotb.utils import get_sim_time
 
@@ -64,7 +64,6 @@ async def test_behav_basic(APP_tb):
     await Timer(10, 'ns')
     APP_tb.app_1ch_tb.vcomp.value = 0
     await Timer(200, 'ns')
-
 
 async def load_pulse(APP_tb, csv_path, column):
     """
@@ -194,3 +193,50 @@ async def test_amem_basic(APP_tb):
     APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
     await Timer(1000, 'ns')
 
+@cocotb.test(skip=((dont_run_all) and not env1("APP_LICNT")))
+async def test_li_control(APP_tb):
+    """
+    Basic test for LI_control
+    """
+    
+    # initial setup
+    APP_tb.li_control_tb.rstb.value = 1
+
+    # wait a bit
+    await Timer(60, 'ns')
+
+    # Reset Pulse
+    APP_tb.li_control_tb.rstb.value = 0
+    await Timer(50, 'ns')
+    APP_tb.li_control_tb.rstb.value = 1
+    await Timer(100, 'ns')
+
+    # test a single LI
+    APP_tb.LI_valid_up_o.value = 0b0010
+    APP_tb.LI_length_o.value = 4
+    await ClockCycles(APP_tb.clk, 2)
+    APP_tb.LI_length_o.value = 0
+    APP_tb.LI_valid_up_o.value = 0b0000
+    await Timer(200, 'ns')
+
+    # test double LI window
+    clock_len_ns = 20
+    li_length = 4
+    # Set valid_up to some value, and give an LI length
+    APP_tb.LI_valid_up_o.value = 0b0100 # arbitrary bit
+    APP_tb.LI_length_o.value = li_length
+    await ClockCycles(APP_tb.clk, 2)
+    #await RisingEdge(APP_tb.clk)
+    APP_tb.LI_length_o.value = 0
+    APP_tb.LI_valid_up_o.value = 0b0000
+    # wait for that to finish
+    # await Timer(clock_len_ns*li_length, 'ns')
+    await ClockCycles(APP_tb.clk, li_length-3)
+    APP_tb.LI_valid_up_o.value = 0b0001
+    APP_tb.LI_length_o = 8
+    #await RisingEdge(APP_tb.clk)
+    await ClockCycles(APP_tb.clk, 4)
+    #await ClockCycles(APP_tb.clk, 1)
+    APP_tb.LI_length_o.value = 0
+    APP_tb.LI_valid_up_o.value = 0b0000
+    await Timer(300, 'ns')
