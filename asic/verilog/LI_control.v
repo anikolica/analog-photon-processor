@@ -26,9 +26,11 @@ module LI_control(
 		    input wire 		       rstb
 		    );
 
-        reg li_start;
-        reg li_end;
-        reg li_active;
+        reg li_start = 1'd0;
+        reg li_end = 1'd0;
+        reg li_active = 1'd0;
+
+        reg [7:0] li_length;
 
         reg [7:0] cycle_counter;
 
@@ -39,39 +41,40 @@ module LI_control(
             li_start <= 1'b0;
             li_end <= 1'b0;
             li_active <= 1'b0;
+            li_length <= 8'd0;
           end else begin
-            // turn off li_end if it is active
-            if (li_end == 1'b1) begin
-              li_end <= 1'b0;
-            end
+            li_start <= 1'b0;
+            li_end <= 1'b0;
             // assuming another LI does not start during one
             // does valid_up_i stay for the whole LI or no? I'm assuming not
-            if ( |valid_up_i ) begin
-              if (cycle_counter == 8'd0) begin
-                li_start = 1'b1;
-                li_active = 1'b1;
-              end else begin
-                // TODO think if there's a nicer way to do this
-                li_start = 1'b0;
-              end
-            end
-            if ( li_active == 1'b1 ) begin
-              if ( cycle_counter < LI_length_i ) begin
-                // increment the counter
-                cycle_counter <= cycle_counter + 8'd1; 
+            // if ((|valid_up_i) && (cycle_counter == 8'd0) && (!li_active)) begin
+            if ((|valid_up_i) && (cycle_counter == 8'd0)) begin
+              li_start <= 1'b1;
+              li_active <= 1'b1;
+              li_length <= LI_length_i;
+              cycle_counter <= 8'd1; 
+            end else if (li_active) begin
+              if ( cycle_counter == li_length ) begin
+                li_end <= 1'b1;
+                if ((|valid_up_i)) begin
+                  li_active <= 1'b1;
+                  li_start <= 1'b1;
+                  li_length <= LI_length_i;
+                  cycle_counter <= 8'd1;
+                end else begin
+                  li_active <= 1'b0;
+                  cycle_counter <= 8'd0;
+                end
               end else begin
                 // set li_end high, li_active low and reset the counter
-                li_end <= 1'b1;
-                li_active <= 1'b0;
-                cycle_counter <= 8'd0;
+                cycle_counter <= cycle_counter + 8'd1; 
               end
             end
           end
         end
 
-        // is reset active low or active high?
-        assign LI_start_o = (rstb == 1'b0) ? 1'b0 : li_start;
-        assign LI_end_o = (rstb == 1'b0) ? 1'b0 : li_end;
-        assign LI_active_o = (rstb == 1'b0) ? 1'b0 : li_active;
+        assign LI_start_o = li_start;
+        assign LI_end_o = li_end;
+        assign LI_active_o = li_active;
 
 endmodule // LI_control
