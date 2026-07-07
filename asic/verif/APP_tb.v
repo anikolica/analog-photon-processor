@@ -26,41 +26,40 @@ module APP_tb;
     wire LI_active_i;
 
     // analog interface to amem_core
-     analog_if analog_if_tb (
-         .clk(clk),
-         .rstb(rstb),
-         .cmp_i(vcomp),
-         .clk_cnt_i(timestamp[7:0]),
- 	    .cnt8_up_0_o(cnt8_up_0_o),
- 	    .cnt8_up_1_o(cnt8_up_1_o),
- 	    .cnt8_up_2_o(cnt8_up_2_o),
- 	    .cnt8_up_3_o(cnt8_up_3_o),
- 	    .cnt8_down_0_o(cnt8_down_0_o),
- 	    .cnt8_down_1_o(cnt8_down_1_o),
- 	    .cnt8_down_2_o(cnt8_down_2_o),
- 	    .cnt8_down_3_o(cnt8_down_3_o),
-         .valid_up_o(valid_up_o),
-         .valid_down_o(valid_down_o)
-     );
- 
-     // amem_core lives inside controller
-     controller controller_tb (
-         .clk(clk),
-         .rstb(rstb),
-         .clk_cnt_i(timestamp[7:0]),
- 	    .valid_up_i(valid_up_o),
- 	    .cnt8_up_0_i(cnt8_up_0_o),
- 	    .cnt8_up_1_i(cnt8_up_1_o),
- 	    .cnt8_up_2_i(cnt8_up_2_o),
- 	    .cnt8_up_3_i(cnt8_up_3_o),
- 	    .valid_down_i(valid_down_o),
- 	    .cnt8_down_0_i(cnt8_down_0_o),
- 	    .cnt8_down_1_i(cnt8_down_1_o),
- 	    .cnt8_down_2_i(cnt8_down_2_o),
- 	    .cnt8_down_3_i(cnt8_down_3_o),
- 	    //.WE_ampl_i(), 
- 	    .WE_time_i(WE_time_i)
-     );
+    analog_if analog_if_tb (
+        .clk(clk),
+        .rstb(rstb),
+        .cmp_i(vcomp),
+        .clk_cnt_i(timestamp[7:0]),
+	    .cnt8_up_0_o(cnt8_up_0_o),
+	    .cnt8_up_1_o(cnt8_up_1_o),
+	    .cnt8_up_2_o(cnt8_up_2_o),
+	    .cnt8_up_3_o(cnt8_up_3_o),
+	    .cnt8_down_0_o(cnt8_down_0_o),
+	    .cnt8_down_1_o(cnt8_down_1_o),
+	    .cnt8_down_2_o(cnt8_down_2_o),
+	    .cnt8_down_3_o(cnt8_down_3_o),
+        .valid_up_o(valid_up_o),
+        .valid_down_o(valid_down_o)
+    );
+
+    // amem_core lives inside controller
+    controller controller_tb (
+        .clk(clk),
+        .rstb(rstb),
+        .clk_cnt_i(timestamp[7:0]),
+	    .valid_up_i(valid_up_o),
+	    .cnt8_up_0_i(cnt8_up_0_o),
+	    .cnt8_up_1_i(cnt8_up_1_o),
+	    .cnt8_up_2_i(cnt8_up_2_o),
+	    .cnt8_up_3_i(cnt8_up_3_o),
+	    .valid_down_i(valid_down_o),
+	    .cnt8_down_0_i(cnt8_down_0_o),
+	    .cnt8_down_1_i(cnt8_down_1_o),
+	    .cnt8_down_2_i(cnt8_down_2_o),
+	    .cnt8_down_3_i(cnt8_down_3_o),
+	    .WE_time_i(WE_time_i)
+    );
 
     // Instantiate app 1ch behavioral model
     // XXX - needs update based on Ravi's simulations,
@@ -68,7 +67,14 @@ module APP_tb;
     app_1ch_behav app_1ch_tb (
         .clk(clk),
        .rst_init(rst_init),
-        .vcomp(vcomp)
+        .vcomp(vcomp),
+        .sample(),
+        .sampleP(),
+        .VP_front(),
+        .VP_back(),
+        .count(),
+        .read_en(),
+        .timeout()
     );
 
     LI_control li_control_tb (
