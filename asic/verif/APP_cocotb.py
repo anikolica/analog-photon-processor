@@ -201,6 +201,8 @@ async def test_li_control(APP_tb):
     
     # initial setup
     APP_tb.li_control_tb.rstb.value = 1
+    APP_tb.LI_valid_up_o.value = 0b0000
+    APP_tb.LI_length_o.value = 0
 
     # wait a bit
     await Timer(60, 'ns')
