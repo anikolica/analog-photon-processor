@@ -193,6 +193,10 @@ async def test_amem_basic(APP_tb):
     APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
     await Timer(1000, 'ns')
 
+async def wait_cycle(clk):
+    await RisingEdge(clk)
+    await RisingEdge(clk)
+
 @cocotb.test(skip=((dont_run_all) and not env1("APP_LICNT")))
 async def test_li_control(APP_tb):
     """
@@ -216,7 +220,8 @@ async def test_li_control(APP_tb):
     # test a single LI
     APP_tb.LI_valid_up_o.value = 0b0010
     APP_tb.LI_length_o.value = 4
-    await ClockCycles(APP_tb.clk, 2)
+    # ensure it stays for a full clock cycle
+    await wait_cycle(APP_tb.clk)
     APP_tb.LI_length_o.value = 0
     APP_tb.LI_valid_up_o.value = 0b0000
     await Timer(200, 'ns')
@@ -227,18 +232,15 @@ async def test_li_control(APP_tb):
     # Set valid_up to some value, and give an LI length
     APP_tb.LI_valid_up_o.value = 0b0100 # arbitrary bit
     APP_tb.LI_length_o.value = li_length
-    await ClockCycles(APP_tb.clk, 2)
-    #await RisingEdge(APP_tb.clk)
+    await wait_cycle(APP_tb.clk)
     APP_tb.LI_length_o.value = 0
     APP_tb.LI_valid_up_o.value = 0b0000
     # wait for that to finish
     # await Timer(clock_len_ns*li_length, 'ns')
-    await ClockCycles(APP_tb.clk, li_length-3)
+    await ClockCycles(APP_tb.clk, li_length-1)
     APP_tb.LI_valid_up_o.value = 0b0001
     APP_tb.LI_length_o = 8
-    #await RisingEdge(APP_tb.clk)
-    await ClockCycles(APP_tb.clk, 4)
-    #await ClockCycles(APP_tb.clk, 1)
+    await RisingEdge(APP_tb.clk)
     APP_tb.LI_length_o.value = 0
     APP_tb.LI_valid_up_o.value = 0b0000
     await Timer(300, 'ns')
