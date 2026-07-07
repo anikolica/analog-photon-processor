@@ -58,6 +58,8 @@ module APP_tb;
 	    .cnt8_down_1_i(cnt8_down_1_o),
 	    .cnt8_down_2_i(cnt8_down_2_o),
 	    .cnt8_down_3_i(cnt8_down_3_o),
+        // WE_ampl_i is not defined
+	    //.WE_ampl_i(), 
 	    .WE_time_i(WE_time_i)
     );
 
