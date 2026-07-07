@@ -7,12 +7,7 @@ VERILOG_SOURCES+=   ../verilog/amem_core.v \
             ../verilog/one_shot_3.v \
             ../verilog/clock_div.v \
             ../verilog/oneshot.v \
-            ../verilog/analog_if/controller.sv \
-            ../verilog/analog_if/analog_if.v \
-            ../verilog/analog_if/clk_cnter.v \
-            ../verilog/analog_if/cmp_sync.v \
-            ../verilog/analog_if/cmp_latch.v \
-            ../verilog/analog_if/controller.sv \
+            ../verilog/LI_control.v \
             APP_tb.v
 
 TOPLEVEL = APP_tb
