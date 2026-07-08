@@ -26,9 +26,9 @@ module LI_control(
 		    input wire 		       rstb
 		    );
 
-        reg li_start = 1'd0;
-        reg li_end = 1'd0;
-        reg li_active = 1'd0;
+        reg li_start;
+        reg li_end;
+        reg li_active;
 
         reg [7:0] li_length;
 
