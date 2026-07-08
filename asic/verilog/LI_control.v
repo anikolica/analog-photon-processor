@@ -44,7 +44,7 @@ module LI_control(
           end else begin
             li_start <= 1'b0;
             li_end <= 1'b0;
-            if ((|valid_up_i) && (cycle_counter == 8'd0)) begin
+            if ((|valid_up_i) && (cycle_counter == 8'd0) && (!li_active)) begin
               li_start <= 1'b1;
               li_active <= 1'b1;
               li_length <= LI_length_i;
