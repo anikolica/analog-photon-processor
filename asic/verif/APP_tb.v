@@ -25,6 +25,10 @@ module APP_tb;
     wire LI_end_i;
     wire LI_active_i;
 
+    // Behavioral test signals for LI_control (separate from existing manual test)
+    reg [7:0] LI_length_behav = 8'hA;
+    wire LI_start_behav, LI_end_behav, LI_active_behav;
+
     // analog interface to amem_core
     analog_if analog_if_tb (
         .clk(clk),
@@ -77,6 +81,16 @@ module APP_tb;
         .count(),
         .read_en(),
         .timeout()
+    );
+
+    LI_control li_control_behav (
+        .valid_up_i(valid_up_o),
+        .LI_length_i(LI_length_behav),
+        .LI_start_o(LI_start_behav),
+        .LI_end_o(LI_end_behav),
+        .LI_active_o(LI_active_behav),
+        .clk(clk),
+        .rstb(rstb)
     );
 
     LI_control li_control_tb (
