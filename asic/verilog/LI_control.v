@@ -30,9 +30,9 @@ module LI_control(
         reg li_end;
         reg li_active;
 
-        reg [7:0] li_length;
-
         reg [7:0] cycle_counter;
+
+        wire valid_le;
 
         always @(posedge clk or negedge rstb) begin
           if (rstb == 1'b0) begin
@@ -40,22 +40,21 @@ module LI_control(
             li_start <= 1'b0;
             li_end <= 1'b0;
             li_active <= 1'b0;
-            li_length <= 8'd0;
           end else begin
             li_start <= 1'b0;
             li_end <= 1'b0;
-            if ((|valid_up_i) && (cycle_counter == 8'd0) && (!li_active)) begin
+            if ((valid_le) && (cycle_counter == 8'd0) && (!li_active)) begin
               li_start <= 1'b1;
               li_active <= 1'b1;
-              li_length <= LI_length_i;
               cycle_counter <= 8'd1; 
             end else if (li_active) begin
-              if ( cycle_counter == li_length ) begin
+              // (safely) assuming that another LI never starts during a window
+              if ( (cycle_counter == LI_length_i) || (valid_le) ) begin
                 li_end <= 1'b1;
-                if ((|valid_up_i)) begin
+                if (valid_le) begin
                   li_active <= 1'b1;
                   li_start <= 1'b1;
-                  li_length <= LI_length_i;
+                  li_end <= 1'b1;
                   cycle_counter <= 8'd1;
                 end else begin
                   li_active <= 1'b0;
@@ -71,5 +70,6 @@ module LI_control(
         assign LI_start_o = li_start;
         assign LI_end_o = li_end;
         assign LI_active_o = li_active;
+        assign valid_le = |valid_up_i;
 
 endmodule // LI_control
