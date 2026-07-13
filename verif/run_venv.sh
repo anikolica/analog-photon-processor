@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # Activate virtual environment
-source "$HOME/cocotb-env/bin/activate"
+if [ -d "$HOME/.app-env" ]; then
+  APP_PREFIX="$HOME/.app-env"
+else
+  APP_PREFIX="$HOME"
+fi
+source "$APP_PREFIX/cocotb-env/bin/activate"
 
 # Prepend cocotb-config from the venv to the PATH
 if [ -e "$VIRTUAL_ENV/bin/cocotb-config" ]; then
