@@ -108,8 +108,6 @@ module APP_tb;
 
     initial begin
         #0 rstb = 1'b0;
-        $shm_open("waves.shm");
-        $shm_probe("AS");
     end
 
 endmodule
