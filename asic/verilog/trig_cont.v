@@ -39,24 +39,36 @@ module trig_cont(
    reg [2:0] next_trig_end;
    reg [2:0] next_trig_idx;
    reg [2:0] last_wptr;
-   reg [2:0] next_last_wptr;
    
-   
+
+   always @( posedge clk, negedge rstb )
+     begin : TRACK_LAST_WPTR
+	if ( rstb == 1'b0 )
+	  begin
+	   last_wptr <= 3'h0;
+	  end
+	else
+	  begin
+	     if ( last_wptr != w_ptr_i )
+	       last_wptr <= w_ptr_i;
+	  end
+     end // block: TRACK_LAST_WPTR
+	
+	
   localparam [1:0]
-                IDLE  = 2'h0,
-                WAIT_TRIG = 2'h1,
-                WAIT_LI_END = 2'h2,
-                MARK_TOTS = 2'h3;
+                IDLE  = 2'b01,
+                WAIT_TRIG = 2'b11,
+                WAIT_LI_END = 2'b10;
    
   
-   always @(*) begin
+   always @(*) 
+     begin : FSM_COMB_BLOCK
       if ( rstb == 1'b0 ) begin
 	 next_state = IDLE;
-	 next_trigd = 8'h0;
-	 next_trig_start = 3'h00;
-	 next_trig_end = 3'h00;
-	 next_trig_idx = 3'h00;
-	 next_last_wptr = 3'h00;
+	 next_trigd = 8'h00;
+	 next_trig_start = 3'h0;
+	 next_trig_end = 3'h0;
+	 next_trig_idx = 3'h0;
       end
       
       next_trig_start = trig_start;
@@ -64,25 +76,22 @@ module trig_cont(
       next_trig_idx = trig_idx;
       next_state = state;
       next_trigd = trigd;
-      next_last_wptr = last_wptr;
       
 
 //      next_trigd = 8'h00;
 //      next_state = IDLE;
             
       if ( read_en_i && event_mux_i[3] )  // clear trigd on read
-	next_trigd = trigd & ~(1'b1 << event_mux_i[2:0]);
+	next_trigd = trigd & ~(8'h01 << event_mux_i[2:0]);
 
-      if ( last_wptr != w_ptr_i )
-	next_last_wptr = w_ptr_i;
       
       case ( state )
 	// We are not marking ToT as triggered and we are not in an LI window
 	IDLE: begin
 	   // Marking ToTs as triggered
 	   if ( trig_idx != trig_end ) begin
-	      next_trigd = trigd | (1'b1 << trig_idx);
-	      next_trig_idx = trig_idx + 1'b1;
+	      next_trigd = trigd | (8'h01 << trig_idx);
+	      next_trig_idx = ( trig_idx == 3'b111 ) ? 3'h0 : trig_idx + 3'b001;
 	   end
 	   
 	   if ( LI_start_i ) begin
@@ -102,8 +111,8 @@ module trig_cont(
 	   else begin
 	      // Marking ToTs as triggered
 	      if ( trig_idx != trig_end ) begin
-		 next_trigd = trigd | (1'b1 << trig_idx);
-		 next_trig_idx = trig_idx + 1'b1;
+		 next_trigd = trigd | (8'h01 << trig_idx);
+		 next_trig_idx = ( trig_idx == 3'b111 ) ? 3'h0 : trig_idx + 3'b001;
 	      end
 
 	      if ( LI_end_i ) next_state = IDLE;
@@ -116,8 +125,8 @@ module trig_cont(
 	   next_trig_end = last_wptr;
 	   // Marking ToTs as triggered
 	   if ( trig_idx != trig_end ) begin
-	      next_trigd = trigd | (1'b1 << trig_idx);
-	      next_trig_idx = trig_idx + 1'b1;
+	      next_trigd = trigd | (8'h01 << trig_idx);
+	      next_trig_idx = ( trig_idx == 3'b111 ) ? 3'h0 : trig_idx + 3'b001;
 	   end
 	     
 	   if ( LI_end_i ) next_state = IDLE;
@@ -127,23 +136,24 @@ module trig_cont(
       endcase // case ( state )
    end // always @ (*)
    
-   always @(posedge clk, negedge rstb )
-     if ( rstb == 1'b0 ) begin
-	state <= IDLE;
-	trigd <= 8'h00;
-	trig_start <= 3'h0;
-	trig_end <= 3'h0;
-	trig_idx <= 3'h0;
-	last_wptr <= 3'h0;
-     end
-     else begin
-	state <= next_state;
-	trigd <= next_trigd;
-	trig_start <= next_trig_start;
-	trig_end <= next_trig_end;
-	trig_idx <= next_trig_idx;
-	last_wptr <= next_last_wptr;
-     end
+   always @(posedge clk, negedge rstb ) 
+     begin : FSM_SEQ_BLOCK
+	if ( rstb == 1'b0 ) begin
+	   state <= IDLE;
+	   trigd <= 8'h00;
+	   trig_start <= 3'h0;
+	   trig_end <= 3'h0;
+	   trig_idx <= 3'h0;
+	end
+	else begin
+	   state <= next_state;
+	   trigd <= next_trigd;
+	   trig_start <= next_trig_start;
+	   trig_end <= next_trig_end;
+	   trig_idx <= next_trig_idx;
+	end // else: !if( rstb == 1'b0 )
+     end // block: FSM_SEQ_BLOCK
+   
    
    
 	  
