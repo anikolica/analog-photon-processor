@@ -48,10 +48,10 @@ module LI_control(
               li_active <= 1'b1;
               cycle_counter <= 8'd1; 
             end else if (li_active) begin
-              // (safely) assuming that another LI never starts during a window
-              if ( (cycle_counter == LI_length_i) || (valid_le) ) begin
+              //if ( (cycle_counter == LI_length_i) || ( (valid_le) && (cycle_counter + 8'd1 == LI_length_i)) ) begin
+              if ( (cycle_counter == LI_length_i) ) begin
                 li_end <= 1'b1;
-                if (valid_le) begin
+                if ((valid_le)) begin
                   li_active <= 1'b1;
                   li_start <= 1'b1;
                   li_end <= 1'b1;
