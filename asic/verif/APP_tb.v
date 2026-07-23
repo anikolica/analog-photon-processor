@@ -17,6 +17,17 @@ module APP_tb;
     reg vcomp = 0; // from tb
     wire rst_init;
     assign rst_init = !rstb;
+    
+    // LI Control signals
+    wire [3:0] LI_valid_up_o;
+    wire [7:0] LI_length_o;
+    wire LI_start_i;
+    wire LI_end_i;
+    wire LI_active_i;
+
+    // Behavioral test signals for LI_control (separate from existing manual test)
+    reg [7:0] LI_length_behav = 8'hA;
+    wire LI_start_behav, LI_end_behav, LI_active_behav;
 
     // analog interface to amem_core
     analog_if analog_if_tb (
@@ -51,7 +62,8 @@ module APP_tb;
 	    .cnt8_down_1_i(cnt8_down_1_o),
 	    .cnt8_down_2_i(cnt8_down_2_o),
 	    .cnt8_down_3_i(cnt8_down_3_o),
-	    .WE_ampl_i(), 
+        // WE_ampl_i is not defined
+	    //.WE_ampl_i(), 
 	    .WE_time_i(WE_time_i)
     );
 
@@ -60,8 +72,35 @@ module APP_tb;
     // then we can generate WE here, instead of APP_cocotb.py
     app_1ch_behav app_1ch_tb (
         .clk(clk),
-        .rst_init(rst_init),
-        .vcomp(vcomp)
+       .rst_init(rst_init),
+        .vcomp(vcomp),
+        .sample(),
+        .sampleP(),
+        .VP_front(),
+        .VP_back(),
+        .count(),
+        .read_en(),
+        .timeout()
+    );
+
+    LI_control li_control_behav (
+        .valid_up_i(valid_up_o),
+        .LI_length_i(LI_length_behav),
+        .LI_start_o(LI_start_behav),
+        .LI_end_o(LI_end_behav),
+        .LI_active_o(LI_active_behav),
+        .clk(clk),
+        .rstb(rstb)
+    );
+
+    LI_control li_control_tb (
+        .valid_up_i(LI_valid_up_o),
+        .LI_length_i(LI_length_o),
+        .LI_start_o(LI_start_i),
+        .LI_end_o(LI_end_i),
+        .LI_active_o(LI_active_i),
+        .clk(clk),
+        .rstb(rstb)
     );
 
     always #10 clk = ~clk; // 50MHz clock
