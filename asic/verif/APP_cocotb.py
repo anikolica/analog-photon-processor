@@ -399,3 +399,19 @@ async def test_oneshot(APP_tb):
     # wait for another rising edge for pulse to deassert
     await RisingEdge(APP_tb.clk)
     assert APP_tb.pulse_in.value == 0, "pulse should go low on next clock cycle"
+
+    # test for retriggers
+    await RisingEdge(APP_tb.clk)
+    APP_tb.trigger_out.value = 1
+    await Timer(1, 'ns')
+    assert APP_tb.pulse_in.value == 1, "pulse should go high asynchronously"
+    #re-sync test to clock
+    await RisingEdge(APP_tb.clk)
+    # wait for another two clock cycles
+    await RisingEdge(APP_tb.clk)
+    await RisingEdge(APP_tb.clk)
+    # ensure on the second clock we don't get a retrigger
+    assert APP_tb.pulse_in.value == 0, "pulse should not re-fire on a held trigger"
+    await RisingEdge(APP_tb.clk)
+    APP_tb.trigger_out.value = 0
+    
