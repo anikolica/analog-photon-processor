@@ -7,14 +7,15 @@ module demux(
         output wire [7:0] demux_o
     );
 
-    reg [7:0] out;
+    //reg [7:0] out;   -- out is a keyword
+    reg [7:0] d_out;
     always @(*)
     begin
         if (!enable_i) begin
-            out = 1'b0;
+            d_out = 8'h00;
         end else begin
-            out = 8'b1 << val_i;
+            d_out = 8'h01 << val_i;
         end
     end
-    assign demux_o = out;
+    assign demux_o = d_out;
 endmodule

@@ -27,6 +27,7 @@
 		    output wire 	       sample_ready_o,
 		    output wire 	       amem_empty_o,
 		    output wire 	       amem_full_o,
+		    output wire 	       LI_end_o,
 
 		    input wire 		       clk,
 		    input wire 		       rstb
@@ -244,6 +245,8 @@
    wire LI_active;
    wire LI_start;
    wire LI_end;
+   assign LI_end_o = LI_end;
+
 
    wire [7:0] triggered;
    
