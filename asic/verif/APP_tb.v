@@ -38,6 +38,9 @@ module APP_tb;
     wire clock_out_2;
     wire clock_out_4;
 
+    // clock_cnter signals
+    wire [7:0] clk_cnt_i;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -136,6 +139,13 @@ module APP_tb;
     clock_div #(.DIVISOR(28'd4)) clock_div_4_tb (
         .clock_in(clk),
         .clock_out(clock_out_4)
+    );
+    
+    // TODO do I need to change nbits ever? Should I test that?
+    clk_cnter clk_cnter_tb (
+        .clk(clk),
+        .rstb(rstb),
+        .clk_cnt_o(clk_cnt_i)
     );
 
     always #10 clk = ~clk; // 50MHz clock

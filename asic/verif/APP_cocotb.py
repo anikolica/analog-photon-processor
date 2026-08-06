@@ -436,3 +436,20 @@ async def test_clock_div(APP_tb):
     await RisingEdge(APP_tb.clk)
     await RisingEdge(APP_tb.clk)
     assert APP_tb.clock_out_4.value == 0, "clock_out must go low"
+
+@cocotb.test(skip=(dont_run_all and not env1("APP_CLKCNTER")))
+async def test_clk_cnter(APP_tb):
+    # Initial setup
+    APP_tb.rstb.value = 0
+    await RisingEdge(APP_tb.clk)
+    APP_tb.rstb.value = 1
+
+    # check if reset has configured things correctly
+    assert APP_tb.clk_cnt_i.value == 0, "rstb must reset clock_cnt to zero"
+    await RisingEdge(APP_tb.clk)
+    for i in range(256):
+        assert APP_tb.clk_cnt_i.value == i, f"clock_cnt must have value {i}, got {APP_tb.clk_cnt_i.value}"
+        await RisingEdge(APP_tb.clk)
+
+    # test roll-over
+    assert APP_tb.clk_cnt_i.value == 0, "clock must roll over once integer limit is hit"
