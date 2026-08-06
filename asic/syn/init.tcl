@@ -56,7 +56,9 @@ set ec::LIBRARY_7THVT   "$TSMC_PDK/digital/Front_End/timing_power_noise/NLDM/tcb
 set ec::VERILOG_LIST    { analog_if.v cmp_sync.v cmp_latch.v \
 			      clk_cnter.v trig_cont.v controller.sv \
 			      #amem_core.v prio_enc_mod8.v one_shot_3.v \
-			  APP.v  }
+			      LI_control.v
+			      APP_dig.v \
+			   }
 
 
 #set ec::VERILOG_LIST    "X0814_opamp_N_P.v PDB1A.v PDB3AC.v  APP.v addr.v clk_counter.v hcc_syncFifo_latC.v"
@@ -238,129 +240,129 @@ puts "\nEC INFO: Total cpu-time and memory after LOAD: [get_attr runtime /] sec.
 
 
 #elaborate 
-elaborate APP   ; # Need to specify toplevel module now -ncd 2025
+elaborate APP_dig   ; # Need to specify toplevel module now -ncd 2025
 
 # Try to preserve analog net 'opamp_out' that connects two analog Marcros
 # This will stop Genus from optimizing the Macros away -ncd 2025
-set_attribute preserve true pad_opamp_out  
-set_attribute preserve true pad_inN  
-set_attribute preserve true pad_inP  
+#set_attribute preserve true pad_opamp_out  
+#set_attribute preserve true pad_inN  
+#set_attribute preserve true pad_inP  
 
-set_attribute preserve true pad_ana0_i 
-set_attribute preserve true pad_ana1_i 
+#set_attribute preserve true pad_ana0_i 
+#set_attribute preserve true pad_ana1_i 
 
-set_attribute preserve true /designs/APP/nets/read_en
-set_attribute preserve true /designs/APP/nets/sample_ready_o
-set_attribute preserve true /designs/APP/nets/amem_empty_o
-set_attribute preserve true /designs/APP/nets/amem_full_o
-set_attribute preserve true /designs/APP/nets/event_mux[0]
-set_attribute preserve true /designs/APP/nets/event_mux[1]
-set_attribute preserve true /designs/APP/nets/event_mux[2]
-set_attribute preserve true /designs/APP/nets/event_mux[3]
+# set_attribute preserve true /designs/APP/nets/read_en
+# set_attribute preserve true /designs/APP/digital_top/nets/sample_ready_o
+# set_attribute preserve true /designs/APP/digital_top/nets/amem_empty_o
+# set_attribute preserve true /designs/APP/digital_top/nets/amem_full_o
+# set_attribute preserve true /designs/APP/nets/event_mux[0]
+# set_attribute preserve true /designs/APP/nets/event_mux[1]
+# set_attribute preserve true /designs/APP/nets/event_mux[2]
+# set_attribute preserve true /designs/APP/nets/event_mux[3]
 
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[0]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[1]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[2]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[3]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[4]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[5]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[6]
-set_attribute preserve true /designs/APP/instances_hier/cntl/nets/triggered[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/cntl/nets/triggered[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_up_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_up_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_up_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_up_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_up_o[3]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_0_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_0_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_1_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_1_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_2_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_2_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_up_3_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_up_3_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/ups[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/ups[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/ups[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/ups[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/ups[3]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/valid_down_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_down_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_down_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_down_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/valid_down_o[3]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_0_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_0_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_1_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_1_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_2_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_2_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[0]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[3]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[4]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[5]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[6]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/cnt8_down_3_o[7]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[0]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[4]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[5]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[6]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/cnt8_down_3_o[7]
 
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/downs[1]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/downs[2]
-set_attribute preserve true /designs/APP/instances_hier/ai/nets/downs[3]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/downs[1]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/downs[2]
+# set_attribute preserve true /designs/APP/instances_hier/digital_top/ai/nets/downs[3]
 
-set_attribute preserve true /designs/APP/nets/w_ptr_up[0]
-set_attribute preserve true /designs/APP/nets/w_ptr_up[1]
-set_attribute preserve true /designs/APP/nets/w_ptr_up[2]
+# set_attribute preserve true /designs/APP/digital_top/nets/w_ptr_up[0]
+# set_attribute preserve true /designs/APP/digital_top/nets/w_ptr_up[1]
+# set_attribute preserve true /designs/APP/digital_top/nets/w_ptr_up[2]
 
 #set_attribute preserve true /designs/APP/instances_hier/cntl
 #set_attribute preserve true /designs/APP/instances_hier/cntl/instances_seq/w_ptr_up_reg[0]
