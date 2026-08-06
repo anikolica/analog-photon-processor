@@ -25,6 +25,11 @@ module APP_tb;
     wire LI_end_i;
     wire LI_active_i;
 
+    // demux signals
+    wire demux_enable_o;
+    wire [2:0] demux_val_o;
+    wire [7:0] demux_i;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -101,6 +106,12 @@ module APP_tb;
         .LI_active_o(LI_active_i),
         .clk(clk),
         .rstb(rstb)
+    );
+
+    demux demux_tb (
+        .enable_i(demux_enable_o),
+        .val_i(demux_val_o),
+        .demux_o(demux_i)
     );
 
     always #10 clk = ~clk; // 50MHz clock

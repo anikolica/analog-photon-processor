@@ -352,3 +352,25 @@ async def test_li_control_behav(APP_tb):
     assert APP_tb.LI_active_behav.value == 0, "LI_active should go low after back-to-back windows complete"
     
     await Timer(100, 'ns')
+
+
+@cocotb.test(skip=(dont_run_all and not env1("APP_DEMUX")))
+async def test_demux(APP_tb):
+    """Test that the demultiplexer properly demuxes values.
+    """
+
+    # initial setup
+
+    # start with demux disabled
+    APP_tb.demux_enable_o.value = 0
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.demux_i.value == 0, "demux must output zero when disabled."
+
+    await RisingEdge(APP_tb.clk)
+    APP_tb.demux_enable_o.value = 1
+    # wait another clock
+    # loop through values, feed to demux and then check proper output
+    for i in range(8):
+        APP_tb.demux_val_o.value = i
+        await RisingEdge(APP_tb.clk)
+        assert APP_tb.demux_i.value == (1 << i), f"demultiplexer must output {(1<<i)} for value {i}, got {APP_tb.demux_i.value}"
