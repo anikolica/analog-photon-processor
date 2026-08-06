@@ -7,7 +7,7 @@ module clk_cnter #(parameter CLK_NBITS=8) (
 				   input wire 		       rstb
 				   );
 
-   reg [7:0] clock_cnt;
+   reg [CLK_NBITS-1:0] clock_cnt;
    assign clk_cnt_o = clock_cnt;
 
    always @(posedge clk, negedge rstb ) begin
