@@ -421,6 +421,9 @@ async def test_clock_div(APP_tb):
     """
     # NOTE this will constantly fire. Do we want a separate clock signal so this
     # only runs during it's own test?
+    # initialize, wait for clock_div's counter to be zero
+    while APP_tb.clock_div_2_tb.counter.value != 0:
+        await RisingEdge(APP_tb.clk)
     
     # DIVISOR=2 test
     await RisingEdge(APP_tb.clk)
@@ -429,6 +432,10 @@ async def test_clock_div(APP_tb):
     await RisingEdge(APP_tb.clk)
     await FallingEdge(APP_tb.clk)
     assert APP_tb.clock_out_2.value == 0, "clock_out must go low"
+
+    # once again, wait for the clock_div counter to be zero
+    while APP_tb.clock_div_4_tb.counter.value != 0:
+        await RisingEdge(APP_tb.clk)
 
     # DIVISOR=4 test
     await RisingEdge(APP_tb.clk)
