@@ -30,6 +30,10 @@ module APP_tb;
     wire [2:0] demux_val_o;
     wire [7:0] demux_i;
 
+    //oneshot signals
+    wire pulse_in;
+    wire trigger_out;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -114,11 +118,19 @@ module APP_tb;
         .demux_o(demux_i)
     );
 
+    oneshot oneshot_tb (
+        .clk(clk),
+        .trigger_in(trigger_out),
+        .pulse_out(pulse_in)
+    );
+
     always #10 clk = ~clk; // 50MHz clock
     always #20 timestamp = timestamp + 1;
 
     initial begin
         #0 rstb = 1'b0;
+        // $shm_open("waves.shm");
+        // shm_probe(APP_tb, "AS");
     end
 
 endmodule

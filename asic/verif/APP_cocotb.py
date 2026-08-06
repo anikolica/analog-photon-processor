@@ -358,9 +358,6 @@ async def test_li_control_behav(APP_tb):
 async def test_demux(APP_tb):
     """Test that the demultiplexer properly demuxes values.
     """
-
-    # initial setup
-
     # start with demux disabled
     APP_tb.demux_enable_o.value = 0
     await RisingEdge(APP_tb.clk)
@@ -374,3 +371,31 @@ async def test_demux(APP_tb):
         APP_tb.demux_val_o.value = i
         await RisingEdge(APP_tb.clk)
         assert APP_tb.demux_i.value == (1 << i), f"demultiplexer must output {(1<<i)} for value {i}, got {APP_tb.demux_i.value}"
+
+@cocotb.test(skip=(dont_run_all and not env1("APP_ONESHOT")))
+async def test_oneshot(APP_tb):
+    """Test async oneshot module.
+    """
+
+    # Initial Setup
+    APP_tb.rstb.value = 1
+    APP_tb.trigger_out.value = 0
+    await ClockCycles(APP_tb.clk, 2)
+
+    # async pulse
+    # wait for next clock dege
+    await RisingEdge(APP_tb.clk)
+    # plus another 1/4 of a cycle
+    await Timer(5, 'ns')
+
+    APP_tb.trigger_out.value = 1
+    # check that pulse goes high before next clock edge
+    await Timer(1, 'ns')
+    APP_tb.trigger_out.value = 0
+    assert APP_tb.pulse_in.value == 1, "pulse should go high asynchronously"
+
+    # wait for next rising edge to get back on the clock
+    await RisingEdge(APP_tb.clk)
+    # wait for another rising edge for pulse to deassert
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.pulse_in.value == 0, "pulse should go low on next clock cycle"
