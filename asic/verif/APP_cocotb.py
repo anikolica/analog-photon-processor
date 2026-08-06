@@ -415,3 +415,24 @@ async def test_oneshot(APP_tb):
     await RisingEdge(APP_tb.clk)
     APP_tb.trigger_out.value = 0
     
+@cocotb.test(skip=(dont_run_all and not env1("APP_CLOCKDIV")))
+async def test_clock_div(APP_tb):
+    """Test of clock_div module
+    """
+    # NOTE this will constantly fire. Do we want a separate clock signal so this
+    # only runs during it's own test?
+    
+    # DIVISOR=2 test
+    await RisingEdge(APP_tb.clk)
+    await FallingEdge(APP_tb.clk)
+    assert APP_tb.clock_out_2.value == 1, "clock_out must go high"
+    await RisingEdge(APP_tb.clk)
+    await FallingEdge(APP_tb.clk)
+    assert APP_tb.clock_out_2.value == 0, "clock_out must go low"
+
+    # DIVISOR=4 test
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.clock_out_4.value == 1, "clock_out must go high"
+    await RisingEdge(APP_tb.clk)
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.clock_out_4.value == 0, "clock_out must go low"

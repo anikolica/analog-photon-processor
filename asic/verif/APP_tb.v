@@ -34,6 +34,10 @@ module APP_tb;
     wire pulse_in;
     wire trigger_out;
 
+    // clock_div signals for DIVISOR=2 and DIVISOR=4
+    wire clock_out_2;
+    wire clock_out_4;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -124,13 +128,23 @@ module APP_tb;
         .pulse_out(pulse_in)
     );
 
+    clock_div clock_div_2_tb (
+        .clock_in(clk),
+        .clock_out(clock_out_2)
+    );
+
+    clock_div #(.DIVISOR(28'd4)) clock_div_4_tb (
+        .clock_in(clk),
+        .clock_out(clock_out_4)
+    );
+
     always #10 clk = ~clk; // 50MHz clock
     always #20 timestamp = timestamp + 1;
 
     initial begin
         #0 rstb = 1'b0;
-        // $shm_open("waves.shm");
-        // shm_probe(APP_tb, "AS");
+        $shm_open("waves.shm");
+        $shm_probe(APP_tb, "AS");
     end
 
 endmodule
