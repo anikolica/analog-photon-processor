@@ -460,3 +460,25 @@ async def test_clk_cnter(APP_tb):
 
     # test roll-over
     assert APP_tb.clk_cnt_i.value == 0, "clock must roll over once integer limit is hit"
+
+@cocotb.test(skip=(dont_run_all and not env1('APP_ADDR')))
+async def test_addr(APP_tb):
+    # Initial setup
+    APP_tb.addr_a_i.value = 0
+    APP_tb.addr_b_i.value = 0
+    APP_tb.rstb.value = 0
+    await RisingEdge(APP_tb.clk)
+    APP_tb.rstb.value = 1
+    await RisingEdge(APP_tb.clk)
+
+    # check if everything reset properly
+    assert APP_tb.addr_c_o.value == 0b0, "output must be zero after reset"
+
+    # check all possible outputs
+    for a in range(16):
+        for b in range(16):
+            APP_tb.addr_a_i.value = a
+            APP_tb.addr_b_i.value = b
+            await RisingEdge(APP_tb.clk)
+            await RisingEdge(APP_tb.clk)
+            assert APP_tb.addr_c_o.value == a + b, f"addr output incorrect, expected {a+b}, got {APP_tb.addr_c_o.value}"

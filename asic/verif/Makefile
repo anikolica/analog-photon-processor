@@ -9,6 +9,7 @@ VERILOG_SOURCES+=   ../verilog/amem_core.v \
             ../verilog/oneshot.v \
             ../verilog/trig_cont.v \
             ../verilog/LI_control.v \
+            ../verilog/addr.v \
             ../verilog/demux.v \
             ../verilog/analog_if/controller.sv \
             ../verilog/analog_if/analog_if.v \

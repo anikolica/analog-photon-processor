@@ -41,6 +41,11 @@ module APP_tb;
     // clock_cnter signals
     wire [7:0] clk_cnt_i;
 
+    // addr signals
+    wire [3:0] addr_a_i;
+    wire [3:0] addr_b_i;
+    wire [4:0] addr_c_o;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -146,6 +151,14 @@ module APP_tb;
         .clk(clk),
         .rstb(rstb),
         .clk_cnt_o(clk_cnt_i)
+    );
+
+    addr addr_tb (
+        .clk(clk),
+        .rstb(rstb),
+        .a_i(addr_a_i),
+        .b_i(addr_b_i),
+        .c_o(addr_c_o)
     );
 
     always #10 clk = ~clk; // 50MHz clock
