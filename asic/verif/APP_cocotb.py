@@ -1,5 +1,6 @@
 import sys
 import random
+import itertools
 import os
 import csv
 
@@ -482,3 +483,185 @@ async def test_addr(APP_tb):
             await RisingEdge(APP_tb.clk)
             await RisingEdge(APP_tb.clk)
             assert APP_tb.addr_c_o.value == a + b, f"addr output incorrect, expected {a+b}, got {APP_tb.addr_c_o.value}"
+
+def prio_enc_mod8_reference(prev_index, falling_edges):
+    """
+    Pure-python mirror of the combinational core of prio_enc_mod8.v.
+
+    Given the current reported index and the mask of falling edges
+    (falling_edges = prev & ~signals), returns (next_index, valid):
+      - no falling edges   -> index holds, valid = 0
+      - some falling edges -> highest-priority bit among the falling set,
+                              where priority scans downward from prev_index
+                              circularly (prev_index, prev_index-1, ...,
+                              0, 7, ..., prev_index+1).
+    """
+    falling_edges &= 0xFF
+    if falling_edges == 0:
+        return prev_index, 0
+
+    # rotate right by (index + 1), OR with the wrapped-around bits
+    k = (prev_index + 1) & 0x7
+    rotated = ((falling_edges >> k) | (falling_edges << (8 - k))) & 0xFF
+    offset = rotated.bit_length() - 1  # leftmost set bit == casex priority result
+    return (offset + prev_index + 1) & 0x7, 1
+
+
+if __name__ == "__main__":
+    # Sanity checks for the reference model against the module header examples.
+    assert prio_enc_mod8_reference(0, 0x00) == (0, 0), "no-edge must hold index"
+    assert prio_enc_mod8_reference(0, 0x18) == (4, 1), "TACs 3 & 4 -> index 4"
+    assert prio_enc_mod8_reference(0, 0x81) == (0, 1), "TACs 7 & 0 wrap -> index 0"
+    assert prio_enc_mod8_reference(0, 0x10) == (4, 1), "single bit -> itself"
+    assert prio_enc_mod8_reference(4, 0x04) == (2, 1), "single bit below index"
+
+    # Exhaustive cross-check of the reference model against two independent
+    # formulations: a literal translation of the Verilog, and the semantic
+    # definition (highest-priority falling bit, scanning circularly downward
+    # from the current index).
+    def verilog_literal(prev_index, falling_edges):
+        """Literal translation of prio_enc_mod8.v lines 69-73."""
+        tb = (prev_index + 1) & 0x7            # index + 3'b001 (3-bit add wraps)
+        shl = (8 - tb) & 0xF                   # 4'b1000 - (index + 3'b001)
+        shifted = ((falling_edges >> tb) |
+                   (falling_edges << shl)) & 0xFF
+        if falling_edges == 0:
+            return prev_index, 0
+        if shifted == 0:
+            return prev_index, 1  # dangles if the RTL ever produces 0; flag it
+        offset = shifted.bit_length() - 1      # casex: leftmost set bit
+        return (prev_index + offset + 1) & 0x7, 1
+
+    def scan_descending(prev_index, falling_edges):
+        """Semantic: pick (prev_index, prev_index-1, ...) mod 8, first set bit."""
+        if falling_edges == 0:
+            return prev_index, 0
+        for i in range(8):
+            bit = (prev_index - i) & 0x7
+            if falling_edges & (1 << bit):
+                return bit, 1
+
+    checked = 0
+    for idx in range(8):
+        for falling in range(256):
+            ref = prio_enc_mod8_reference(idx, falling)
+            assert ref == verilog_literal(idx, falling), \
+                f"ref vs verilog_literal mismatch idx={idx} falling={falling:08b}"
+            assert ref == scan_descending(idx, falling), \
+                f"ref vs scan_descending mismatch idx={idx} falling={falling:08b}"
+            checked += 1
+    assert checked == 8 * 256, "exhaustive cross-check must cover all cases"
+    print(f"prio_enc_mod8_reference sanity checks passed ({checked} cases)")
+
+
+async def prio_enc_reset(APP_tb):
+    """Pulse rstb low for one clock and return to normal operation."""
+    APP_tb.rstb.value = 1
+    await RisingEdge(APP_tb.clk)
+    APP_tb.rstb.value = 0
+    await RisingEdge(APP_tb.clk)
+    APP_tb.rstb.value = 1
+    await RisingEdge(APP_tb.clk)
+
+
+async def prio_set_index(APP_tb, target):
+    """
+    Drive prio_enc_mod8_tb to an arbitrary internal index state.
+
+    With index == 0 a single falling bit always reports that bit's own
+    index, so falling each bit 0..target in sequence leaves index == target.
+    """
+    APP_tb.p_signals_out.value = 0
+    for i in range(target + 1):
+        APP_tb.p_signals_out.value = 1 << i
+        await RisingEdge(APP_tb.clk)  # latch signals into prev
+        APP_tb.p_signals_out.value = 0
+        await RisingEdge(APP_tb.clk)  # detect the falling edge -> index = i
+
+
+async def prio_drive(APP_tb, signals):
+    """
+    Apply one clock cycle of `signals` to p_signals_out and return the
+    resulting (index, valid) outputs as a tuple.
+
+    A short timer after the clock edge lets the non-blocking register
+    updates for index/valid settle before reading back.
+    """
+    APP_tb.p_signals_out.value = signals
+    await RisingEdge(APP_tb.clk)
+    await Timer(1, 'ns')  # 1 ns << 20 ns clock period; read NBA-updated outputs
+    return int(APP_tb.p_index_in.value), int(APP_tb.p_valid_in.value)
+
+
+def prio_enc_model_step(state, signals):
+    """
+    One DUT clock cycle in python.  state = {'prev': int, 'index': int}
+    mirrors the DUT's prev/index registers.  Returns (new_state, (index, valid)).
+    """
+    falling = state['prev'] & (~signals) & 0xFF
+    if falling:
+        index, _ = prio_enc_mod8_reference(state['index'], falling)
+        valid = 1
+    else:
+        index, valid = state['index'], 0
+    return {'prev': signals, 'index': index}, (index, valid)
+
+
+@cocotb.test(skip=(dont_run_all and not env1('APP_PRIO_ENC')))
+async def test_prio_enc_mod8(APP_tb):
+    """
+    Test prio_enc_mod8.
+
+    Checks reset behavior, the two documented examples from the module
+    header, then exhaustively sweeps every (current index, falling_edges)
+    combination against a python reference model.  Ends with a seeded
+    randomized regression that compares every clock cycle against a full
+    python model of the DUT (prev/index registers).
+    """
+
+    # Initial Setup
+    await prio_enc_reset(APP_tb)
+    assert APP_tb.p_signals_out.value == 0, "Input signals not properly reset."
+    assert APP_tb.p_index_in.value == 0, "Output indices not properly reset."
+    assert APP_tb.p_valid_in.value == 0, "Valid flag not properly reset."
+
+    # Module header examples
+    await prio_enc_reset(APP_tb)
+    await prio_drive(APP_tb, 0x18)
+    got = await prio_drive(APP_tb, 0x00)
+    assert got == prio_enc_mod8_reference(0, 0x18), \
+        f"TACs 3 and 4 finishing together must report index 4, got {got}"
+
+    # TACs 7 and 0 finish at the same time
+    await prio_enc_reset(APP_tb)
+    await prio_drive(APP_tb, 0x81)
+    got = await prio_drive(APP_tb, 0x00)
+    assert got == prio_enc_mod8_reference(0, 0x81), \
+        f"TACs 7 and 0 finishing together must report index 0 (mod 8 wrap), got {got}"
+
+    case_count = 0
+    for idx, falling in itertools.product(range(8), range(256)):
+        await prio_set_index(APP_tb, idx)
+        got = await prio_drive(APP_tb, falling)
+        assert got == (idx, 0), (
+            f"exhaustive idx={idx} falling={falling:08b}: rising edge must not "
+            f"set valid or change index, got {got}")
+        exp = prio_enc_mod8_reference(idx, falling)
+        got = await prio_drive(APP_tb, 0x00)
+        assert got == exp, (
+            f"exhaustive idx={idx} falling={falling:08b}: expected {exp}, got {got}")
+        case_count += 1
+    assert case_count == 8 * 256, \
+        "exhaustive sweep must cover all index x falling_edges combinations"
+
+    # Seeded randomized regression
+    # Cycle-by-cycle comparison against a python model of the full DUT.
+    await prio_enc_reset(APP_tb)
+    state = {'prev': 0, 'index': 0}
+    rng = random.Random(1234)
+    for i in range(2000):
+        sig = rng.randrange(256)
+        state, exp = prio_enc_model_step(state, sig)
+        got = await prio_drive(APP_tb, sig)
+        assert got == exp, \
+            f"random case {i}: signals={sig:08b}, expected {exp}, got {got}"

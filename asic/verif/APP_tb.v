@@ -46,6 +46,12 @@ module APP_tb;
     wire [3:0] addr_b_i;
     wire [4:0] addr_c_o;
 
+    // prio_enc_mod8 signals
+    // p_signals_out is driven from APP_cocotb.py
+    wire [7:0] p_signals_out = 8'b0;
+    wire [2:0] p_index_in;
+    wire p_valid_in;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -93,7 +99,7 @@ module APP_tb;
     // then we can generate WE here, instead of APP_cocotb.py
     app_1ch_behav app_1ch_tb (
         .clk(clk),
-       .rst_init(rst_init),
+        .rst_init(rst_init),
         .vcomp(vcomp),
         .sample(),
         .sampleP(),
@@ -102,6 +108,14 @@ module APP_tb;
         .count(),
         .read_en(),
         .timeout()
+    );
+
+    prio_enc_mod8 prio_enc_mod8_tb (
+        .clk(clk),
+        .rstb(rstb),
+        .signals(p_signals_out),
+        .index(p_index_in),
+        .valid(p_valid_in)
     );
 
     LI_control li_control_behav (
