@@ -665,3 +665,65 @@ async def test_prio_enc_mod8(APP_tb):
         got = await prio_drive(APP_tb, sig)
         assert got == exp, \
             f"random case {i}: signals={sig:08b}, expected {exp}, got {got}"
+
+@cocotb.test(skip=(dont_run_all and not env1('APP_OS3')))
+async def test_one_shot_3(APP_tb):
+    # Initial Setup
+    APP_tb.o3_trigger_o.value = 0
+    
+    APP_tb.rstb.value = 1
+    
+    # Ensure rstb is high
+    await RisingEdge(APP_tb.clk)
+
+    # toggle reset low
+    APP_tb.rstb.value = 0
+    await RisingEdge(APP_tb.clk)
+    APP_tb.rstb.value = 1
+
+    # Check values are set properly
+    assert APP_tb.one_shot_3_tb.trigger_d.value == 0, "trigger_d must be zero!"
+    assert APP_tb.o3_pulse_i.value == 0, 'pulse must be zero!'
+    assert APP_tb.one_shot_3_tb.cnt.value == 0, "cnt must be zero!"
+
+    # wait another cycle before triggering a pulse
+    await RisingEdge(APP_tb.clk)
+
+    # pulse trigger
+    APP_tb.o3_trigger_o.value = 1
+    await RisingEdge(APP_tb.clk)
+    APP_tb.o3_trigger_o.value = 0
+
+    # ensure pulse stays high for three clock cycles
+    for i in range(3):
+        await RisingEdge(APP_tb.clk)
+        assert APP_tb.o3_pulse_i.value == 1, "pulse must be high for three clock cycles"
+
+    # ensure pulse goes low
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.o3_pulse_i.value == 0, "pulse must go low after three cycles"
+
+    # retrigger
+
+    # pulse trigger
+    APP_tb.o3_trigger_o.value = 1
+    await RisingEdge(APP_tb.clk)
+    APP_tb.o3_trigger_o.value = 0
+
+    # ensure pulse goes high
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.o3_pulse_i.value == 1, "pulse must be high for three clock cycles"
+
+    # pulse trigger again
+    APP_tb.o3_trigger_o.value = 1
+    await RisingEdge(APP_tb.clk)
+    APP_tb.o3_trigger_o.value = 0
+
+    # ensure it stays high for three cycles
+    for i in range(3):
+        await RisingEdge(APP_tb.clk)
+        assert APP_tb.o3_pulse_i.value == 1, "pulse must be high for three clock cycles"
+
+    # ensure pulse goes low
+    await RisingEdge(APP_tb.clk)
+    assert APP_tb.o3_pulse_i.value == 0, "pulse must go low after three cycles"

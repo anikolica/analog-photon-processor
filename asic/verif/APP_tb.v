@@ -47,10 +47,13 @@ module APP_tb;
     wire [4:0] addr_c_o;
 
     // prio_enc_mod8 signals
-    // p_signals_out is driven from APP_cocotb.py
     wire [7:0] p_signals_out = 8'b0;
     wire [2:0] p_index_in;
     wire p_valid_in;
+
+    // one_shot_3 signals
+    wire o3_trigger_o;
+    wire o3_pulse_i;
 
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
@@ -173,6 +176,13 @@ module APP_tb;
         .a_i(addr_a_i),
         .b_i(addr_b_i),
         .c_o(addr_c_o)
+    );
+
+    one_shot_3 one_shot_3_tb (
+        .clk(clk),
+        .rstb(rstb),
+        .trigger(o3_trigger_o),
+        .pulse(o3_pulse_i)
     );
 
     always #10 clk = ~clk; // 50MHz clock
