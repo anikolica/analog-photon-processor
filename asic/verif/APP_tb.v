@@ -55,6 +55,17 @@ module APP_tb;
     wire o3_trigger_o;
     wire o3_pulse_i;
 
+    // trig_cont unit test signals
+    wire [2:0] tc_w_ptr_o;
+    wire tc_LI_start_o;
+    wire tc_LI_end_o;
+
+    wire tc_trigger_o;
+    wire tc_read_en_o;
+    wire [3:0] tc_event_mux_o;
+
+    wire [7:0] tc_trigd_i;
+
     // Behavioral test signals for LI_control (separate from existing manual test)
     reg [7:0] LI_length_behav = 8'hA;
     wire LI_start_behav, LI_end_behav, LI_active_behav;
@@ -183,6 +194,18 @@ module APP_tb;
         .rstb(rstb),
         .trigger(o3_trigger_o),
         .pulse(o3_pulse_i)
+    );
+
+    trig_cont trig_cont_tb (
+        .w_ptr_i(tc_w_ptr_o),
+        .LI_start_i(tc_LI_start_o),
+        .LI_end_i(tc_LI_end_o),
+        .trigger_i(tc_trigger_o),
+        .read_en_i(tc_read_en_o),
+        .event_mux_i(tc_event_mux_o),
+        .trigd_o(tc_trigd_i),
+        .clk(clk),
+        .rstb(rstb)
     );
 
     always #10 clk = ~clk; // 50MHz clock

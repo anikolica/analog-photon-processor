@@ -727,3 +727,149 @@ async def test_one_shot_3(APP_tb):
     # ensure pulse goes low
     await RisingEdge(APP_tb.clk)
     assert APP_tb.o3_pulse_i.value == 0, "pulse must go low after three cycles"
+
+@cocotb.test(skip=(dont_run_all and not env1('APP_TRIGCONT')))
+async def test_trig_cont(APP_tb):
+    """
+    Block-level unit test for trig_cont -- a 3-state FSM
+    (IDLE / WAIT_TRIG / WAIT_LI_END, see asic/verilog/trig_cont.v).
+
+    Covers:
+      - async active-low reset -> IDLE, all regs cleared
+      - last_wptr write-pointer tracking
+      - IDLE -> WAIT_TRIG on LI_start, trig_start = last_wptr
+      - untriggered LI: WAIT_TRIG -> IDLE on LI_end, no ToTs marked
+      - trigger: WAIT_TRIG -> WAIT_LI_END, trig_idx rewound to trig_start
+        (verified indirectly via the exact trigd mask after drain)
+      - triggered-window ToT marking (trigd bitmask accumulation)
+      - WAIT_LI_END -> IDLE on LI_end
+      - read_en_i && event_mux_i[3] clears trigd bit event_mux_i[2:0]
+      - event_mux_i[3] == 0 does NOT clear
+    """
+    # State encodings defined in trig_cont.v
+    IDLE = 0
+    WAIT_TRIG = 1
+    WAIT_LI_END = 2
+
+    # Initial values for the inputs
+    APP_tb.tc_w_ptr_o.value = 0
+    APP_tb.tc_LI_start_o.value = 0
+    APP_tb.tc_LI_end_o.value = 0
+    APP_tb.tc_trigger_o.value = 0
+    APP_tb.tc_read_en_o.value = 0
+    APP_tb.tc_event_mux_o.value = 0
+    # ensure rstb is high
+    APP_tb.rstb.value = 1
+    await RisingEdge(APP_tb.clk)
+    
+    # pulse rstb
+    APP_tb.rstb.value = 0
+    await RisingEdge(APP_tb.clk)
+    APP_tb.rstb.value = 1
+
+    # Ensure reset is properly completed (both latched state and comb outputs)
+    assert APP_tb.trig_cont_tb.state.value == IDLE, 'state must be IDLE after reset!'
+    assert APP_tb.trig_cont_tb.trigd.value == 0, 'trigd must be zero after reset!'
+    assert APP_tb.trig_cont_tb.trig_start.value == 0, 'trig_start must be zero after reset!'
+    assert APP_tb.trig_cont_tb.trig_end.value == 0, 'trig_end must be zero after reset!'
+    assert APP_tb.trig_cont_tb.trig_idx.value == 0, 'trig_idx must be zero after reset!'
+    assert APP_tb.trig_cont_tb.last_wptr.value == 0, 'last_wptr must be zero after reset!'
+    assert APP_tb.trig_cont_tb.next_state.value == IDLE, 'next_state must be IDLE!'
+    assert APP_tb.trig_cont_tb.next_trigd.value == 0, 'next_trigd must be zero!'
+    assert APP_tb.trig_cont_tb.next_trig_start.value == 0, 'next_trig_start must be zero!'
+    assert APP_tb.trig_cont_tb.next_trig_end.value == 0, 'next_trig_end must be zero!'
+    assert APP_tb.trig_cont_tb.next_trig_idx.value == 0, 'next_trig_idx must be zero!'
+    assert APP_tb.trig_cont_tb.next_last_wptr.value == 0, 'next_last_wptr must be zero!'
+
+    # NOTE: in this IUS/cocotb setup, await RisingEdge(clk) resumes the test
+    # BEFORE the same-edge nonblocking assignments commit. All register-value
+    # asserts below are therefore made one full clock cycle (a "settle" edge)
+    # after the edge that latches the value being checked.
+
+    # ---- last_wptr tracks the write pointer ----
+    APP_tb.tc_w_ptr_o.value = 3
+    await RisingEdge(APP_tb.clk)      # E: last_wptr <= 3
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.last_wptr.value == 3, 'last_wptr must follow w_ptr_i'
+    # no marking in IDLE while trig_idx == trig_end (both 0)
+    assert APP_tb.trig_cont_tb.trigd.value == 0, 'no ToTs should be marked before an LI window'
+
+    # ---- IDLE -> WAIT_TRIG on LI_start; trig_start = last_wptr ----
+    APP_tb.tc_LI_start_o.value = 1
+    await RisingEdge(APP_tb.clk)      # E: state <= WAIT_TRIG, trig_start <= 3
+    APP_tb.tc_LI_start_o.value = 0
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.state.value == WAIT_TRIG, 'LI_start must move to WAIT_TRIG'
+    assert APP_tb.trig_cont_tb.trig_start.value == 3, 'trig_start must equal last_wptr'
+
+    # ---- Untriggered LI: WAIT_TRIG -> IDLE on LI_end, no bits marked ----
+    APP_tb.tc_LI_end_o.value = 1
+    await RisingEdge(APP_tb.clk)      # E: state <= IDLE
+    APP_tb.tc_LI_end_o.value = 0
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.state.value == IDLE, 'untriggered LI_end must return to IDLE'
+    assert APP_tb.trig_cont_tb.trigd.value == 0, 'no ToTs marked in an untriggered window'
+
+    # ---- Triggered window: WAIT_TRIG -> WAIT_LI_END, trig_idx = trig_start ----
+    # Start a new LI at write pointer 2
+    APP_tb.tc_w_ptr_o.value = 2
+    await RisingEdge(APP_tb.clk)      # E: last_wptr <= 2
+    await RisingEdge(APP_tb.clk)      # settle
+    APP_tb.tc_LI_start_o.value = 1
+    await RisingEdge(APP_tb.clk)      # E: state <= WAIT_TRIG, trig_start <= 2
+    APP_tb.tc_LI_start_o.value = 0
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.state.value == WAIT_TRIG
+    assert APP_tb.trig_cont_tb.trig_start.value == 2, 'trig_start must equal last_wptr'
+
+    # Advance the write pointer to 5 BEFORE triggering so the window covers 2..4.
+    APP_tb.tc_w_ptr_o.value = 5
+    await RisingEdge(APP_tb.clk)      # E: last_wptr <= 5
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.last_wptr.value == 5, \
+        'last_wptr must track the pre-trigger advance'
+
+    APP_tb.tc_trigger_o.value = 1
+    await RisingEdge(APP_tb.clk)      # E: state <= WAIT_LI_END, trig_idx <= trig_start(2)
+    APP_tb.tc_trigger_o.value = 0
+    # Drain trig_idx from trig_start up to trig_end (== last_wptr == 5) and settle.
+    # If the trigger had NOT rewound trig_idx to trig_start, marking would have
+    # continued from 0 and trigd would be 0x07..0x1F instead of 0x1C below.
+    await ClockCycles(APP_tb.clk, 4)
+    expected = (1 << 2) | (1 << 3) | (1 << 4)   # 0x1C
+    assert APP_tb.trig_cont_tb.state.value == WAIT_LI_END, 'still in WAIT_LI_END while LI open'
+    assert APP_tb.trig_cont_tb.trigd.value == expected, \
+        'triggered window must mark locations trig_start..w_ptr-1 (got %s)' \
+        % hex(APP_tb.trig_cont_tb.trigd.value)
+    assert APP_tb.trig_cont_tb.trig_idx.value == 5, 'trig_idx must catch up to trig_end'
+    assert APP_tb.trig_cont_tb.trig_end.value == 5, 'trig_end must track last_wptr'
+
+    # ---- LI_end: WAIT_LI_END -> IDLE, drain complete ----
+    APP_tb.tc_LI_end_o.value = 1
+    await RisingEdge(APP_tb.clk)      # E: state <= IDLE
+    APP_tb.tc_LI_end_o.value = 0
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.state.value == IDLE, 'LI_end must return to IDLE'
+    await RisingEdge(APP_tb.clk)      # settle again
+    assert APP_tb.trig_cont_tb.trigd.value == expected, \
+        'no extra ToTs should be marked after the drain completes'
+
+    # ---- Read path: read_en_i && event_mux_i[3] clears bit event_mux_i[2:0] ----
+    # clear location 2 (valid event)
+    APP_tb.tc_read_en_o.value = 1
+    APP_tb.tc_event_mux_o.value = 0b1000 | 0b010   # valid + addr 2
+    await RisingEdge(APP_tb.clk)      # E: trigd bit 2 cleared
+    APP_tb.tc_read_en_o.value = 0
+    APP_tb.tc_event_mux_o.value = 0
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.trigd.value == (expected & ~(1 << 2)), \
+        'read_en with valid event must clear the addressed bit'
+
+    # read with event_mux_i[3] == 0 must NOT clear (location 3 stays set)
+    APP_tb.tc_read_en_o.value = 1
+    APP_tb.tc_event_mux_o.value = 0b011             # addr 3, no valid bit
+    await RisingEdge(APP_tb.clk)      # E: no clear (valid bit low)
+    APP_tb.tc_read_en_o.value = 0
+    await RisingEdge(APP_tb.clk)      # settle
+    assert APP_tb.trig_cont_tb.trigd.value == (expected & ~(1 << 2)), \
+        'read_en without a valid event must not clear trigd'
