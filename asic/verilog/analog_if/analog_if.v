@@ -17,16 +17,10 @@
 		    input wire [CLK_NBITS-1:0] clk_cnt_i,
 
 		    output wire [3:0] valid_up_o,
-		    output wire [CLK_NBITS-1:0] cnt8_up_0_o,
-		    output wire [CLK_NBITS-1:0] cnt8_up_1_o,
-		    output wire [CLK_NBITS-1:0] cnt8_up_2_o,
-		    output wire [CLK_NBITS-1:0] cnt8_up_3_o,
+		    output wire [CLK_NBITS-1:0] cnt_up_o,
 
 		    output wire [3:0] valid_down_o,
-		    output wire [CLK_NBITS-1:0] cnt8_down_0_o,
-		    output wire [CLK_NBITS-1:0] cnt8_down_1_o,
-		    output wire [CLK_NBITS-1:0] cnt8_down_2_o,
-		    output wire [CLK_NBITS-1:0] cnt8_down_3_o,
+		    output wire [CLK_NBITS-1:0] cnt_down_o,
 
 		    input wire 	      clk,
 		    input wire 	      rstb
@@ -47,17 +41,11 @@
    cmp_latch cl_up( .cmp_syncs_i( ups ), .cmp_acks_o( cmp_acks_up ),
 		 .clk( clk ), .rstb( rstb ));
 
-   reg [CLK_NBITS-1:0]  cnt8_up_0;
-   reg [CLK_NBITS-1:0]  cnt8_up_1;
-   reg [CLK_NBITS-1:0]  cnt8_up_2;
-   reg [CLK_NBITS-1:0]  cnt8_up_3;
+   reg [CLK_NBITS-1:0]  cnt_up;
 
    reg [3:0] valid_up;
 
-   assign cnt8_up_0_o = cnt8_up_0;
-   assign cnt8_up_1_o = cnt8_up_1;
-   assign cnt8_up_2_o = cnt8_up_2;
-   assign cnt8_up_3_o = cnt8_up_3;
+   assign cnt_up_o = cnt_up;
 
    assign valid_up_o = valid_up;
    
@@ -67,18 +55,12 @@
 
    always @(posedge clk, negedge rstb ) begin
       if ( rstb == 1'b0 ) begin
-	 cnt8_up_0 <= {CLK_NBITS{1'b0}};
-	 cnt8_up_1 <= {CLK_NBITS{1'b0}};
-	 cnt8_up_2 <= {CLK_NBITS{1'b0}};
-	 cnt8_up_3 <= {CLK_NBITS{1'b0}};
+	 cnt_up <= {CLK_NBITS{1'b0}};
 
 	 valid_up <= 4'b0000;
       end
       else begin
-	 if ( ups[0] ) cnt8_up_0 <= clk_cnt_i;
-	 if ( ups[1] ) cnt8_up_1 <= clk_cnt_i;
-	 if ( ups[2] ) cnt8_up_2 <= clk_cnt_i;
-	 if ( ups[3] ) cnt8_up_3 <= clk_cnt_i;
+	 if ( |ups ) cnt_up <= clk_cnt_i;
 
 	 valid_up <= ups;
       end // else: !if( rstb == 1'b0 )
@@ -99,17 +81,11 @@
    cmp_latch cl_down( .cmp_syncs_i( downs ), .cmp_acks_o( cmp_acks_down ),
 		 .clk( clk ), .rstb( rstb ));
 
-   reg [CLK_NBITS-1:0]  cnt8_down_0;
-   reg [CLK_NBITS-1:0]  cnt8_down_1;
-   reg [CLK_NBITS-1:0]  cnt8_down_2;
-   reg [CLK_NBITS-1:0]  cnt8_down_3;
+   reg [CLK_NBITS-1:0]  cnt_down;
 
    reg [3:0] valid_down;
 
-   assign cnt8_down_0_o = cnt8_down_0;
-   assign cnt8_down_1_o = cnt8_down_1;
-   assign cnt8_down_2_o = cnt8_down_2;
-   assign cnt8_down_3_o = cnt8_down_3;
+   assign cnt_down_o = cnt_down;
 
    assign valid_down_o = valid_down;
    
@@ -119,18 +95,12 @@
 
    always @(posedge clk, negedge rstb ) begin
       if ( rstb == 1'b0 ) begin
-	 cnt8_down_0 <= {CLK_NBITS{1'b0}};
-	 cnt8_down_1 <= {CLK_NBITS{1'b0}};
-	 cnt8_down_2 <= {CLK_NBITS{1'b0}};
-	 cnt8_down_3 <= {CLK_NBITS{1'b0}};
+	 cnt_down <= {CLK_NBITS{1'b0}};
 
 	 valid_down <= 4'b0000;
       end
       else begin
-	 if ( downs[0] ) cnt8_down_0 <= clk_cnt_i;
-	 if ( downs[1] ) cnt8_down_1 <= clk_cnt_i;
-	 if ( downs[2] ) cnt8_down_2 <= clk_cnt_i;
-	 if ( downs[3] ) cnt8_down_3 <= clk_cnt_i;
+	 if ( |downs ) cnt_down <= clk_cnt_i;
 
 	 valid_down <= downs;
       end // else: !if( rstb == 1'b0 )
