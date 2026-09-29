@@ -61,6 +61,8 @@
    wire       sample_ready_o;
    wire       amem_empty_o;
    wire       amem_full_o;
+
+   wire       LI_active;
    
    
    controller #(.CLK_NBITS(CLK_NBITS)) cntl (
@@ -79,12 +81,23 @@
 		  .event_mux_o( event_mux ),
 		  .sample_ready_o( sample_ready_o ),
 		  .amem_empty_o( amem_empty_o ),
-		  .amem_full_o( amem_full_o ),
+	          .amem_full_o( amem_full_o ),
+		  .LI_active_o( LI_active ),
 		  .LI_end_o( LI_end_o ),
 					     
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );
-					    
+
+   LI_metadata #(.CLK_NBITS(CLK_NBITS)) LI_meta (
+						 .valid_i( valid_up ),
+						 .ts_i( ),                 // XXX
+						 .LI_active_i( LI_active ),
+						 .LI_end_i( LI_end_o ),
+						 .clk( clk ),
+						 .rstb( rstb )
+						 );
+   
+   
 
 endmodule // APP_dig
