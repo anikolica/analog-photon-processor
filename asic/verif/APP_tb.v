@@ -8,8 +8,7 @@ module APP_tb;
 
     // Analog memory signals
     wire [3:0] valid_up_o, valid_down_o;
-    wire [7:0] cnt8_up_0_o, cnt8_up_1_o, cnt8_up_2_o, cnt8_up_3_o,
-               cnt8_down_0_o, cnt8_down_1_o, cnt8_down_2_o, cnt8_down_3_o;
+    wire [7:0] cnt_up_o, cnt_down_o;
     reg [7:0] WE_time_i = 8'b00000000; // eventually from behavioral model
     reg [2:0] wr_ptr = 3'b000;
 
@@ -35,14 +34,8 @@ module APP_tb;
         .rstb(rstb),
         .cmp_i(vcomp),
         .clk_cnt_i(timestamp[7:0]),
-	    .cnt8_up_0_o(cnt8_up_0_o),
-	    .cnt8_up_1_o(cnt8_up_1_o),
-	    .cnt8_up_2_o(cnt8_up_2_o),
-	    .cnt8_up_3_o(cnt8_up_3_o),
-	    .cnt8_down_0_o(cnt8_down_0_o),
-	    .cnt8_down_1_o(cnt8_down_1_o),
-	    .cnt8_down_2_o(cnt8_down_2_o),
-	    .cnt8_down_3_o(cnt8_down_3_o),
+	    .cnt_up_o(cnt_up_o),
+	    .cnt_down_o(cnt_down_o),
         .valid_up_o(valid_up_o),
         .valid_down_o(valid_down_o)
     );
@@ -52,18 +45,10 @@ module APP_tb;
         .clk(clk),
         .rstb(rstb),
         .clk_cnt_i(timestamp[7:0]),
+	    .cnt_up_i(cnt_up_o),
+	    .cnt_down_i(cnt_down_o),
 	    .valid_up_i(valid_up_o),
-	    .cnt8_up_0_i(cnt8_up_0_o),
-	    .cnt8_up_1_i(cnt8_up_1_o),
-	    .cnt8_up_2_i(cnt8_up_2_o),
-	    .cnt8_up_3_i(cnt8_up_3_o),
 	    .valid_down_i(valid_down_o),
-	    .cnt8_down_0_i(cnt8_down_0_o),
-	    .cnt8_down_1_i(cnt8_down_1_o),
-	    .cnt8_down_2_i(cnt8_down_2_o),
-	    .cnt8_down_3_i(cnt8_down_3_o),
-        // WE_ampl_i is not defined
-	    //.WE_ampl_i(), 
 	    .WE_time_i(WE_time_i)
     );
 
