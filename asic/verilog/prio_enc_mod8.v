@@ -15,15 +15,15 @@
 `default_nettype none
 
 module prio_enc_mod8(
-    input        clk,
-    input        rstb,
-    input [7:0]  signals,
+    input wire       clk,
+    input wire       rstb,
+    input wire [7:0] signals,
     output reg [2:0] index,
     output reg valid
 );
 
-    reg [7:0] prev = 8'b00000000;
-    reg [2:0] offset = 3'b000;
+    reg [7:0] prev;
+    reg [2:0] offset;
 
     wire [7:0] falling_edges;
     wire [7:0] rotated;
