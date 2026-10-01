@@ -16,7 +16,7 @@
 module LI_control(
 		    input wire [3:0] 	       valid_up_i,
 		    
-		    input wire [7:0] 	       LI length_i, // Length of LI in clocks
+		    input wire [7:0] 	       LI_length_i, // Length of LI in clocks
 		    
 		    output wire 	       LI_start_o, // pulses at beginning of LI
 		    output wire 	       LI_end_o, // pulses at end of LI
@@ -25,5 +25,51 @@ module LI_control(
 		    input wire 		       clk,
 		    input wire 		       rstb
 		    );
+
+        reg li_start;
+        reg li_end;
+        reg li_active;
+
+        reg [7:0] cycle_counter;
+
+        wire valid_le;
+
+        always @(posedge clk or negedge rstb) begin
+          if (rstb == 1'b0) begin
+            cycle_counter <= 8'd0;
+            li_start <= 1'b0;
+            li_end <= 1'b0;
+            li_active <= 1'b0;
+          end else begin
+            li_start <= 1'b0;
+            li_end <= 1'b0;
+            if ((valid_le) && (cycle_counter == 8'd0) && (!li_active)) begin
+              li_start <= 1'b1;
+              li_active <= 1'b1;
+              cycle_counter <= 8'd1; 
+            end else if (li_active) begin
+              //if ( (cycle_counter == LI_length_i) || ( (valid_le) && (cycle_counter + 8'd1 == LI_length_i)) ) begin
+              if ( (cycle_counter == LI_length_i) ) begin
+                li_end <= 1'b1;
+                if ((valid_le)) begin
+                  li_active <= 1'b1;
+                  li_start <= 1'b1;
+                  li_end <= 1'b1;
+                  cycle_counter <= 8'd1;
+                end else begin
+                  li_active <= 1'b0;
+                  cycle_counter <= 8'd0;
+                end
+              end else begin
+                cycle_counter <= cycle_counter + 8'd1; 
+              end
+            end
+          end
+        end
+
+        assign LI_start_o = li_start;
+        assign LI_end_o = li_end;
+        assign LI_active_o = li_active;
+        assign valid_le = |valid_up_i;
 
 endmodule // LI_control

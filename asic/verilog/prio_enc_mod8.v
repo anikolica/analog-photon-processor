@@ -15,8 +15,8 @@
 `default_nettype none
 
 module prio_enc_mod8(
-    input wire       clk,
-    input wire       rstb,
+    input wire   clk,
+    input wire   rstb,
     input wire [7:0] signals,
     output reg [2:0] index,
     output reg valid

@@ -44,7 +44,7 @@ module APP(
 	   
 	   // *** Digital Pads -ncd  ***
 	   
-	   input wire  pad_a0_i,
+	   input wire  pad_trig_i,
 	   /*
 	   input wire  pad_a1_i,
 	   input wire  pad_a2_i,
@@ -89,7 +89,6 @@ module APP(
 	   input wire  pad_rstb_i
 		 );
 
-	   localparam CLK_NBITS = 8;  // Number of bits in TimeStamp
 	   
 
 
@@ -150,15 +149,17 @@ module APP(
    
    wire       anaOut_o;
 
+   wire       trigger;
+   
    wire       clk;
    wire       rstb;
 
    /*****************************************************
     *             Input pads                            *
     *****************************************************/
-   PDDW0408SCDG padA0( .I(1'b0), .DS(1'b1), .OEN(1'b1),
-			.PAD(pad_a0_i),    // Input pad
-			.C  (a_i[0]),      // signal
+   PDDW0408SCDG padTrig( .I(1'b0), .DS(1'b1), .OEN(1'b1),
+			.PAD(pad_trig_i),    // Input pad
+			.C  (trigger),      // signal
 			.PE (1'b1), .IE(1'b1) );
 /*
    PDDW0408SCDG padA1( .I(1'b0), .DS(1'b1), .OEN(1'b1),
@@ -506,6 +507,7 @@ wire   cycle_LI_ch1;
 wire   ch1_timePeak1_P, ch1_timePeak1_N;
 wire   LI_ch1;
    
+wire       read_en;
 
    
 // swapped in gutted APP_chan --> APP_chan_gutted    
@@ -527,51 +529,26 @@ APP_chan_gutted APPchan1 (.CMP(CMP_ch1), .WE_ampl(WE_ampl_ch1), .WE_time(WE_time
      .delay_hold_U1P(delay_hold_U1P[3:0]),
      .delay_hold_U2(delay_hold_U2[3:0]),
      .delay_hold_U2P(delay_hold_U2P[3:0]), .vcomp(vcomp), 
-     .cycle(cycle), .cycle_LI(cycle_LI_ch1), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1)  );
+     .cycle(cycle), .cycle_LI(cycle_LI_ch1), .Nhit_sum(Nhit_sum_ch1), .Analog_sum(Analog_sum_ch1),
+     .ana_read_en( read_en )
+			  );
 
+   wire [3:0] event_mux;
+   
    /*
-    * DIGITAL Blocks
+    * DIGITAL top level
     */
-   wire [CLK_NBITS-1:0] clk_cnt;
+   APP_dig digital_top (
+			.cmp_i( CMP_ch1 ),
+			.WE_time_i( WE_time_ch1 ),
+			.trigger_i( trigger ),
+			.read_en_o( read_en ),
+			.event_mux_o( event_mux ),
+			.clk( clk ),
+			.rstb( rstb )
+			);
    
-   clk_cnter #(.CLK_NBITS(CLK_NBITS)) clock_cnt (
-		  .clk_cnt_o( clk_cnt ),
-		  .clk( clk ), 
-		  .rstb( rstb )
-		  );
-			 
 
-   wire [3:0] valid_up, valid_down;
-   wire [CLK_NBITS-1:0] cnt_up_0, cnt_up_1, cnt_up_2, cnt_up_3,
-	      cnt_down_0, cnt_down_1, cnt_down_2, cnt_down_3;
-   
-   analog_if #(.CLK_NBITS(CLK_NBITS)) ai ( 
-                  .cmp_i( CMP_ch1 ), .clk_cnt_i( clk_cnt ),
-                  .valid_up_o( valid_up ),
-		  .cnt8_up_0_o( cnt_up_0 ), .cnt8_up_1_o( cnt_up_1 ), 
-		  .cnt8_up_2_o( cnt_up_2 ), .cnt8_up_3_o( cnt_up_3 ), 
-		  .valid_down_o( valid_down ),
-		  .cnt8_down_0_o( cnt_down_0 ), .cnt8_down_1_o( cnt_down_1 ), 
-		  .cnt8_down_2_o( cnt_down_2 ), .cnt8_down_3_o( cnt_down_3 ),
-		  //.WE_ampl_i( WE_ampl_ch1 ), .WE_time_i( WE_time_ch1 ),
-		  .clk( clk ), 
-		  .rstb( rstb )
-		  );
-
-   controller #(.CLK_NBITS(CLK_NBITS)) cntl (
-                  .clk_cnt_i( clk_cnt ),
-                  .valid_up_i( valid_up ),
-		  .cnt8_up_0_i( cnt_up_0 ), .cnt8_up_1_i( cnt_up_1 ), 
-		  .cnt8_up_2_i( cnt_up_2 ), .cnt8_up_3_i( cnt_up_3 ), 
-		  .valid_down_i( valid_down ),
-		  .cnt8_down_0_i( cnt_down_0 ), .cnt8_down_1_i( cnt_down_1 ), 
-		  .cnt8_down_2_i( cnt_down_2 ), .cnt8_down_3_i( cnt_down_3 ),
-		  
-		  .clk( clk ), 
-		  .rstb( rstb )
-		  );
-					    
-   
    
    
 // These single-ended pads will eventually be replace with differential pads -ncd   

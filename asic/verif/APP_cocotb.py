@@ -6,7 +6,7 @@ import csv
 import cocotb 
 from cocotb import triggers, result, utils, clock 
 from cocotb.clock import Clock 
-from cocotb.triggers import Timer, RisingEdge, FallingEdge, Edge 
+from cocotb.triggers import Timer, RisingEdge, FallingEdge, Edge, ClockCycles 
 from cocotb.result import TestSuccess, TestFailure, ReturnValue 
 from cocotb.utils import get_sim_time
 
@@ -64,7 +64,6 @@ async def test_behav_basic(APP_tb):
     await Timer(10, 'ns')
     APP_tb.app_1ch_tb.vcomp.value = 0
     await Timer(200, 'ns')
-
 
 async def load_pulse(APP_tb, csv_path, column):
     """
@@ -194,3 +193,162 @@ async def test_amem_basic(APP_tb):
     APP_tb.controller_tb.amem_core_tb.adc_done_i = 0;
     await Timer(1000, 'ns')
 
+async def wait_cycle(clk):
+    await RisingEdge(clk)
+    await RisingEdge(clk)
+
+@cocotb.test(skip=((dont_run_all) and not env1("APP_LICNT")))
+async def test_li_control(APP_tb):
+    """
+    Basic test for LI_control
+    """
+
+    LI_LENGTH = 8
+    
+    # initial setup
+    APP_tb.li_control_tb.rstb.value = 1
+    APP_tb.LI_valid_up_o.value = 0b0000
+    APP_tb.LI_length_o.value = 0
+
+    # wait a bit
+    await Timer(60, 'ns')
+
+    # Reset Pulse
+    APP_tb.li_control_tb.rstb.value = 0
+    await Timer(50, 'ns')
+    APP_tb.li_control_tb.rstb.value = 1
+    await Timer(100, 'ns')
+
+    # set LI_length
+    APP_tb.LI_length_o.value = LI_LENGTH 
+
+    # Check that values are correct after reset
+    assert APP_tb.LI_active_i.value == 0, "LI_active has improper value after reset"
+    assert APP_tb.LI_end_i.value == 0, "LI_end has improper value after reset"
+    assert APP_tb.LI_start_i.value == 0, "LI_start has improper value after reset"
+
+
+    # test a single LI
+    APP_tb.LI_valid_up_o.value = 0b0010
+    # ensure it stays for a full clock cycle
+    await wait_cycle(APP_tb.clk)
+    # set valid_up down
+    APP_tb.LI_valid_up_o.value = 0b0000
+    # make sure LI_start pulses
+    assert APP_tb.LI_start_i.value == 1, "LI_start should pulse at the beginning of a TOT"
+    await ClockCycles(APP_tb.clk, LI_LENGTH)
+    # make sure LI_end pulses
+    assert APP_tb.LI_end_i == 1, "LI_end should pulse at the end of a TOT"
+
+    # space the tests out
+    await Timer(50, 'ns')
+    assert APP_tb.LI_active_i.value == 0, "LI_active must go low after LI window"
+    assert APP_tb.LI_start_i.value == 0, "LI_start must be low after LI window"
+    assert APP_tb.LI_end_i.value == 0, "LI_end must be low after LI window"
+
+    # test double LI window
+    #li_length = 4
+    # Set valid_up to some value, and give an LI length
+    APP_tb.LI_valid_up_o.value = 0b0100 # arbitrary bit
+    #APP_tb.LI_length_o.value = LI_LENGTH 
+    await RisingEdge(APP_tb.clk)
+    APP_tb.LI_valid_up_o.value = 0b0000
+    # wait for that to finish
+    # li_length-1 because we want it on the last cycle of the li, and already
+    # waited one cycle
+    await ClockCycles(APP_tb.clk, LI_LENGTH-1)
+    # now a back-to-back TOT
+    APP_tb.LI_valid_up_o.value = 0b0001
+    #APP_tb.LI_length_o.value = LI_LENGTH
+    await RisingEdge(APP_tb.clk)
+    APP_tb.LI_valid_up_o.value = 0b0000
+    # wait for the next rising edge to verify
+    await RisingEdge(APP_tb.clk)
+    # check that LI_active stays high
+    assert APP_tb.LI_active_i.value == 1, "LI_active_i should stay high for back to back TOTs"
+    # check that li_start and li_end pulsed
+    assert ((APP_tb.LI_start_i.value == 1) and (APP_tb.LI_end_i == 1)), "LI_start and LI_end should pulse simulatenously for a back-to-back TOT"
+    # wait to finish
+    #await Timer(100, 'ns')
+    # ensure that a valid_up during the LI_window does't cause another LI to start
+    await ClockCycles(APP_tb.clk, 2)
+    APP_tb.LI_valid_up_o.value = 0b0010
+    await RisingEdge(APP_tb.clk)
+    APP_tb.LI_valid_up_o.value = 0b0000
+    assert APP_tb.LI_start_i.value == 0, "An LI_valid_up during an LI_window should be ignored"
+    await Timer(260, 'ns')
+
+    # check that everything is low at the end
+    assert APP_tb.LI_active_i.value == 0, "LI_active must go low after LI window"
+    assert APP_tb.LI_start_i.value == 0, "LI_start must be low after LI window"
+    assert APP_tb.LI_end_i.value == 0, "LI_end must be low after LI window"
+    #APP_tb.LI_length_o.value = 0
+
+@cocotb.test(skip=(dont_run_all and not env1("APP_LIBEHAV")))
+async def test_li_control_behav(APP_tb):
+    """
+    Test LI_control with real TOT stimulus from app_1ch_behav via analog_if.
+    Validates LI_start, LI_end, and LI_active signals with real vcomp pulses.
+    """
+    
+    # Initial setup - reset state
+    APP_tb.vcomp.value = 0
+    APP_tb.rstb.value = 1
+    APP_tb.LI_length_behav.value = 0
+    
+    # Wait after initial setup
+    await Timer(100, 'ns')
+    
+    # Reset pulse
+    APP_tb.rstb.value = 0
+    await Timer(50, 'ns')
+    APP_tb.rstb.value = 1
+    await Timer(100, 'ns')
+    
+    # Verify reset state
+    assert APP_tb.LI_active_behav.value == 0, "LI_active should be low after reset"
+
+    LI_LENGTH = 4
+    
+    # Single tot
+    APP_tb.LI_length_behav.value = LI_LENGTH
+    
+    # Pulse vcomp to generate valid_up_o
+    APP_tb.vcomp.value = 1
+    await Timer(25, 'ns')
+    APP_tb.vcomp.value = 0
+    
+    await ClockCycles(APP_tb.clk, 2)
+    
+    assert APP_tb.LI_active_behav.value == 1, "LI_active should be high during window"
+    
+    # Wait for the window to complete
+    await ClockCycles(APP_tb.clk, LI_LENGTH)
+    await RisingEdge(APP_tb.clk)
+    
+    assert APP_tb.LI_active_behav.value == 0, "LI_active should be low after window ends"
+    
+    # Back to back TOT
+    
+    # Pulse vcomp to start first window
+    APP_tb.vcomp.value = 1
+    await Timer(25, 'ns')
+    APP_tb.vcomp.value = 0
+    await ClockCycles(APP_tb.clk, 2)
+    
+    assert APP_tb.LI_active_behav.value == 1, "LI_active should be high for first window"
+    await RisingEdge(APP_tb.clk)
+    
+    APP_tb.vcomp.value = 1
+    await RisingEdge(APP_tb.clk)
+    APP_tb.vcomp.value = 0
+    
+    await RisingEdge(APP_tb.clk)
+    
+    assert APP_tb.LI_active_behav.value == 1, "LI_active should stay high for back-to-back TOT"
+    
+    await ClockCycles(APP_tb.clk, LI_LENGTH+1)
+    
+    assert APP_tb.LI_active_behav.value == 0, "LI_active should go low after back-to-back windows complete"
+    
+    await Timer(100, 'ns')
