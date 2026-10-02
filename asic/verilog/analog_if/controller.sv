@@ -5,16 +5,10 @@
 		    input wire [CLK_NBITS-1:0] clk_cnt_i,
 
 		    input wire [3:0] 	       valid_up_i,
-		    input wire [CLK_NBITS-1:0] cnt8_up_0_i,
-		    input wire [CLK_NBITS-1:0] cnt8_up_1_i,
-		    input wire [CLK_NBITS-1:0] cnt8_up_2_i,
-		    input wire [CLK_NBITS-1:0] cnt8_up_3_i,
+		    input wire [CLK_NBITS-1:0] cnt_up_i,
 
 		    input wire [3:0] 	       valid_down_i,
-		    input wire [CLK_NBITS-1:0] cnt8_down_0_i,
-		    input wire [CLK_NBITS-1:0] cnt8_down_1_i,
-		    input wire [CLK_NBITS-1:0] cnt8_down_2_i,
-		    input wire [CLK_NBITS-1:0] cnt8_down_3_i,
+		    input wire [CLK_NBITS-1:0] cnt_down_i,
 
 		    input wire [7:0] 	       WE_time_i,
 		    input wire 		       trigger_i,
@@ -27,6 +21,7 @@
 		    output wire 	       sample_ready_o,
 		    output wire 	       amem_empty_o,
 		    output wire 	       amem_full_o,
+		    output wire 	       LI_active_o,
 		    output wire 	       LI_end_o,
 
 		    input wire 		       clk,
@@ -63,76 +58,35 @@
 	end
       else begin
 	 // ONE valid
-	 if ( valid_up_i == 4'b0001 ) begin
-	    ts_up[w_ptr_up] <= cnt8_up_0_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
-	 end
-	 else if ( valid_up_i == 4'b0010 ) begin
-	    ts_up[w_ptr_up] <= cnt8_up_1_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
-	 end
-	 else if ( valid_up_i == 4'b0100 ) begin
-	    ts_up[w_ptr_up] <= cnt8_up_2_i;
-	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
-	 end
-	 else if ( valid_up_i == 4'b1000 ) begin
-	    ts_up[w_ptr_up] <= cnt8_up_3_i;
+	 if ( (valid_up_i == 4'b0001) || (valid_up_i == 4'b0010) ||
+	      (valid_up_i == 4'b0100) || (valid_up_i == 4'b1000) ) begin
+	    ts_up[w_ptr_up] <= cnt_up_i;
 	    w_ptr_up <= (w_ptr_up + 3'h1) % 4'h8;
 	 end
 	 else
 	   // TWO valids
-	   if ( valid_up_i == 4'b0011 ) begin
-	      ts_up[w_ptr_up] <= cnt8_up_0_i;
-	      ts_up[w_ptr_up+1'b1] <= cnt8_up_1_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
-	   end
-	   else if ( valid_up_i == 4'b0110 ) begin
-	      ts_up[w_ptr_up] <= cnt8_up_1_i;
-	      ts_up[w_ptr_up+1'b1] <= cnt8_up_2_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
-	   end
-	   else if ( valid_up_i == 4'b1100 ) begin
-	      ts_up[w_ptr_up] <= cnt8_up_2_i;
-	      ts_up[w_ptr_up+1'b1] <= cnt8_up_3_i;
-	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
-	   end
-	   else if ( valid_up_i == 4'b1001 ) begin
-	      ts_up[w_ptr_up] <= cnt8_up_3_i;
-	      ts_up[w_ptr_up+1'b1] <= cnt8_up_0_i;
+	   if ( (valid_up_i == 4'b0011) || (valid_up_i == 4'b0110) ||
+		(valid_up_i == 4'b1100) || (valid_up_i == 4'b1001)  ) begin
+	      ts_up[w_ptr_up] <= cnt_up_i;
+	      ts_up[w_ptr_up+1'b1] <= cnt_up_i;
 	      w_ptr_up <= (w_ptr_up + 3'h2) % 4'h8;
 	   end
 	   else
 	     // THREE valids
-	     if ( valid_up_i == 4'b0111 ) begin
-		ts_up[w_ptr_up] <= cnt8_up_0_i;
-		ts_up[w_ptr_up+3'h1] <= cnt8_up_1_i;
-		ts_up[w_ptr_up+3'h2] <= cnt8_up_2_i;
+	     if ( (valid_up_i == 4'b0111) || (valid_up_i == 4'b1110) ||
+		  (valid_up_i == 4'b1101) || (valid_up_i == 4'b1011)  ) begin
+		ts_up[w_ptr_up] <= cnt_up_i;
+		ts_up[w_ptr_up+3'h1] <= cnt_up_i;
+		ts_up[w_ptr_up+3'h2] <= cnt_up_i;
 		w_ptr_up <= (w_ptr_up + 3'h3) % 4'h8;
-	     end
-	     else if ( valid_up_i == 4'b1110 ) begin
-		ts_up[w_ptr_up] <= cnt8_up_1_i;
-		ts_up[w_ptr_up+3'h1] <= cnt8_up_2_i;
-		ts_up[w_ptr_up+3'h2] <= cnt8_up_3_i;
-		w_ptr_up <= (w_ptr_up + 3'h3) % 4'h8;
-	     end
-	     else if ( valid_up_i == 4'b1101 ) begin
-		ts_up[w_ptr_up] <= cnt8_up_2_i;
-		ts_up[w_ptr_up+3'h1] <= cnt8_up_3_i;
-		ts_up[w_ptr_up+3'h2] <= cnt8_up_0_i;
-		w_ptr_up <= (w_ptr_up + 3'h3) % 4'h8;
-	     end
-	     else if ( valid_up_i == 4'b1011 ) begin
-		ts_up[w_ptr_up] <= cnt8_up_3_i;
-		ts_up[w_ptr_up+3'h1] <= cnt8_up_0_i;
-		ts_up[w_ptr_up+3'h2] <= cnt8_up_1_i;
 	     end
 	     else 
 	       // FOUR valids
 	       if ( valid_up_i == 4'b1111 ) begin    // XXX - Where do we start?
-		  ts_up[w_ptr_up] <= cnt8_up_0_i;
-		  ts_up[w_ptr_up+3'h1] <= cnt8_up_1_i;
-		  ts_up[w_ptr_up+3'h2] <= cnt8_up_2_i;
-		  ts_up[w_ptr_up+3'h3] <= cnt8_up_3_i;
+		  ts_up[w_ptr_up] <= cnt_up_i;
+		  ts_up[w_ptr_up+3'h1] <= cnt_up_i;
+		  ts_up[w_ptr_up+3'h2] <= cnt_up_i;
+		  ts_up[w_ptr_up+3'h3] <= cnt_up_i;
 		  w_ptr_up <= (w_ptr_up + 3'h4) % 4'h8;
 	       end
       end // else: !if( rstb == 1'b0 )
@@ -167,76 +121,35 @@
 	end
       else begin
 	 // ONE valid
-	 if ( valid_down_i == 4'b0001 ) begin
-	    ts_down[w_ptr_down] <= cnt8_down_0_i;
-	    w_ptr_down <= (w_ptr_down + 3'h1) % 4'h8;
-	 end
-	 else if ( valid_down_i == 4'b0010 ) begin
-	    ts_down[w_ptr_down] <= cnt8_down_1_i;
-	    w_ptr_down <= (w_ptr_down + 3'h1) % 4'h8;
-	 end
-	 else if ( valid_down_i == 4'b0100 ) begin
-	    ts_down[w_ptr_down] <= cnt8_down_2_i;
-	    w_ptr_down <= (w_ptr_down + 3'h1) % 4'h8;
-	 end
-	 else if ( valid_down_i == 4'b1000 ) begin
-	    ts_down[w_ptr_down] <= cnt8_down_3_i;
+	 if ( (valid_down_i == 4'b0001) || (valid_down_i == 4'b0010) ||
+	      (valid_down_i == 4'b0100) || (valid_down_i == 4'b1000) ) begin
+	    ts_down[w_ptr_down] <= cnt_down_i;
 	    w_ptr_down <= (w_ptr_down + 3'h1) % 4'h8;
 	 end
 	 else
 	   // TWO valids
-	   if ( valid_down_i == 4'b0011 ) begin
-	      ts_down[w_ptr_down] <= cnt8_down_0_i;
-	      ts_down[w_ptr_down+1'b1] <= cnt8_down_1_i;
-	      w_ptr_down <= (w_ptr_down + 3'h2) % 4'h8;
-	   end
-	   else if ( valid_down_i == 4'b0110 ) begin
-	      ts_down[w_ptr_down] <= cnt8_down_1_i;
-	      ts_down[w_ptr_down+1'b1] <= cnt8_down_2_i;
-	      w_ptr_down <= (w_ptr_down + 3'h2) % 4'h8;
-	   end
-	   else if ( valid_down_i == 4'b1100 ) begin
-	      ts_down[w_ptr_down] <= cnt8_down_2_i;
-	      ts_down[w_ptr_down+1'b1] <= cnt8_down_3_i;
-	      w_ptr_down <= (w_ptr_down + 3'h2) % 4'h8;
-	   end
-	   else if ( valid_down_i == 4'b1001 ) begin
-	      ts_down[w_ptr_down] <= cnt8_down_3_i;
-	      ts_down[w_ptr_down+1'b1] <= cnt8_down_0_i;
+	   if ( (valid_down_i == 4'b0011) || (valid_down_i == 4'b0110) ||
+		(valid_down_i == 4'b1100) || (valid_down_i == 4'b1001)  ) begin
+	      ts_down[w_ptr_down] <= cnt_down_i;
+	      ts_down[w_ptr_down+1'b1] <= cnt_down_i;
 	      w_ptr_down <= (w_ptr_down + 3'h2) % 4'h8;
 	   end
 	   else
 	     // THREE valids
-	     if ( valid_down_i == 4'b0111 ) begin
-		ts_down[w_ptr_down] <= cnt8_down_0_i;
-		ts_down[w_ptr_down+3'h1] <= cnt8_down_1_i;
-		ts_down[w_ptr_down+3'h2] <= cnt8_down_2_i;
+	     if ( (valid_down_i == 4'b0111) || (valid_down_i == 4'b1110) ||
+		  (valid_down_i == 4'b1101) || (valid_down_i == 4'b1011)  ) begin
+		ts_down[w_ptr_down] <= cnt_down_i;
+		ts_down[w_ptr_down+3'h1] <= cnt_down_i;
+		ts_down[w_ptr_down+3'h2] <= cnt_down_i;
 		w_ptr_down <= (w_ptr_down + 3'h3) % 4'h8;
-	     end
-	     else if ( valid_down_i == 4'b1110 ) begin
-		ts_down[w_ptr_down] <= cnt8_down_1_i;
-		ts_down[w_ptr_down+3'h1] <= cnt8_down_2_i;
-		ts_down[w_ptr_down+3'h2] <= cnt8_down_3_i;
-		w_ptr_down <= (w_ptr_down + 3'h3) % 4'h8;
-	     end
-	     else if ( valid_down_i == 4'b1101 ) begin
-		ts_down[w_ptr_down] <= cnt8_down_2_i;
-		ts_down[w_ptr_down+3'h1] <= cnt8_down_3_i;
-		ts_down[w_ptr_down+3'h2] <= cnt8_down_0_i;
-		w_ptr_down <= (w_ptr_down + 3'h3) % 4'h8;
-	     end
-	     else if ( valid_down_i == 4'b1011 ) begin
-		ts_down[w_ptr_down] <= cnt8_down_3_i;
-		ts_down[w_ptr_down+3'h1] <= cnt8_down_0_i;
-		ts_down[w_ptr_down+3'h2] <= cnt8_down_1_i;
 	     end
 	     else 
 	       // FOUR valids
 	       if ( valid_down_i == 4'b1111 ) begin    // XXX - Where do we start?
-		  ts_down[w_ptr_down] <= cnt8_down_0_i;
-		  ts_down[w_ptr_down+3'h1] <= cnt8_down_1_i;
-		  ts_down[w_ptr_down+3'h2] <= cnt8_down_2_i;
-		  ts_down[w_ptr_down+3'h3] <= cnt8_down_3_i;
+		  ts_down[w_ptr_down] <= cnt_down_i;
+		  ts_down[w_ptr_down+3'h1] <= cnt_down_i;
+		  ts_down[w_ptr_down+3'h2] <= cnt_down_i;
+		  ts_down[w_ptr_down+3'h3] <= cnt_down_i;
 		  w_ptr_down <= (w_ptr_down + 3'h4) % 4'h8;
 	       end
       end // else: !if( rstb == 1'b0 )
@@ -245,6 +158,7 @@
    wire LI_active;
    wire LI_start;
    wire LI_end;
+   assign LI_active_o = LI_active;
    assign LI_end_o = LI_end;
 
 

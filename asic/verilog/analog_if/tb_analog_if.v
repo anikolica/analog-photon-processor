@@ -7,16 +7,10 @@
    reg cmp;
 
    wire [3:0] valid_up;
-   wire [7:0] cnt8_up_0;
-   wire [7:0] cnt8_up_1;
-   wire [7:0] cnt8_up_2;
-   wire [7:0] cnt8_up_3;
+   wire [7:0] cnt_up;
    
    wire [3:0] valid_down;
-   wire [7:0] cnt8_down_0;
-   wire [7:0] cnt8_down_1;
-   wire [7:0] cnt8_down_2;
-   wire [7:0] cnt8_down_3;
+   wire [7:0] cnt_down;
    
    
    reg clk;
@@ -124,11 +118,9 @@
    analog_if ai (
 //   analog_if_CLK_NBITS8 ai (
 		  .cmp_i( cmp ), .clk_cnt_i( clk_cnt ), .valid_up_o( valid_up ),
-		  .cnt8_up_0_o( cnt8_up_0 ), .cnt8_up_1_o( cnt8_up_1 ),
-		  .cnt8_up_2_o( cnt8_up_2 ), .cnt8_up_3_o( cnt8_up_3 ),
+		  .cnt_up_o( cnt_up ),
 		  .valid_down_o( valid_down ),
-		  .cnt8_down_0_o( cnt8_down_0 ), .cnt8_down_1_o( cnt8_down_1 ),
-		  .cnt8_down_2_o( cnt8_down_2 ), .cnt8_down_3_o( cnt8_down_3 ),
+		  .cnt_down_o( cnt_down ),
 		  .clk( clk ), .rstb( rstb )
 		  );
 
@@ -137,12 +129,8 @@
                   .clk_cnt_o( clk_cnt ), .clk( clk ), .rstb( rstb ) );
    
    controller ctrl ( .clk_cnt_i( clk_cnt ),
-		     .valid_up_i( valid_up ), .cnt8_up_0_i( cnt8_up_0 ),
-		      .cnt8_up_1_i( cnt8_up_1 ), .cnt8_up_2_i( cnt8_up_2),
-		      .cnt8_up_3_i( cnt8_up_3 ),
-		     .valid_down_i( valid_down ), .cnt8_down_0_i( cnt8_down_0 ),
-		      .cnt8_down_1_i( cnt8_down_1 ), .cnt8_down_2_i( cnt8_down_2),
-		      .cnt8_down_3_i( cnt8_down_3 ),
+		     .valid_up_i( valid_up ), .cnt_up_i( cnt8_up ),
+		     .valid_down_i( valid_down ), .cnt_down_i( cnt_down ),
 		     .WE_time_i( 8'h00 ),
 		     .clk( clk ), .rstb( rstb )
 		     );

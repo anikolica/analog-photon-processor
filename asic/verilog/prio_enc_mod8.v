@@ -22,8 +22,8 @@ module prio_enc_mod8(
     output reg valid
 );
 
-    reg [7:0] prev = 8'b00000000;
-    reg [2:0] offset = 3'b000;
+    reg [7:0] prev;
+    reg [2:0] offset;
 
     wire [7:0] falling_edges;
     wire [7:0] rotated;

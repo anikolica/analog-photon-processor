@@ -39,17 +39,15 @@
 			 
 
    wire [3:0] valid_up, valid_down;
-   wire [CLK_NBITS-1:0] cnt_up_0, cnt_up_1, cnt_up_2, cnt_up_3,
-	      cnt_down_0, cnt_down_1, cnt_down_2, cnt_down_3;
+   wire [CLK_NBITS-1:0] cnt_up,
+			cnt_down;
    
    analog_if #(.CLK_NBITS(CLK_NBITS)) ai ( 
                   .cmp_i( cmp_i ), .clk_cnt_i( clk_cnt ),
                   .valid_up_o( valid_up ),
-		  .cnt8_up_0_o( cnt_up_0 ), .cnt8_up_1_o( cnt_up_1 ), 
-		  .cnt8_up_2_o( cnt_up_2 ), .cnt8_up_3_o( cnt_up_3 ), 
+		  .cnt_up_o( cnt_up ),
 		  .valid_down_o( valid_down ),
-		  .cnt8_down_0_o( cnt_down_0 ), .cnt8_down_1_o( cnt_down_1 ), 
-		  .cnt8_down_2_o( cnt_down_2 ), .cnt8_down_3_o( cnt_down_3 ),
+		  .cnt_down_o( cnt_down ),
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );
@@ -61,16 +59,16 @@
    wire       sample_ready_o;
    wire       amem_empty_o;
    wire       amem_full_o;
+
+   wire       LI_active;
    
    
    controller #(.CLK_NBITS(CLK_NBITS)) cntl (
                   .clk_cnt_i( clk_cnt ),
                   .valid_up_i( valid_up ),
-		  .cnt8_up_0_i( cnt_up_0 ), .cnt8_up_1_i( cnt_up_1 ), 
-		  .cnt8_up_2_i( cnt_up_2 ), .cnt8_up_3_i( cnt_up_3 ), 
+		  .cnt_up_i( cnt_up_0 ),
 		  .valid_down_i( valid_down ),
-		  .cnt8_down_0_i( cnt_down_0 ), .cnt8_down_1_i( cnt_down_1 ), 
-		  .cnt8_down_2_i( cnt_down_2 ), .cnt8_down_3_i( cnt_down_3 ),
+		  .cnt8_down_i( cnt_down ),
 		  .WE_time_i( WE_time_i ),
 		  .trigger_i( trigger_i ),
 	
@@ -79,12 +77,23 @@
 		  .event_mux_o( event_mux ),
 		  .sample_ready_o( sample_ready_o ),
 		  .amem_empty_o( amem_empty_o ),
-		  .amem_full_o( amem_full_o ),
+	          .amem_full_o( amem_full_o ),
+		  .LI_active_o( LI_active ),
 		  .LI_end_o( LI_end_o ),
 					     
 		  .clk( clk ), 
 		  .rstb( rstb )
 		  );
-					    
+
+   LI_metadata #(.CLK_NBITS(CLK_NBITS)) LI_meta (
+						 .valid_i( valid_up ),
+						 .ts_i( cnt_up ),
+						 .LI_active_i( LI_active ),
+						 .LI_end_i( LI_end_o ),
+						 .clk( clk ),
+						 .rstb( rstb )
+						 );
+   
+   
 
 endmodule // APP_dig

@@ -45,30 +45,32 @@ module amem_core #(parameter DEPTH=8)(
 );
 
     // Registers
-    reg [2:0] read_pointer_reg = 3'b000;
-    reg [2:0] read_pointer_next_reg = 3'b000;
-    reg [3:0] event_mux_reg = 4'b0000;
+    reg [2:0] read_pointer_reg;
+    reg [2:0] read_pointer_next_reg;
+    reg [3:0] event_mux_reg;
 	assign event_mux_o = event_mux_reg;
 
-    reg empty_reg = 1'b1;
-	reg full_reg = 1'b0;
+    reg empty_reg;
+    reg empty_next_reg;
+	reg full_reg;
+    reg full_next_reg;
 	assign amem_empty_o = empty_reg;
 	assign amem_full_o = full_reg;
 
-	reg read_en_reg = 1'b0;
-    reg sample_ready_reg = 1'b0;
+	reg read_en_reg;
+    reg sample_ready_reg;
 	assign read_en_o = read_en_reg;
     assign sample_ready_o = sample_ready_reg;
 
     wire [2:0] WE_last;
     wire WE_valid;
 
-    reg trigger_one_shot = 1'b0;
+    reg trigger_one_shot;
     wire mux_done;
     
     // States
-    reg [4:0] curr_state = 5'b00000;
-    reg [4:0] next_state = 5'b00000;
+    reg [4:0] curr_state;
+    reg [4:0] next_state;
     localparam [4:0]
                 INIT  = 0,
                 UPDATE_PTR = 1,
@@ -110,32 +112,55 @@ module amem_core #(parameter DEPTH=8)(
             curr_state <= next_state;
     end
 
+    // Read pointer and empty/full update
+    always @ (posedge clk or negedge rstb)
+    begin
+        if (!rstb)
+        begin
+            read_pointer_reg <= 3'b111; // INIT starts at last location
+            empty_reg <= 1'b1; // empty
+            full_reg <= 1'b0; // not full
+        end
+        else
+        begin
+            read_pointer_reg <= read_pointer_next_reg;
+            empty_reg <= empty_next_reg;
+            full_reg <= full_next_reg;
+        end
+    end
+
     // State machine for main read loop
     always @ (*)
 	begin
+        // Maintain values of these pointers between states
+        next_state = curr_state;
+        read_pointer_next_reg = read_pointer_reg;
+        empty_next_reg = empty_reg;
+        full_next_reg = full_reg;
         case (curr_state)
             INIT: 
             begin
                 // Wait for first write after rstb.
                 // write pointer from analog_if points to NEXT location to write.
-                // read pointer points to location currently reading. 
-                empty_reg = 1'b1; // empty because wr_ptr = rd_ptr + 1 (mod 8)
-                full_reg = 1'b0; // not full   
+                // read pointer points to location currently reading.
                 read_en_reg = 1'b0; // do not read     
                 event_mux_reg = 4'b1000; // hi-Z state    
                 sample_ready_reg = 1'b0; // sample not ready
-                read_pointer_reg = 3'b111; // INIT starts at last location
-                read_pointer_next_reg = 3'b000; 
+                trigger_one_shot = 1'b0;
                 if ((wr_ptr_i != 4'b0000) && WE_valid) // if wr_ptr ++ AND WE_valid (TACs done)
                     next_state = UPDATE_PTR; 
             end
             UPDATE_PTR:
             begin
+                read_en_reg = 1'b0;
+                event_mux_reg = 4'b1000; 
+                sample_ready_reg = 1'b0;
+                trigger_one_shot = 1'b0;
                 if (!triggered_mode_i)
                 begin
                     if (read_pointer_reg != WE_last)
                     begin
-                        read_pointer_reg = read_pointer_reg + 1;
+                        read_pointer_next_reg = read_pointer_reg + 1;
                         next_state = EMPTY_FULL;
                     end
                     else
@@ -143,31 +168,39 @@ module amem_core #(parameter DEPTH=8)(
                 end
                 else if (triggered_mode_i)
                 begin
-                    // XXX - in triggered mode, update read_pointer_reg w/ valid_cells_i
+                    // XXX - in triggered mode, update read_pointer_next_reg w/ valid_cells_i
                 end
             end
             EMPTY_FULL:
             begin // update empty/full based on wr_ptr, WE_valid (TACs), valid_cells_i (trigger)
+                read_en_reg = 1'b0;
+                event_mux_reg = 4'b1000; 
+                sample_ready_reg = 1'b0;
+                trigger_one_shot = 1'b0; 
                 if (wr_ptr_i == read_pointer_reg) // full condition
                 begin
-                    full_reg = 1'b1;
-                    empty_reg = 1'b0;   
+                    full_next_reg = 1'b1;
+                    empty_next_reg = 1'b0;   
                     next_state = WAIT_READ; 
                 end
                 else if (wr_ptr_i == read_pointer_reg + 1) // empty condition
                 begin
-                    full_reg = 1'b0;
-                    empty_reg = 1'b1;
+                    full_next_reg = 1'b0;
+                    empty_next_reg = 1'b1;
                 end
                 else // else not empty and not full
                 begin
-                    full_reg = 1'b0;
-                    empty_reg = 1'b0;
+                    full_next_reg = 1'b0;
+                    empty_next_reg = 1'b0;
                     next_state = WAIT_READ;
                 end
             end
             WAIT_READ:
             begin // wait for FPGA to request a read
+                read_en_reg = 1'b0;
+                event_mux_reg = 4'b1000; 
+                sample_ready_reg = 1'b0;
+                trigger_one_shot = 1'b0;
                 if (read_next_i)
                 begin
                     next_state = SWITCH_MUX_ON;
@@ -175,23 +208,35 @@ module amem_core #(parameter DEPTH=8)(
             end
             SWITCH_MUX_ON:
             begin
-                event_mux_reg = read_pointer_reg;
+                read_en_reg = 1'b0;
+                event_mux_reg = read_pointer_reg; // read desired location
+                sample_ready_reg = 1'b0;
                 trigger_one_shot = 1'b1; // XXX -- programmable wait, or memory_ready_i
                 next_state = SWITCH_MUX_WAIT;
             end
             SWITCH_MUX_WAIT:
             begin
-                trigger_one_shot = 1'b0;
+                read_en_reg = 1'b0;   
+                event_mux_reg = read_pointer_reg;  
+                sample_ready_reg = 1'b0;
+                trigger_one_shot = 1'b0; // de-assert and wait 3 cycles
                 next_state = WAIT_STABLE;
             end
             WAIT_STABLE:
             begin
+                read_en_reg = 1'b0;   
+                event_mux_reg = read_pointer_reg;  
+                sample_ready_reg = 1'b0;
+                trigger_one_shot = 1'b0;
                 if (!mux_done)
                     next_state = READY_TO_READ;
             end
             READY_TO_READ:
-            begin            
-                sample_ready_reg = 1'b1;
+            begin         
+                read_en_reg = 1'b0;   
+                event_mux_reg = read_pointer_reg;  
+                sample_ready_reg = 1'b1; // sample ready
+                trigger_one_shot = 1'b0;
                 if (adc_done_i)
                 begin
                     next_state = MUX_OFF;
@@ -199,20 +244,25 @@ module amem_core #(parameter DEPTH=8)(
             end
             MUX_OFF:
             begin
+                read_en_reg = 1'b0;   
                 event_mux_reg = 4'b1000; // hi-Z
-                sample_ready_reg = 1'b0;
+                sample_ready_reg = 1'b0; // de-assert after hi-Z
+                trigger_one_shot = 1'b0;
                 next_state = UPDATE_PTR; // repeat until empty/full
             end
             default: 
             begin
                 empty_reg = 1'b1; // empty
+                empty_next_reg = 1'b1;
                 full_reg = 1'b0; // not full   
+                full_next_reg = 1'b0;
                 read_en_reg = 1'b0; // do not read     
                 event_mux_reg = 4'b1000; // hi-Z state    
                 sample_ready_reg = 1'b0; // sample not ready
                 read_pointer_reg = 3'b111; // INIT starts at last location
-                read_pointer_next_reg = 3'b000;
-                next_state = INIT;
+                read_pointer_next_reg = 3'b111;
+                trigger_one_shot = 1'b0;
+                next_state = INIT; 
             end
             // XXX -- if back edge TAC and mem/mempong setting do not agree,
             // do nothing or ERROR ?
